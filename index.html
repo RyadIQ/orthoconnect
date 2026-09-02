@@ -1056,17 +1056,53 @@
   }
 
   /* ===== NAV USER ===== */
-  .nav-user { display: none; align-items: center; gap: 10px; }
+  .nav-user { display: none; align-items: center; gap: 10px; position: relative; }
   .nav-user.show { display: flex; }
   .nav-avatar {
     width: 34px; height: 34px; border-radius: 50%;
     background: var(--navy); color: var(--white);
     font-size: 13px; font-weight: 700;
+    font-family: 'Inter', sans-serif;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
+    border: none; padding: 0;
   }
+  .nav-avatar:focus-visible { outline: 2px solid var(--turquoise); outline-offset: 2px; }
+
+  /* Menu du compte, déroulé depuis l'avatar. Tout ce qui est réservé
+     au compte connecté vit ici, hors de la navigation publique. */
+  .user-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px); right: 0;
+    min-width: 200px;
+    background: var(--white);
+    border: 1px solid var(--grey-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hover);
+    padding: 6px;
+    z-index: 1001;
+  }
+  .user-menu.open { display: block; }
+  .user-menu a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    background: none;
+  }
+  .user-menu a:hover { background: var(--grey-bg); color: var(--navy); }
+  .user-menu-sep { height: 1px; background: var(--grey-border); margin: 6px 4px; }
+
   .nav-login-btn { display: inline-flex; }
   .nav-login-btn.hide { display: none; }
+
+  .mobile-menu-sep {
+    height: 1px; background: var(--grey-border);
+    margin: 10px 0 6px; border: none;
+  }
 
   /* ===== DASHBOARD ===== */
   .dash-hero {
@@ -1157,6 +1193,24 @@
     overflow: hidden; margin: 8px 0 24px;
   }
   .completion-fill { height: 100%; background: var(--turquoise); transition: width 0.3s ease; }
+
+  /* ===== CATALOGUE VIDE ===== */
+  .catalogue-vide {
+    grid-column: 1 / -1;
+    border: 1px dashed var(--grey-border);
+    border-radius: var(--radius);
+    background: var(--white);
+    padding: 56px 32px;
+    text-align: center;
+  }
+  .catalogue-vide-icone { font-size: 34px; margin-bottom: 14px; }
+  .catalogue-vide-titre {
+    font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 10px;
+  }
+  .catalogue-vide p {
+    color: var(--text-secondary); font-size: 14px; line-height: 1.7;
+    max-width: 480px; margin: 0 auto;
+  }
 
   /* ===== ADMIN ===== */
   .admin-badge {
@@ -1360,12 +1414,19 @@
       <li><a href="#" onclick="showPage('produits')" id="nav-produits">Produits &amp; matériels</a></li>
       <li><a href="#" onclick="requireAuth('emploi')" id="nav-emploi">Emploi</a></li>
       <li><a href="#" onclick="requireAuth('actus')" id="nav-actu">Actualités</a></li>
-      <li id="navAdminItem" style="display:none"><a href="#" onclick="ouvrirAdmin()" id="nav-admin">Admin</a></li>
       <li id="navLoginItem"><a href="#" class="nav-cta btn nav-login-btn" onclick="openAuth('signup')">Espace praticien</a></li>
       <li>
         <div class="nav-user" id="navUser">
-          <a href="#" onclick="showPage('dashboard')" style="font-weight:600; color:var(--navy)">Mon espace</a>
-          <div class="nav-avatar" id="navAvatar" onclick="showPage('dashboard')">--</div>
+          <button type="button" class="nav-avatar" id="navAvatar"
+                  onclick="toggleUserMenu(event)"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="userMenu"
+                  aria-label="Menu du compte">--</button>
+          <div class="user-menu" id="userMenu">
+            <a href="#" onclick="fermerUserMenu(); showPage('dashboard')">Mon espace</a>
+            <a href="#" id="userMenuAdmin" style="display:none" onclick="fermerUserMenu(); ouvrirAdmin()">Admin</a>
+            <div class="user-menu-sep"></div>
+            <a href="#" onclick="fermerUserMenu(); doLogout()">Se déconnecter</a>
+          </div>
         </div>
       </li>
     </ul>
@@ -1381,6 +1442,7 @@
   <a href="#" onclick="showPage('produits'); toggleMenu()">Produits &amp; matériels</a>
   <a href="#" onclick="requireAuth('emploi'); toggleMenu()">Emploi</a>
   <a href="#" onclick="requireAuth('actus'); toggleMenu()">Actualités</a>
+  <div class="mobile-menu-sep"></div>
   <a href="#" id="mobLogin" onclick="openAuth('signup'); toggleMenu()" style="color:var(--turquoise); font-weight:600">Espace praticien</a>
   <a href="#" id="mobDash" onclick="showPage('dashboard'); toggleMenu()" style="display:none; color:var(--navy); font-weight:600">Mon espace</a>
   <a href="#" id="mobAdmin" onclick="ouvrirAdmin(); toggleMenu()" style="display:none; color:var(--navy); font-weight:600">Admin</a>
@@ -2532,6 +2594,16 @@ function nomOrganisme(f) {
   return (f.organismes && f.organismes.nom) || f.organisme || '';
 }
 
+// Une grille vide sans explication laisse croire à une panne. On
+// distingue le catalogue encore vide du filtre qui ne ramène rien.
+function catalogueVide(icone, titre, texte) {
+  return `<div class="catalogue-vide">
+      <div class="catalogue-vide-icone" aria-hidden="true">${icone}</div>
+      <div class="catalogue-vide-titre">${titre}</div>
+      <p>${texte}</p>
+    </div>`;
+}
+
 function setStat(id, valeur) {
   const el = document.getElementById(id);
   if (el) el.textContent = valeur;
@@ -3031,6 +3103,16 @@ function renderActus() {
 function renderFormationsDB(data) {
   const grid = document.getElementById('formationsGrid');
   if (!grid) return;
+
+  if (!data.length) {
+    grid.innerHTML = formationsDB.length
+      ? catalogueVide('🔍', 'Aucune formation dans ce format',
+          "Aucune formation publiée ne correspond à ce filtre pour l'instant. Essayez un autre format, ou revenez sur « Tous ».")
+      : catalogueVide('📚', 'Catalogue en cours de constitution',
+          "Les premières formations sont en cours de référencement. Chaque organisme, chaque date et chaque tarif sont vérifiés avant publication, plutôt que repris tels quels d'une plaquette. Le catalogue s'ouvrira au fil des vérifications.");
+    return;
+  }
+
   grid.innerHTML = data.map(f => `
     <div class="formation-card">
       <div class="formation-card-top">
@@ -3065,6 +3147,16 @@ function filterFormations(format, btn) {
 function renderProduitsDB(data) {
   const grid = document.getElementById('produitsGrid');
   if (!grid) return;
+
+  if (!data.length) {
+    grid.innerHTML = produitsDB.length
+      ? catalogueVide('🔍', 'Aucun produit dans cette catégorie',
+          "Aucun matériel référencé ne correspond à ce filtre pour l'instant. Essayez une autre catégorie, ou revenez sur « Tous ».")
+      : catalogueVide('🔬', 'Comparatif en cours de constitution',
+          "Les fiches matériel sont en cours de rédaction. Caractéristiques techniques et retours de praticiens sont recueillis avant mise en ligne, pour que la comparaison ait une valeur. Revenez d'ici peu.");
+    return;
+  }
+
   grid.innerHTML = data.map(p => {
     const specs = typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || []);
     const initiale = p.marque.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
@@ -3229,10 +3321,28 @@ function setNoindex(actif) {
 
 function majVisibiliteAdmin() {
   const affichage = estAdmin() ? 'block' : 'none';
-  const item = document.getElementById('navAdminItem');
+  const item = document.getElementById('userMenuAdmin');
   const mob  = document.getElementById('mobAdmin');
-  if (item) item.style.display = estAdmin() ? 'list-item' : 'none';
+  if (item) item.style.display = affichage;
   if (mob) mob.style.display = affichage;
+}
+
+// Menu du compte, ouvert depuis l'avatar.
+function toggleUserMenu(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('userMenu');
+  const btn  = document.getElementById('navAvatar');
+  if (!menu) return;
+  const ouvert = !menu.classList.contains('open');
+  menu.classList.toggle('open', ouvert);
+  if (btn) btn.setAttribute('aria-expanded', ouvert ? 'true' : 'false');
+}
+
+function fermerUserMenu() {
+  const menu = document.getElementById('userMenu');
+  const btn  = document.getElementById('navAvatar');
+  if (menu) menu.classList.remove('open');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
 }
 
 async function ouvrirAdmin() {
@@ -3750,6 +3860,15 @@ function showPage(page) {
 function toggleMenu() {
   document.getElementById('mobileMenu').classList.toggle('open');
 }
+
+// Le menu du compte se referme au clic ailleurs et à l'échappement.
+document.addEventListener('click', (e) => {
+  const zone = document.getElementById('navUser');
+  if (zone && !zone.contains(e.target)) fermerUserMenu();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') fermerUserMenu();
+});
 
 // ═══════════════════════════════════════════════
 // DÉMARRAGE
