@@ -19,6 +19,16 @@
 -- SECURITY DEFINER fait tourner la fonction avec les droits de son
 -- propriétaire, qui contourne RLS.
 --
+-- POLICIES RLS : RIEN À FAIRE DE CE CÔTÉ
+-- Vérifié sur la base : RLS est déjà activée sur public.praticiens, et
+-- les trois policies nécessaires existent déjà —
+--   « praticien lit son profil »     SELECT  (auth.uid() = id)
+--   « praticien cree son profil »    INSERT
+--   « praticien modifie son profil » UPDATE  (auth.uid() = id)
+-- Ce fichier ne crée donc et ne modifie aucune policy. Le trigger n'en
+-- a pas besoin puisqu'il est SECURITY DEFINER, et ensureProfile() côté
+-- client passe par les deux premières.
+--
 -- HYPOTHÈSE SUR LE SCHÉMA
 -- On suppose public.praticiens (id uuid primary key référençant
 -- auth.users, nom text, email text, ville text, statut text,
@@ -83,71 +93,7 @@ create trigger on_auth_user_created
 
 
 -- ───────────────────────────────────────────────────────────────────
--- 3. Policies RLS indispensables au filet ensureProfile()
---
--- Le trigger contourne RLS, mais ensureProfile() insère depuis le
--- navigateur avec le rôle authenticated : sans policy INSERT, le filet
--- de sécurité échouerait silencieusement.
---
--- Ces deux policies sont strictement limitées à la ligne du praticien
--- connecté. Elles s'ajoutent à tes policies existantes sans les
--- remplacer (les policies permissives se cumulent en OR).
---
--- ⚠ AVANT DE LANCER LE « enable row level security » CI-DESSOUS
--- Si RLS était jusqu'ici DÉSACTIVÉE sur praticiens, l'activer coupe
--- d'un coup tous les accès qui n'ont pas de policy, et deux choses du
--- site cassent immédiatement :
---   1. saveProfile() fait un UPDATE  -> il faut la policy UPDATE plus bas
---   2. loadAvis() joint praticiens(nom, ville) SANS être connecté
---      -> il faut une policy SELECT pour le rôle anon, sinon plus aucun
---         avis ne s'affiche sur les fiches produits.
---
--- Vérifie d'abord l'état actuel :
---   select relrowsecurity from pg_class
---   where oid = 'public.praticiens'::regclass;
---
---   select policyname, cmd, roles
---   from pg_policies
---   where schemaname = 'public' and tablename = 'praticiens';
---
--- Si relrowsecurity vaut déjà true, la ligne ci-dessous ne change rien
--- et tu peux continuer. Sinon, lis d'abord les deux points ci-dessus.
---
--- Au passage : si une policy SELECT expose praticiens à anon, elle doit
--- porter sur une vue limitée à (id, nom, ville). La table contient les
--- numéros RPPS, qui n'ont rien à faire dans une réponse publique.
--- ───────────────────────────────────────────────────────────────────
-alter table public.praticiens enable row level security;
-
-drop policy if exists "praticiens_select_own" on public.praticiens;
-create policy "praticiens_select_own"
-  on public.praticiens
-  for select
-  to authenticated
-  using (auth.uid() = id);
-
-drop policy if exists "praticiens_insert_own" on public.praticiens;
-create policy "praticiens_insert_own"
-  on public.praticiens
-  for insert
-  to authenticated
-  with check (auth.uid() = id);
-
--- Rappel : saveProfile() fait un UPDATE. Si tu n'as pas déjà une policy
--- UPDATE, décommente celle-ci, sinon la fiche cabinet ne s'enregistrera
--- plus.
---
--- drop policy if exists "praticiens_update_own" on public.praticiens;
--- create policy "praticiens_update_own"
---   on public.praticiens
---   for update
---   to authenticated
---   using (auth.uid() = id)
---   with check (auth.uid() = id);
-
-
--- ───────────────────────────────────────────────────────────────────
--- 4. Rattrapage des comptes déjà créés sans profil  [OPTIONNEL]
+-- 3. Rattrapage des comptes déjà créés sans profil  [OPTIONNEL]
 --
 -- À lancer une fois si des comptes orphelins existent déjà (le bug que
 -- ce trigger corrige a pu en produire). Idempotent : relançable sans
@@ -178,7 +124,7 @@ create policy "praticiens_insert_own"
 
 
 -- ───────────────────────────────────────────────────────────────────
--- 5. Vérification après exécution
+-- 4. Vérification après exécution
 -- ───────────────────────────────────────────────────────────────────
 
 -- Le trigger est bien posé :
