@@ -92,6 +92,30 @@ create trigger on_auth_user_created
 -- Ces deux policies sont strictement limitées à la ligne du praticien
 -- connecté. Elles s'ajoutent à tes policies existantes sans les
 -- remplacer (les policies permissives se cumulent en OR).
+--
+-- ⚠ AVANT DE LANCER LE « enable row level security » CI-DESSOUS
+-- Si RLS était jusqu'ici DÉSACTIVÉE sur praticiens, l'activer coupe
+-- d'un coup tous les accès qui n'ont pas de policy, et deux choses du
+-- site cassent immédiatement :
+--   1. saveProfile() fait un UPDATE  -> il faut la policy UPDATE plus bas
+--   2. loadAvis() joint praticiens(nom, ville) SANS être connecté
+--      -> il faut une policy SELECT pour le rôle anon, sinon plus aucun
+--         avis ne s'affiche sur les fiches produits.
+--
+-- Vérifie d'abord l'état actuel :
+--   select relrowsecurity from pg_class
+--   where oid = 'public.praticiens'::regclass;
+--
+--   select policyname, cmd, roles
+--   from pg_policies
+--   where schemaname = 'public' and tablename = 'praticiens';
+--
+-- Si relrowsecurity vaut déjà true, la ligne ci-dessous ne change rien
+-- et tu peux continuer. Sinon, lis d'abord les deux points ci-dessus.
+--
+-- Au passage : si une policy SELECT expose praticiens à anon, elle doit
+-- porter sur une vue limitée à (id, nom, ville). La table contient les
+-- numéros RPPS, qui n'ont rien à faire dans une réponse publique.
 -- ───────────────────────────────────────────────────────────────────
 alter table public.praticiens enable row level security;
 
