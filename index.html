@@ -2227,7 +2227,22 @@ async function doSignup() {
   };
 
   try {
-    const { data, error } = await sb.auth.signUp({ email, password: mdp });
+    // Le profil n'est plus inséré ici : ces métadonnées sont lues par le
+    // trigger handle_new_user (voir trigger_profil.sql), qui crée la
+    // ligne dans praticiens au moment de l'inscription.
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password: mdp,
+      options: {
+        data: {
+          nom,
+          ville,
+          statut: statutChoisi,
+          rpps: estInterne ? null : rpps,
+          faculte: estInterne ? fac : null
+        }
+      }
+    });
 
     if (error) {
       resetBtn();
@@ -2249,27 +2264,18 @@ async function doSignup() {
       return showNotice('signupError', "Votre compte est créé. Confirmez votre adresse via le lien envoyé à " + email + ", puis connectez-vous pour compléter votre fiche praticien. Inutile de refaire une inscription.");
     }
 
-    const profil = {
-      id: data.user.id, nom, email, ville,
-      statut: statutChoisi,
-      rpps: estInterne ? null : rpps,
-      faculte: estInterne ? fac : null
-    };
-
-    const { error: pErr } = await sb.from('praticiens').insert(profil);
+    // refreshAuthUI lit le profil créé par le trigger et, s'il manque,
+    // le crée via ensureProfile().
+    await refreshAuthUI();
     resetBtn();
 
-    if (pErr) {
-      // Le compte d'authentification existe déjà : surtout ne pas laisser
-      // croire qu'il faut recommencer l'inscription, ce serait un cul-de-sac.
-      const doublon = pErr.code === '23505' || (pErr.message || '').includes('duplicate');
-      return showNotice('signupError', doublon
-        ? "Votre compte est bien créé, mais un profil existe déjà avec ces informations (email ou RPPS). Connectez-vous avec " + email + " plutôt que de créer un second compte."
-        : "Votre compte est bien créé, mais votre fiche praticien n'a pas pu être enregistrée. Connectez-vous avec " + email + " et complétez-la depuis votre espace, ou écrivez à contact@orthoconnect.fr.");
+    if (!currentProfile) {
+      // Le compte d'authentification existe : surtout ne pas laisser croire
+      // qu'il faut recommencer l'inscription, ce serait un cul-de-sac.
+      return showNotice('signupError', "Votre compte est bien créé, mais votre fiche praticien n'a pas pu être enregistrée. Connectez-vous avec " + email + " et complétez-la depuis votre espace, ou écrivez à contact@orthoconnect.fr.");
     }
 
     closeAuth();
-    await refreshAuthUI();
     showPage('dashboard');
 
   } catch (e) {
@@ -2316,6 +2322,40 @@ function requireAuth(panel) {
   showDashPanel(panel);
 }
 
+// Filet de sécurité du trigger handle_new_user : si l'inscription a
+// créé le compte auth sans la ligne praticiens (trigger en échec, ou
+// compte antérieur au trigger), on la crée ici à la première connexion.
+// Sans ça le compte serait authentifiable mais inutilisable.
+async function ensureProfile(user) {
+  // maybeSingle et non single : zéro ligne est un cas normal ici,
+  // single le traiterait comme une erreur.
+  const { data, error } = await sb.from('praticiens')
+    .select('*').eq('id', user.id).maybeSingle();
+
+  if (error) {
+    console.error('Lecture du profil praticien:', error);
+    return null;
+  }
+  if (data) return data;
+
+  const meta = user.user_metadata || {};
+  const { data: cree, error: insErr } = await sb.from('praticiens').insert({
+    id: user.id,
+    email: user.email,
+    nom: meta.nom || null,
+    ville: meta.ville || null,
+    statut: meta.statut || 'liberal',
+    rpps: meta.rpps || null,
+    faculte: meta.faculte || null
+  }).select().maybeSingle();
+
+  if (insErr) {
+    console.error('Création du profil praticien:', insErr);
+    return null;
+  }
+  return cree;
+}
+
 async function refreshAuthUI() {
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
@@ -2326,8 +2366,7 @@ async function refreshAuthUI() {
   const mobDash = document.getElementById('mobDash');
 
   if (currentUser) {
-    const { data } = await sb.from('praticiens').select('*').eq('id', currentUser.id).single();
-    currentProfile = data;
+    currentProfile = await ensureProfile(currentUser);
 
     const { data: sv } = await sb.from('formations_sauvegardees')
       .select('formation_id').eq('praticien_id', currentUser.id);
@@ -2338,10 +2377,9 @@ async function refreshAuthUI() {
     if (mobLogin) mobLogin.style.display = 'none';
     if (mobDash) mobDash.style.display = 'block';
 
-    if (currentProfile) {
-      const initials = currentProfile.nom.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-      document.getElementById('navAvatar').textContent = initials;
-    }
+    const initiales = (currentProfile && currentProfile.nom || '')
+      .split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    document.getElementById('navAvatar').textContent = initiales || '--';
     renderDashboard();
   } else {
     currentProfile = null;
@@ -2381,12 +2419,22 @@ function computeCompletion(p) {
 }
 
 function renderDashboard() {
-  if (!currentProfile) return;
-  const p = currentProfile;
-  const prenom = p.nom.split(' ')[0];
+  // Profil introuvable malgré ensureProfile : on l'explique au lieu
+  // d'afficher un tableau de bord vide sans raison apparente.
+  if (!currentProfile) {
+    document.getElementById('dashHello').textContent = 'Bonjour';
+    document.getElementById('dashSub').textContent =
+      "Votre fiche praticien est introuvable. Écrivez à contact@orthoconnect.fr en précisant votre email de connexion.";
+    document.getElementById('dashAlert').style.display = 'none';
+    return;
+  }
 
-  document.getElementById('dashHello').textContent = 'Bonjour Dr. ' + prenom;
-  document.getElementById('dashSub').textContent = p.ville + ' · Espace praticien OrthoConnect';
+  const p = currentProfile;
+  const prenom = (p.nom || '').split(' ').filter(Boolean)[0] || '';
+
+  document.getElementById('dashHello').textContent = prenom ? 'Bonjour Dr. ' + prenom : 'Bonjour';
+  document.getElementById('dashSub').textContent =
+    (p.ville ? p.ville + ' · ' : '') + 'Espace praticien OrthoConnect';
 
   const pct = computeCompletion(p);
   document.getElementById('statProfil').textContent = pct + '%';
