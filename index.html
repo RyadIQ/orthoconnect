@@ -1088,6 +1088,29 @@
     margin-bottom: 20px; display: flex; gap: 8px; align-items: flex-start; line-height: 1.5;
   }
 
+
+  .statut-choice { display: flex; gap: 6px; }
+  .statut-btn {
+    flex: 1;
+    padding: 9px 6px;
+    border: 1.5px solid var(--grey-border);
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .statut-btn:hover { border-color: var(--turquoise); }
+  .statut-btn.active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: var(--white);
+    font-weight: 600;
+  }
+
   /* ===== NAV USER ===== */
   .nav-user { display: none; align-items: center; gap: 10px; }
   .nav-user.show { display: flex; }
@@ -1220,31 +1243,48 @@
           <span class="lo">O</span><span class="lc">C</span>
         </div>
       </div>
-      <h3>Créer mon espace praticien</h3>
+      <h3>Rejoindre OrthoConnect</h3>
       <p class="auth-sub">Gratuit, sans engagement. Accès immédiat.</p>
 
       <div class="auth-badge">
         <span>🔒</span>
-        <span>Réservé aux orthodontistes et chirurgiens-dentistes inscrits à l'Ordre. Votre numéro RPPS reste confidentiel.</span>
+        <span>Réservé aux orthodontistes et internes en ODF. Vos identifiants professionnels restent confidentiels.</span>
       </div>
 
       <div class="auth-error" id="signupError"></div>
+
+      <div class="auth-field">
+        <label>Votre statut</label>
+        <div class="statut-choice">
+          <button type="button" class="statut-btn active" data-statut="liberal" onclick="setStatut('liberal', this)">Libéral</button>
+          <button type="button" class="statut-btn" data-statut="collaborateur" onclick="setStatut('collaborateur', this)">Collaborateur</button>
+          <button type="button" class="statut-btn" data-statut="interne" onclick="setStatut('interne', this)">Interne</button>
+        </div>
+      </div>
 
       <div class="auth-field">
         <label for="suPrenom">Prénom et nom</label>
         <input type="text" id="suPrenom" placeholder="Marie Dupont">
       </div>
       <div class="auth-field">
-        <label for="suEmail">Email professionnel</label>
+        <label for="suEmail">Email</label>
         <input type="email" id="suEmail" placeholder="marie.dupont@cabinet.fr">
       </div>
-      <div class="auth-field">
+
+      <div class="auth-field" id="fieldRpps">
         <label for="suRpps">Numéro RPPS</label>
         <input type="text" id="suRpps" placeholder="10001234567" maxlength="11">
         <div class="auth-hint">11 chiffres, figure sur votre carte CPS</div>
       </div>
+
+      <div class="auth-field" id="fieldFac" style="display:none">
+        <label for="suFac">Faculté de rattachement</label>
+        <input type="text" id="suFac" placeholder="Université de Lyon 1">
+        <div class="auth-hint">Votre accès sera confirmé sous 48 h</div>
+      </div>
+
       <div class="auth-field">
-        <label for="suVille">Ville d'exercice</label>
+        <label for="suVille" id="labelVille">Ville d'exercice</label>
         <input type="text" id="suVille" placeholder="Lyon">
       </div>
       <div class="auth-field">
@@ -1253,7 +1293,7 @@
       </div>
 
       <button class="btn btn-turquoise" id="signupBtn" style="width:100%; justify-content:center; margin-top:8px" onclick="doSignup()">
-        Créer mon espace
+        Créer mon compte
       </button>
 
       <div class="auth-switch">
@@ -1344,33 +1384,33 @@
     <div class="hero-inner">
       <div class="hero-content">
         <div class="hero-eyebrow">
-          Internes en DES, collaborateurs, titulaires
+          Libéral, collaborateur, interne
         </div>
-        <h1>Ce que vos <em>consœurs et confrères</em> savent déjà</h1>
-        <p>Les formations, les retours terrain sur le matériel et les postes à pourvoir en ODF, réunis au même endroit. Sans cotisation, sans démarchage.</p>
+        <h1>Le réseau des <em>orthodontistes</em> français</h1>
+        <p>Se former, recruter, s'équiper.</p>
         <div class="hero-ctas">
           <a class="btn btn-turquoise" onclick="openAuth('signup')">
-            Ouvrir mon compte
+            Rejoindre gratuitement
           </a>
           <a class="btn btn-outline-white" onclick="showPage('formations')">
-            Voir les formations
+            Découvrir
           </a>
         </div>
         <div style="margin-top:14px; font-size:13px; color:rgba(255,255,255,0.5)">
-          Vérification RPPS. Réservé aux praticiens et internes en spécialité.
+          Inscription gratuite. Réservé aux praticiens et internes en ODF.
         </div>
         <div class="hero-stats">
           <div>
-            <div class="hero-stat-value">2 450</div>
-            <div class="hero-stat-label">SQODF exerçant en France</div>
-          </div>
-          <div>
-            <div class="hero-stat-value">120</div>
+            <div class="hero-stat-value" id="heroStatFormations">120</div>
             <div class="hero-stat-label">Formations recensées</div>
           </div>
           <div>
-            <div class="hero-stat-value">34</div>
+            <div class="hero-stat-value" id="heroStatPostes">34</div>
             <div class="hero-stat-label">Postes à pourvoir</div>
+          </div>
+          <div>
+            <div class="hero-stat-value" id="heroStatProduits">48</div>
+            <div class="hero-stat-label">Matériels comparés</div>
           </div>
         </div>
       </div>
@@ -1486,20 +1526,20 @@
     <div class="container">
       <div class="metrics-grid">
         <div>
-          <div class="metric-value">2 450</div>
-          <div class="metric-label">Spécialistes qualifiés en ODF exerçant en France</div>
+          <div class="metric-value">Gratuit</div>
+          <div class="metric-label">Aucune cotisation, aucun frais d'inscription</div>
         </div>
         <div>
-          <div class="metric-value">1 sur 3</div>
-          <div class="metric-label">Orthodontistes ayant changé de système d'aligneurs en trois ans</div>
+          <div class="metric-value">Vérifié</div>
+          <div class="metric-label">Accès réservé aux praticiens et internes en ODF</div>
         </div>
         <div>
-          <div class="metric-value">21 h</div>
-          <div class="metric-label">Durée annuelle moyenne de formation continue déclarée</div>
+          <div class="metric-value">Indépendant</div>
+          <div class="metric-label">Aucune société savante ni syndicat derrière la plateforme</div>
         </div>
         <div>
-          <div class="metric-value">~ 90</div>
-          <div class="metric-label">Internes formés chaque année en DES d'ODF</div>
+          <div class="metric-value">Sans spam</div>
+          <div class="metric-label">Vos coordonnées ne sont transmises à personne</div>
         </div>
       </div>
     </div>
@@ -2204,6 +2244,13 @@ async function loadCatalogues() {
     renderProduitsDB(produitsDB);
     renderJobs();
     renderActus();
+
+    const sf = document.getElementById('heroStatFormations');
+    const sp = document.getElementById('heroStatPostes');
+    const spr = document.getElementById('heroStatProduits');
+    if (sf) sf.textContent = formationsDB.length;
+    if (sp) sp.textContent = jobsDB.length;
+    if (spr) spr.textContent = produitsDB.length;
   } catch (e) {
     console.error('Chargement catalogues:', e);
   }
@@ -2231,17 +2278,33 @@ function showError(id, msg) {
   el.classList.add('show');
 }
 
+let statutChoisi = 'liberal';
+
+function setStatut(s, btn) {
+  statutChoisi = s;
+  document.querySelectorAll('.statut-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const estInterne = s === 'interne';
+  document.getElementById('fieldRpps').style.display = estInterne ? 'none' : 'block';
+  document.getElementById('fieldFac').style.display = estInterne ? 'block' : 'none';
+  document.getElementById('labelVille').textContent = estInterne ? "Ville d'internat" : "Ville d'exercice";
+}
+
 async function doSignup() {
   const nom = document.getElementById('suPrenom').value.trim();
   const email = document.getElementById('suEmail').value.trim();
   const rpps = document.getElementById('suRpps').value.trim();
+  const fac = document.getElementById('suFac').value.trim();
   const ville = document.getElementById('suVille').value.trim();
   const mdp = document.getElementById('suPassword').value;
+  const estInterne = statutChoisi === 'interne';
 
   if (!nom) return showError('signupError', "Indiquez votre prénom et nom.");
   if (!email || !email.includes('@')) return showError('signupError', "Indiquez un email valide.");
-  if (!/^\d{11}$/.test(rpps)) return showError('signupError', "Le numéro RPPS doit contenir exactement 11 chiffres.");
-  if (!ville) return showError('signupError', "Indiquez votre ville d'exercice.");
+  if (!estInterne && !/^\d{11}$/.test(rpps)) return showError('signupError', "Le numéro RPPS doit contenir exactement 11 chiffres.");
+  if (estInterne && !fac) return showError('signupError', "Indiquez votre faculté de rattachement.");
+  if (!ville) return showError('signupError', estInterne ? "Indiquez votre ville d'internat." : "Indiquez votre ville d'exercice.");
   if (!mdp || mdp.length < 8) return showError('signupError', "Choisissez un mot de passe d'au moins 8 caractères.");
 
   const btn = document.getElementById('signupBtn');
@@ -2253,19 +2316,24 @@ async function doSignup() {
 
     if (error) {
       btn.disabled = false;
-      btn.textContent = 'Créer mon espace';
+      btn.textContent = 'Créer mon compte';
       if (error.message.includes('already registered')) {
         return showError('signupError', "Cet email est déjà utilisé. Connectez-vous.");
       }
       return showError('signupError', error.message);
     }
 
-    const { error: pErr } = await sb.from('praticiens').insert({
-      id: data.user.id, nom, email, rpps, ville
-    });
+    const profil = {
+      id: data.user.id, nom, email, ville,
+      statut: statutChoisi,
+      rpps: estInterne ? null : rpps,
+      faculte: estInterne ? fac : null
+    };
+
+    const { error: pErr } = await sb.from('praticiens').insert(profil);
 
     btn.disabled = false;
-    btn.textContent = 'Créer mon espace';
+    btn.textContent = 'Créer mon compte';
 
     if (pErr) {
       if (pErr.message.includes('duplicate') || pErr.code === '23505') {
@@ -2285,7 +2353,7 @@ async function doSignup() {
 
   } catch (e) {
     btn.disabled = false;
-    btn.textContent = 'Créer mon espace';
+    btn.textContent = 'Créer mon compte';
     showError('signupError', "Une erreur est survenue. Réessayez.");
   }
 }
