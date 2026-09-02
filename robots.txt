@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://orthoconnect.fr/sitemap.xml
