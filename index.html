@@ -550,46 +550,6 @@
   }
   .metric-label { font-size: 14px; color: rgba(255,255,255,0.6); }
 
-  /* TESTIMONIALS */
-  .testimonials-section { padding: 80px 0; background: var(--grey-bg); }
-  .testimonials-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-  .testimonial {
-    background: var(--white);
-    border: 1px solid var(--grey-border);
-    border-radius: var(--radius);
-    padding: 28px;
-  }
-  .testimonial-text {
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.7;
-    margin-bottom: 20px;
-    font-style: italic;
-  }
-  .testimonial-author {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .testimonial-avatar {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    background: var(--navy);
-    color: var(--white);
-    font-size: 16px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .testimonial-name { font-size: 14px; font-weight: 600; }
-  .testimonial-role { font-size: 13px; color: var(--text-light); }
-
   /* CTA BAND */
   .cta-band {
     padding: 80px 0;
@@ -973,26 +933,6 @@
     margin-top: 20px;
   }
 
-  /* LOGOS MARQUES */
-  .logos-section { padding: 64px 0; background: var(--grey-bg); }
-  .logos-grid {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-  }
-  .logo-pill {
-    background: var(--white);
-    border: 1px solid var(--grey-border);
-    border-radius: 8px;
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    letter-spacing: 0.5px;
-  }
-
   /* ===== RESPONSIVE ===== */
   @media (max-width: 1024px) {
     .features-4grid { grid-template-columns: repeat(2,1fr) !important; }
@@ -1019,7 +959,6 @@
     .audience-grid { grid-template-columns: 1fr; }
     .steps-grid { grid-template-columns: 1fr; }
     .formations-grid { grid-template-columns: 1fr; }
-    .testimonials-grid { grid-template-columns: 1fr; }
     .why-grid { grid-template-columns: 1fr; }
     .pricing-grid { grid-template-columns: 1fr; }
     .pricing-card.featured { transform: none; }
@@ -1080,6 +1019,11 @@
     margin-bottom: 14px;
   }
   .auth-error.show { display: block; }
+  .auth-error.notice {
+    background: var(--turquoise-light);
+    border-color: #9ADDE5;
+    color: #00606A;
+  }
   .auth-switch { text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 18px; }
   .auth-switch a { color: var(--turquoise); font-weight: 600; cursor: pointer; text-decoration: none; }
   .auth-badge {
@@ -1545,47 +1489,6 @@
     </div>
   </section>
 
-  <section class="testimonials-section">
-    <div class="container">
-      <div class="section-header">
-        <h2>Ce qu'en disent les premiers inscrits</h2>
-        <div class="section-divider"></div>
-      </div>
-      <div class="testimonials-grid">
-        <div class="testimonial">
-          <p class="testimonial-text">« J'ai passé trois soirées à chercher qui formait sérieusement aux aligneurs. Ici je compare les organismes, les durées et les tarifs sur une seule page. »</p>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar">MD</div>
-            <div>
-              <div class="testimonial-name">Dr Marie Dumont</div>
-              <div class="testimonial-role">SQODF, exercice libéral, Lyon</div>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial">
-          <p class="testimonial-text">« En troisième année de DES, je ne sais pas ce que vaut une rétrocession correcte. Voir plusieurs annonces côte à côte donne enfin un point de repère. »</p>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar">TC</div>
-            <div>
-              <div class="testimonial-name">Dr Thomas Chevalier</div>
-              <div class="testimonial-role">Interne en DES d'ODF, Bordeaux</div>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial">
-          <p class="testimonial-text">« Avant de changer de système de brackets, j'ai lu ce qu'en disaient huit confrères qui les posent tous les jours. Le représentant ne m'aurait pas dit ça. »</p>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar">IM</div>
-            <div>
-              <div class="testimonial-name">Dr Isabelle Morel</div>
-              <div class="testimonial-role">SQODF, collaboratrice libérale, Nantes</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section class="cta-band">
     <div class="container">
       <h2>Ouvrez votre compte en une minute</h2>
@@ -1653,16 +1556,16 @@
       <p>Formations DPC éligibles, certifiantes et continues pour les orthodontistes</p>
       <div class="page-hero-meta">
         <div class="page-hero-stat">
-          <div class="page-hero-stat-val">120+</div>
+          <div class="page-hero-stat-val" id="statPageFormations">&mdash;</div>
           <div class="page-hero-stat-lbl">Formations</div>
         </div>
         <div class="page-hero-stat">
-          <div class="page-hero-stat-val">38</div>
+          <div class="page-hero-stat-val" id="statPageOrganismes">&mdash;</div>
           <div class="page-hero-stat-lbl">Organismes</div>
         </div>
         <div class="page-hero-stat">
-          <div class="page-hero-stat-val">100%</div>
-          <div class="page-hero-stat-lbl">Vérifiées</div>
+          <div class="page-hero-stat-val" id="statPageDpc">&mdash;</div>
+          <div class="page-hero-stat-lbl">Formations DPC</div>
         </div>
       </div>
     </div>
@@ -1725,15 +1628,15 @@
       <p>Aligneurs, brackets et scanners. Fiches techniques et retours de praticiens</p>
       <div class="page-hero-meta">
         <div class="page-hero-stat">
-          <div class="page-hero-stat-val">48</div>
+          <div class="page-hero-stat-val" id="statPageProduits">&mdash;</div>
           <div class="page-hero-stat-lbl">Produits</div>
         </div>
         <div class="page-hero-stat">
-          <div class="page-hero-stat-val">620+</div>
-          <div class="page-hero-stat-lbl">Avis vérifiés</div>
+          <div class="page-hero-stat-val" id="statPageAvis">&mdash;</div>
+          <div class="page-hero-stat-lbl">Avis publiés</div>
         </div>
         <div class="page-hero-stat">
-          <div class="page-hero-stat-val">18</div>
+          <div class="page-hero-stat-val" id="statPageMarques">&mdash;</div>
           <div class="page-hero-stat-lbl">Marques</div>
         </div>
       </div>
@@ -2030,25 +1933,6 @@
     </div>
   </section>
 
-  <section class="logos-section">
-    <div class="container">
-      <div class="section-header">
-        <h2>Ils nous font confiance</h2>
-        <div class="section-divider"></div>
-      </div>
-      <div class="logos-grid">
-        <div class="logo-pill">ALIGN TECHNOLOGY</div>
-        <div class="logo-pill">ORMCO</div>
-        <div class="logo-pill">DENTSPLY SIRONA</div>
-        <div class="logo-pill">3M UNITEK</div>
-        <div class="logo-pill">SPARK ALIGNERS</div>
-        <div class="logo-pill">CARESTREAM DENTAL</div>
-        <div class="logo-pill">MEDIT</div>
-        <div class="logo-pill">PLANMECA</div>
-      </div>
-    </div>
-  </section>
-
   <section class="pricing-section">
     <div class="container">
       <div class="section-header">
@@ -2069,7 +1953,7 @@
             <li><span class="check">✓</span> Rapport de consultations mensuel</li>
             <li><span class="check">✓</span> Mise en ligne en 48h</li>
           </ul>
-          <a class="btn btn-outline" style="width:100%; justify-content:center">Demander une démo</a>
+          <button type="button" class="btn btn-outline" style="width:100%; justify-content:center" onclick="demanderDemo('starter')">Demander une démo</button>
         </div>
         <div class="pricing-card featured">
           <div class="pricing-badge">⭐ Le plus choisi</div>
@@ -2085,7 +1969,7 @@
             <li><span class="check">✓</span> 1 encart newsletter trimestrielle</li>
             <li><span class="check">✓</span> Account manager dédié</li>
           </ul>
-          <a class="btn btn-turquoise" style="width:100%; justify-content:center">Demander une démo</a>
+          <button type="button" class="btn btn-turquoise" style="width:100%; justify-content:center" onclick="demanderDemo('pro')">Demander une démo</button>
         </div>
         <div class="pricing-card">
           <div class="pricing-name">Premium</div>
@@ -2101,13 +1985,13 @@
             <li><span class="check">✓</span> Présence aux événements OrthoConnect</li>
             <li><span class="check">✓</span> Visibilité homepage (rotation partenaires)</li>
           </ul>
-          <a class="btn btn-primary" style="width:100%; justify-content:center">Demander une démo</a>
+          <button type="button" class="btn btn-primary" style="width:100%; justify-content:center" onclick="demanderDemo('premium')">Demander une démo</button>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="contact-section">
+  <section class="contact-section" id="contactPartenaires">
     <div class="container">
       <div class="contact-inner">
         <div class="section-header">
@@ -2190,7 +2074,6 @@
       <div class="footer-col">
         <h4>Contact</h4>
         <a href="mailto:partenaires@orthoconnect.fr">partenaires@orthoconnect.fr</a>
-        <a href="tel:+33123456789">+33 1 23 45 67 89</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -2226,13 +2109,19 @@ let savedIds = [];
 // ═══════════════════════════════════════════════
 // CHARGEMENT DES CATALOGUES (public, sans auth)
 // ═══════════════════════════════════════════════
+function setStat(id, valeur) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = valeur;
+}
+
 async function loadCatalogues() {
   try {
-    const [f, p, j, a] = await Promise.all([
+    const [f, p, j, a, av] = await Promise.all([
       sb.from('formations').select('*').eq('actif', true).order('id'),
       sb.from('produits').select('*').eq('actif', true).order('id'),
       sb.from('offres_emploi').select('*').eq('actif', true).order('publie_le', { ascending: false }),
-      sb.from('actualites').select('*').eq('actif', true).order('publie_le', { ascending: false })
+      sb.from('actualites').select('*').eq('actif', true).order('publie_le', { ascending: false }),
+      sb.from('avis').select('id', { count: 'exact', head: true })
     ]);
 
     formationsDB = f.data || [];
@@ -2245,12 +2134,20 @@ async function loadCatalogues() {
     renderJobs();
     renderActus();
 
-    const sf = document.getElementById('heroStatFormations');
-    const sp = document.getElementById('heroStatPostes');
-    const spr = document.getElementById('heroStatProduits');
-    if (sf) sf.textContent = formationsDB.length;
-    if (sp) sp.textContent = jobsDB.length;
-    if (spr) spr.textContent = produitsDB.length;
+    const distinct = (rows, champ) => new Set(rows.map(r => r[champ]).filter(Boolean)).size;
+
+    // Tous ces chiffres viennent de Supabase : aucun compteur en dur dans le HTML.
+    setStat('heroStatFormations', formationsDB.length);
+    setStat('heroStatPostes', jobsDB.length);
+    setStat('heroStatProduits', produitsDB.length);
+
+    setStat('statPageFormations', formationsDB.length);
+    setStat('statPageOrganismes', distinct(formationsDB, 'organisme'));
+    setStat('statPageDpc', formationsDB.filter(x => x.dpc).length);
+
+    setStat('statPageProduits', produitsDB.length);
+    setStat('statPageAvis', av.count || 0);
+    setStat('statPageMarques', distinct(produitsDB, 'marque'));
   } catch (e) {
     console.error('Chargement catalogues:', e);
   }
@@ -2265,17 +2162,30 @@ function openAuth(mode) {
 }
 function closeAuth() {
   document.getElementById('authOverlay').classList.remove('open');
-  document.getElementById('signupError').classList.remove('show');
-  document.getElementById('loginError').classList.remove('show');
+  clearMessage('signupError');
+  clearMessage('loginError');
 }
 function switchAuth(mode) {
   document.getElementById('authSignup').style.display = mode === 'signup' ? 'block' : 'none';
   document.getElementById('authLogin').style.display = mode === 'login' ? 'block' : 'none';
+  clearMessage('signupError');
+  clearMessage('loginError');
 }
 function showError(id, msg) {
   const el = document.getElementById(id);
   el.textContent = msg;
+  el.classList.remove('notice');
   el.classList.add('show');
+}
+// Même encart, ton neutre : le compte a bien été créé, ce n'est pas une erreur.
+function showNotice(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('notice', 'show');
+}
+function clearMessage(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('show', 'notice');
 }
 
 let statutChoisi = 'liberal';
@@ -2311,16 +2221,32 @@ async function doSignup() {
   btn.disabled = true;
   btn.textContent = 'Création en cours...';
 
+  const resetBtn = () => {
+    btn.disabled = false;
+    btn.textContent = 'Créer mon compte';
+  };
+
   try {
     const { data, error } = await sb.auth.signUp({ email, password: mdp });
 
     if (error) {
-      btn.disabled = false;
-      btn.textContent = 'Créer mon compte';
+      resetBtn();
       if (error.message.includes('already registered')) {
         return showError('signupError', "Cet email est déjà utilisé. Connectez-vous.");
       }
       return showError('signupError', error.message);
+    }
+
+    if (!data || !data.user) {
+      resetBtn();
+      return showError('signupError', "Le compte n'a pas pu être créé. Réessayez dans quelques instants.");
+    }
+
+    // Sans session, l'insertion dans praticiens partirait sans identité
+    // authentifiée et serait rejetée : on s'arrête avant d'essayer.
+    if (!data.session) {
+      resetBtn();
+      return showNotice('signupError', "Votre compte est créé. Confirmez votre adresse via le lien envoyé à " + email + ", puis connectez-vous pour compléter votre fiche praticien. Inutile de refaire une inscription.");
     }
 
     const profil = {
@@ -2331,20 +2257,15 @@ async function doSignup() {
     };
 
     const { error: pErr } = await sb.from('praticiens').insert(profil);
-
-    btn.disabled = false;
-    btn.textContent = 'Créer mon compte';
+    resetBtn();
 
     if (pErr) {
-      if (pErr.message.includes('duplicate') || pErr.code === '23505') {
-        return showError('signupError', "Ce numéro RPPS est déjà enregistré.");
-      }
-      return showError('signupError', "Erreur lors de la création du profil.");
-    }
-
-    if (!data.session) {
-      showError('signupError', "Compte créé. Vérifiez votre boîte mail pour confirmer votre adresse.");
-      return;
+      // Le compte d'authentification existe déjà : surtout ne pas laisser
+      // croire qu'il faut recommencer l'inscription, ce serait un cul-de-sac.
+      const doublon = pErr.code === '23505' || (pErr.message || '').includes('duplicate');
+      return showNotice('signupError', doublon
+        ? "Votre compte est bien créé, mais un profil existe déjà avec ces informations (email ou RPPS). Connectez-vous avec " + email + " plutôt que de créer un second compte."
+        : "Votre compte est bien créé, mais votre fiche praticien n'a pas pu être enregistrée. Connectez-vous avec " + email + " et complétez-la depuis votre espace, ou écrivez à contact@orthoconnect.fr.");
     }
 
     closeAuth();
@@ -2352,8 +2273,8 @@ async function doSignup() {
     showPage('dashboard');
 
   } catch (e) {
-    btn.disabled = false;
-    btn.textContent = 'Créer mon compte';
+    resetBtn();
+    console.error('Inscription:', e);
     showError('signupError', "Une erreur est survenue. Réessayez.");
   }
 }
@@ -2743,6 +2664,25 @@ function filterProduits(cat, btn) {
 // ═══════════════════════════════════════════════
 // FORMULAIRE PARTENAIRES
 // ═══════════════════════════════════════════════
+
+// Depuis la grille tarifaire : descend jusqu'au formulaire de la même
+// page et pré-sélectionne l'offre cliquée.
+function demanderDemo(offre) {
+  const page = document.getElementById('page-marques');
+  if (page && !page.classList.contains('active')) showPage('marques');
+
+  const select = document.getElementById('offre');
+  if (select && offre) select.value = offre;
+
+  const cible = document.getElementById('contactPartenaires');
+  if (!cible) return;
+
+  requestAnimationFrame(() => {
+    cible.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (select) select.focus({ preventScroll: true });
+  });
+}
+
 async function submitForm(e) {
   e.preventDefault();
 
