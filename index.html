@@ -1158,6 +1158,71 @@
   }
   .completion-fill { height: 100%; background: var(--turquoise); transition: width 0.3s ease; }
 
+  /* ===== ADMIN ===== */
+  .admin-badge {
+    display: inline-block; background: var(--navy); color: var(--white);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    padding: 3px 7px; border-radius: 4px; text-transform: uppercase;
+  }
+  .admin-toolbar {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 18px;
+  }
+  .admin-toolbar .spacer { flex: 1; }
+  .admin-search { max-width: 300px; padding: 9px 14px; font-size: 14px; }
+
+  .admin-table-wrap {
+    overflow-x: auto; border: 1px solid var(--grey-border); border-radius: var(--radius);
+  }
+  table.admin-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px; }
+  .admin-table th {
+    text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-secondary); white-space: nowrap;
+    padding: 11px 14px; background: var(--grey-bg); border-bottom: 1px solid var(--grey-border);
+  }
+  .admin-table td { padding: 11px 14px; border-bottom: 1px solid var(--grey-border); vertical-align: middle; }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tbody tr:hover { background: var(--grey-bg); }
+  .admin-table .col-actions { text-align: right; white-space: nowrap; }
+  .admin-nom { font-weight: 600; color: var(--navy); }
+
+  /* Le RPPS n'est jamais rendu en clair par défaut : il se dévoile au
+     survol, au focus clavier ou au clic. */
+  .rpps { cursor: pointer; outline: none; font-variant-numeric: tabular-nums; }
+  .rpps-clair { display: none; color: var(--navy); font-weight: 600; }
+  .rpps-masque { color: var(--text-light); letter-spacing: 2px; }
+  .rpps:hover .rpps-clair, .rpps:focus .rpps-clair, .rpps.revele .rpps-clair { display: inline; }
+  .rpps:hover .rpps-masque, .rpps:focus .rpps-masque, .rpps.revele .rpps-masque { display: none; }
+  .rpps:focus { box-shadow: 0 0 0 2px var(--turquoise); border-radius: 3px; }
+
+  .badge-brouillon { background: #FFF3E6; color: #B26A00; }
+  .badge-publie    { background: #E8F5E9; color: #2E7D32; }
+  .badge-archive   { background: var(--grey-bg); color: var(--text-secondary); }
+
+  .admin-form {
+    border: 1px solid var(--turquoise); border-radius: var(--radius);
+    padding: 24px; margin-bottom: 24px; background: var(--turquoise-light);
+  }
+  .admin-form h3 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 18px; }
+  .admin-form .form-group { margin-bottom: 14px; }
+  .admin-form input, .admin-form select, .admin-form textarea { background: var(--white); }
+  .admin-form textarea { min-height: 80px; }
+  .admin-form-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+  .admin-check { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 400; cursor: pointer; }
+  .admin-check input { width: auto; }
+
+  .admin-message {
+    display: none; padding: 12px 16px; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 600; margin-bottom: 18px;
+  }
+  .admin-message.show { display: block; }
+  .admin-message.ok { background: #E8F5E9; border: 1px solid #C8E6C9; color: #2E7D32; }
+  .admin-message.ko { background: #FEF2F2; border: 1px solid #FECACA; color: #B91C1C; }
+
+  .admin-empty {
+    padding: 28px; text-align: center; color: var(--text-secondary);
+    border: 1px dashed var(--grey-border); border-radius: var(--radius); font-size: 14px;
+  }
+
   @media (max-width: 900px) {
     .dash-grid { grid-template-columns: 1fr; }
     .dash-nav { position: static; flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
@@ -1295,6 +1360,7 @@
       <li><a href="#" onclick="showPage('produits')" id="nav-produits">Produits &amp; matériels</a></li>
       <li><a href="#" onclick="requireAuth('emploi')" id="nav-emploi">Emploi</a></li>
       <li><a href="#" onclick="requireAuth('actus')" id="nav-actu">Actualités</a></li>
+      <li id="navAdminItem" style="display:none"><a href="#" onclick="ouvrirAdmin()" id="nav-admin">Admin</a></li>
       <li id="navLoginItem"><a href="#" class="nav-cta btn nav-login-btn" onclick="openAuth('signup')">Espace praticien</a></li>
       <li>
         <div class="nav-user" id="navUser">
@@ -1317,6 +1383,7 @@
   <a href="#" onclick="requireAuth('actus'); toggleMenu()">Actualités</a>
   <a href="#" id="mobLogin" onclick="openAuth('signup'); toggleMenu()" style="color:var(--turquoise); font-weight:600">Espace praticien</a>
   <a href="#" id="mobDash" onclick="showPage('dashboard'); toggleMenu()" style="display:none; color:var(--navy); font-weight:600">Mon espace</a>
+  <a href="#" id="mobAdmin" onclick="ouvrirAdmin(); toggleMenu()" style="display:none; color:var(--navy); font-weight:600">Admin</a>
 </div>
 
 <!-- ==================== -->
@@ -1876,6 +1943,344 @@
   </section>
 </div>
 
+<!-- ==================== -->
+<!-- PAGE : ADMIN         -->
+<!-- Accès contrôlé côté base par is_admin() ; le masquage JS n'est   -->
+<!-- qu'un confort d'interface, les policies RLS font foi.            -->
+<!-- ==================== -->
+<div class="page" id="page-admin">
+
+  <section class="dash-hero">
+    <div class="container">
+      <div class="dash-hello">Administration <span class="admin-badge">Admin</span></div>
+      <div class="dash-sub">Inscrits, organismes, formations et sessions</div>
+    </div>
+  </section>
+
+  <section class="dash-body">
+    <div class="container">
+
+      <div class="admin-message ko" id="adminErreur"></div>
+      <div class="admin-message" id="adminMessage"></div>
+
+      <div class="dash-grid">
+
+        <div class="dash-nav">
+          <button class="active" onclick="showAdminPanel('accueil', this)">📊 Tableau de bord</button>
+          <button onclick="showAdminPanel('inscrits', this)">👥 Inscrits</button>
+          <button onclick="showAdminPanel('organismes', this)">🏢 Organismes</button>
+          <button onclick="showAdminPanel('formations', this)">📚 Formations</button>
+          <button onclick="showAdminPanel('sessions', this)">🗓 Sessions</button>
+          <button onclick="showPage('dashboard')" style="margin-top:12px; color:var(--text-light)">↩ Mon espace</button>
+        </div>
+
+        <div>
+
+          <!-- TABLEAU DE BORD -->
+          <div class="dash-panel active" id="adminPanel-accueil">
+            <h2>Tableau de bord</h2>
+            <p class="panel-sub">État de la plateforme.</p>
+
+            <div class="dash-section-title">Inscrits</div>
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-val" id="admStatInscrits">0</div>
+                <div class="stat-lbl">Total</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="admStatLiberal">0</div>
+                <div class="stat-lbl">Libéraux</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="admStatCollab">0</div>
+                <div class="stat-lbl">Collaborateurs</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="admStatInterne">0</div>
+                <div class="stat-lbl">Internes</div>
+              </div>
+            </div>
+
+            <div class="dash-section-title">Catalogue</div>
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-val" id="admStatPubliees">0</div>
+                <div class="stat-lbl">Formations publiées</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="admStatBrouillons">0</div>
+                <div class="stat-lbl">Brouillons en attente</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="admStatOrganismes">0</div>
+                <div class="stat-lbl">Organismes</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="admStatSessions">0</div>
+                <div class="stat-lbl">Sessions à venir</div>
+              </div>
+            </div>
+
+            <div class="dash-section-title">Brouillons en attente de publication</div>
+            <div id="admBrouillons"></div>
+          </div>
+
+          <!-- INSCRITS -->
+          <div class="dash-panel" id="adminPanel-inscrits">
+            <h2>Répertoire des inscrits</h2>
+            <p class="panel-sub">Le numéro RPPS se dévoile au survol, au focus clavier ou au clic. Il n'est jamais affiché en continu.</p>
+
+            <div class="admin-toolbar">
+              <input type="text" class="admin-search" id="admRecherche" placeholder="Rechercher un nom, une ville, un email"
+                     oninput="rechercherInscrits(this.value)">
+              <span class="spacer"></span>
+              <span style="font-size:13px; color:var(--text-secondary)" id="admInscritsCompte"></span>
+            </div>
+            <div id="admInscritsListe"></div>
+          </div>
+
+          <!-- ORGANISMES -->
+          <div class="dash-panel" id="adminPanel-organismes">
+            <h2>Organismes</h2>
+            <p class="panel-sub">Organismes de formation et fournisseurs de matériel. Un même organisme peut faire les deux.</p>
+
+            <div class="admin-toolbar">
+              <button class="btn btn-turquoise btn-sm" onclick="ouvrirFormOrganisme(null)">+ Nouvel organisme</button>
+            </div>
+
+            <div class="admin-form" id="orgForm" style="display:none">
+              <h3 id="orgFormTitre">Nouvel organisme</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="orgNom">Nom</label>
+                  <input type="text" id="orgNom" placeholder="Ortho Up Network">
+                </div>
+                <div class="form-group">
+                  <label for="orgType">Type</label>
+                  <select id="orgType">
+                    <option value="formation">Organisme de formation</option>
+                    <option value="fournisseur">Fournisseur de matériel</option>
+                    <option value="les_deux">Les deux</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="orgSite">Site web</label>
+                  <input type="url" id="orgSite" placeholder="https://exemple.fr">
+                </div>
+                <div class="form-group">
+                  <label for="orgLogo">URL du logo</label>
+                  <input type="url" id="orgLogo" placeholder="https://exemple.fr/logo.png">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="orgNiveau">Niveau d'offre</label>
+                  <select id="orgNiveau">
+                    <option value="aucun">Aucun</option>
+                    <option value="starter">Starter</option>
+                    <option value="pro">Pro</option>
+                    <option value="premium">Premium</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Statuts</label>
+                  <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:10px">
+                    <label class="admin-check"><input type="checkbox" id="orgQualiopi"> Qualiopi</label>
+                    <label class="admin-check"><input type="checkbox" id="orgPartenaire"> Partenaire</label>
+                    <label class="admin-check"><input type="checkbox" id="orgActif" checked> Actif</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="orgDescription">Description</label>
+                <textarea id="orgDescription" placeholder="Présentation de l'organisme"></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="orgContactNom">Contact commercial</label>
+                  <input type="text" id="orgContactNom" placeholder="Nom du contact">
+                </div>
+                <div class="form-group">
+                  <label for="orgContactEmail">Email du contact</label>
+                  <input type="email" id="orgContactEmail" placeholder="contact@organisme.fr">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="orgContactTel">Téléphone du contact</label>
+                <input type="tel" id="orgContactTel" placeholder="+33 1 00 00 00 00">
+              </div>
+              <div class="admin-form-actions">
+                <button class="btn btn-turquoise btn-sm" onclick="enregistrerOrganisme()">Enregistrer</button>
+                <button class="btn btn-outline btn-sm" onclick="fermerFormOrganisme()">Annuler</button>
+              </div>
+            </div>
+
+            <div id="admOrganismesListe"></div>
+          </div>
+
+          <!-- FORMATIONS -->
+          <div class="dash-panel" id="adminPanel-formations">
+            <h2>Formations</h2>
+            <p class="panel-sub">Seules les formations publiées apparaissent dans le catalogue public.</p>
+
+            <div class="admin-toolbar">
+              <button class="btn btn-turquoise btn-sm" onclick="ouvrirFormFormation(null)">+ Nouvelle formation</button>
+              <span class="spacer"></span>
+              <span class="filter-label">Statut :</span>
+              <button class="filter-btn active" onclick="filtrerFormationsAdmin('tous', this)">Toutes</button>
+              <button class="filter-btn" onclick="filtrerFormationsAdmin('brouillon', this)">Brouillons</button>
+              <button class="filter-btn" onclick="filtrerFormationsAdmin('publie', this)">Publiées</button>
+              <button class="filter-btn" onclick="filtrerFormationsAdmin('archive', this)">Archivées</button>
+            </div>
+
+            <div class="admin-form" id="formForm" style="display:none">
+              <h3 id="formFormTitre">Nouvelle formation</h3>
+              <div class="form-group">
+                <label for="fmTitre">Titre</label>
+                <input type="text" id="fmTitre" placeholder="Aligneurs : biomécanique et planification">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fmOrganisme">Organisme</label>
+                  <select id="fmOrganisme"></select>
+                </div>
+                <div class="form-group">
+                  <label for="fmThematique">Thématique</label>
+                  <input type="text" id="fmThematique" placeholder="Aligneurs, orthopédie, lingual...">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fmNiveau">Niveau</label>
+                  <select id="fmNiveau">
+                    <option value="">Non précisé</option>
+                    <option value="initiation">Initiation</option>
+                    <option value="perfectionnement">Perfectionnement</option>
+                    <option value="expert">Expert</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="fmFormat">Format</label>
+                  <select id="fmFormat">
+                    <option value="presentiel">Présentiel</option>
+                    <option value="distanciel">Distanciel</option>
+                    <option value="hybride">Hybride</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fmDuree">Durée</label>
+                  <input type="text" id="fmDuree" placeholder="3 jours">
+                </div>
+                <div class="form-group">
+                  <label for="fmPrix">Prix (€)</label>
+                  <input type="number" id="fmPrix" min="0" step="1" placeholder="1890">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fmDpcNumero">Numéro DPC</label>
+                  <input type="text" id="fmDpcNumero" placeholder="Référence de l'action DPC">
+                </div>
+                <div class="form-group">
+                  <label for="fmVerifieLe">Vérifiée le</label>
+                  <input type="date" id="fmVerifieLe">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="admin-check"><input type="checkbox" id="fmDpc"> Éligible DPC</label>
+              </div>
+              <div class="form-group">
+                <label for="fmPrerequis">Prérequis</label>
+                <textarea id="fmPrerequis" placeholder="Prérequis pour suivre la formation"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="fmDescription">Description</label>
+                <textarea id="fmDescription" placeholder="Contenu et objectifs de la formation"></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fmUrlSource">URL source</label>
+                  <input type="url" id="fmUrlSource" placeholder="https://organisme.fr/formation">
+                </div>
+                <div class="form-group">
+                  <label for="fmStatut">Statut</label>
+                  <select id="fmStatut">
+                    <option value="brouillon">Brouillon</option>
+                    <option value="publie">Publiée</option>
+                    <option value="archive">Archivée</option>
+                  </select>
+                </div>
+              </div>
+              <div class="admin-form-actions">
+                <button class="btn btn-turquoise btn-sm" onclick="enregistrerFormation()">Enregistrer</button>
+                <button class="btn btn-outline btn-sm" onclick="fermerFormFormation()">Annuler</button>
+              </div>
+            </div>
+
+            <div id="admFormationsListe"></div>
+          </div>
+
+          <!-- SESSIONS -->
+          <div class="dash-panel" id="adminPanel-sessions">
+            <h2>Sessions</h2>
+            <p class="panel-sub">Les dates concrètes d'une formation. Une formation peut en avoir plusieurs.</p>
+
+            <div class="admin-toolbar">
+              <button class="btn btn-turquoise btn-sm" onclick="ouvrirFormSession(null)">+ Nouvelle session</button>
+            </div>
+
+            <div class="admin-form" id="sessForm" style="display:none">
+              <h3 id="sessFormTitre">Nouvelle session</h3>
+              <div class="form-group">
+                <label for="seFormation">Formation</label>
+                <select id="seFormation"></select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="seDebut">Date de début</label>
+                  <input type="date" id="seDebut">
+                </div>
+                <div class="form-group">
+                  <label for="seFin">Date de fin</label>
+                  <input type="date" id="seFin">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="seVille">Ville</label>
+                  <input type="text" id="seVille" placeholder="Lyon">
+                </div>
+                <div class="form-group">
+                  <label for="sePlaces">Places</label>
+                  <input type="number" id="sePlaces" min="0" step="1" placeholder="24">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="seUrl">URL d'inscription</label>
+                <input type="url" id="seUrl" placeholder="https://organisme.fr/inscription">
+              </div>
+              <div class="form-group">
+                <label class="admin-check"><input type="checkbox" id="seActif" checked> Session active</label>
+              </div>
+              <div class="admin-form-actions">
+                <button class="btn btn-turquoise btn-sm" onclick="enregistrerSession()">Enregistrer</button>
+                <button class="btn btn-outline btn-sm" onclick="fermerFormSession()">Annuler</button>
+              </div>
+            </div>
+
+            <div id="admSessionsListe"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
 <!-- =================== -->
 <!-- PAGE 4 : MARQUES    -->
 <!-- =================== -->
@@ -2109,6 +2514,24 @@ let savedIds = [];
 // ═══════════════════════════════════════════════
 // CHARGEMENT DES CATALOGUES (public, sans auth)
 // ═══════════════════════════════════════════════
+// Le catalogue public lit désormais statut = 'publie' et le nom de
+// l'organisme par jointure. Tant que admin_et_organismes.sql n'est pas
+// passé, ces colonnes n'existent pas : on retombe alors sur l'ancien
+// schéma pour ne pas vider le catalogue entre le déploiement du front
+// et l'exécution du SQL.
+async function chargerFormationsPubliques() {
+  const neuf = await sb.from('formations')
+    .select('*, organismes(nom)').eq('statut', 'publie').order('id');
+  if (!neuf.error) return neuf;
+
+  console.warn('Schéma formations non migré, repli sur actif/organisme :', neuf.error.message);
+  return sb.from('formations').select('*').eq('actif', true).order('id');
+}
+
+function nomOrganisme(f) {
+  return (f.organismes && f.organismes.nom) || f.organisme || '';
+}
+
 function setStat(id, valeur) {
   const el = document.getElementById(id);
   if (el) el.textContent = valeur;
@@ -2117,7 +2540,7 @@ function setStat(id, valeur) {
 async function loadCatalogues() {
   try {
     const [f, p, j, a, av] = await Promise.all([
-      sb.from('formations').select('*').eq('actif', true).order('id'),
+      chargerFormationsPubliques(),
       sb.from('produits').select('*').eq('actif', true).order('id'),
       sb.from('offres_emploi').select('*').eq('actif', true).order('publie_le', { ascending: false }),
       sb.from('actualites').select('*').eq('actif', true).order('publie_le', { ascending: false }),
@@ -2376,6 +2799,7 @@ async function refreshAuthUI() {
     if (loginBtn) loginBtn.classList.add('hide');
     if (mobLogin) mobLogin.style.display = 'none';
     if (mobDash) mobDash.style.display = 'block';
+    majVisibiliteAdmin();
 
     const initiales = (currentProfile && currentProfile.nom || '')
       .split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -2388,6 +2812,7 @@ async function refreshAuthUI() {
     if (loginBtn) loginBtn.classList.remove('hide');
     if (mobLogin) mobLogin.style.display = 'block';
     if (mobDash) mobDash.style.display = 'none';
+    majVisibiliteAdmin();
   }
 }
 
@@ -2395,14 +2820,16 @@ async function refreshAuthUI() {
 // DASHBOARD
 // ═══════════════════════════════════════════════
 function showDashPanel(name, btn) {
-  document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
+  // Sélecteurs limités à #page-dashboard : l'admin réutilise les mêmes
+  // classes et serait sinon désactivée au passage.
+  document.querySelectorAll('#page-dashboard .dash-panel').forEach(p => p.classList.remove('active'));
   const panel = document.getElementById('panel-' + name);
   if (panel) panel.classList.add('active');
 
-  document.querySelectorAll('.dash-nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#page-dashboard .dash-nav button').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   else {
-    document.querySelectorAll('.dash-nav button').forEach(b => {
+    document.querySelectorAll('#page-dashboard .dash-nav button').forEach(b => {
       const oc = b.getAttribute('onclick');
       if (oc && oc.includes("'" + name + "'")) b.classList.add('active');
     });
@@ -2611,7 +3038,7 @@ function renderFormationsDB(data) {
         ${f.dpc ? '<span class="badge badge-new">DPC éligible</span>' : ''}
       </div>
       <div class="formation-card-body">
-        <div class="formation-orga">${f.organisme}</div>
+        <div class="formation-orga">${nomOrganisme(f)}</div>
         <div class="formation-title">${f.titre}</div>
         <div class="formation-desc">${f.description || ''}</div>
         <div class="formation-meta">
@@ -2754,9 +3181,563 @@ async function submitForm(e) {
 }
 
 // ═══════════════════════════════════════════════
+// ADMINISTRATION
+//
+// L'accès réel est verrouillé en base : is_admin() gouverne les
+// policies RLS de praticiens, organismes, formations et
+// sessions_formation. Tout ce qui suit n'est qu'une interface ; un
+// praticien qui forcerait l'affichage de la page obtiendrait des
+// listes vides et des écritures refusées.
+// ═══════════════════════════════════════════════
+let adminPraticiens = [];
+let adminOrganismes = [];
+let adminFormations = [];
+let adminSessions   = [];
+let filtreStatutFormation = 'tous';
+let rechercheInscrits = '';
+let orgEnCours  = null;
+let formEnCours = null;
+let sessEnCours = null;
+
+// Les listes admin affichent des données saisies par des tiers
+// (noms de praticiens, d'organismes). On échappe systématiquement.
+function esc(v) {
+  return String(v === null || v === undefined ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function estAdmin() {
+  return !!(currentProfile && currentProfile.role === 'admin');
+}
+
+// Le site est une SPA à une seule URL : un <meta robots> statique
+// désindexerait tout. On l'injecte uniquement pendant l'affichage de
+// l'admin, et on le retire en sortant.
+function setNoindex(actif) {
+  let m = document.getElementById('metaRobots');
+  if (actif && !m) {
+    m = document.createElement('meta');
+    m.id = 'metaRobots';
+    m.name = 'robots';
+    m.content = 'noindex, nofollow';
+    document.head.appendChild(m);
+  } else if (!actif && m) {
+    m.remove();
+  }
+}
+
+function majVisibiliteAdmin() {
+  const affichage = estAdmin() ? 'block' : 'none';
+  const item = document.getElementById('navAdminItem');
+  const mob  = document.getElementById('mobAdmin');
+  if (item) item.style.display = estAdmin() ? 'list-item' : 'none';
+  if (mob) mob.style.display = affichage;
+}
+
+async function ouvrirAdmin() {
+  if (!estAdmin()) { showPage(currentUser ? 'dashboard' : 'landing'); return; }
+  showPage('admin');
+  await chargerAdmin();
+}
+
+function showAdminPanel(name, btn) {
+  document.querySelectorAll('#page-admin .dash-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('adminPanel-' + name);
+  if (panel) panel.classList.add('active');
+
+  document.querySelectorAll('#page-admin .dash-nav button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function adminMessage(texte, estErreur) {
+  const el = document.getElementById('adminMessage');
+  el.textContent = texte;
+  el.className = 'admin-message show ' + (estErreur ? 'ko' : 'ok');
+  if (!estErreur) setTimeout(() => { el.className = 'admin-message'; }, 4000);
+}
+
+async function chargerAdmin() {
+  const [pr, org, fo, se] = await Promise.all([
+    sb.from('praticiens').select('id, nom, email, ville, statut, rpps, role, created_at')
+      .order('created_at', { ascending: false }),
+    sb.from('organismes').select('*').order('nom'),
+    sb.from('formations').select('*, organismes(id, nom)').order('id', { ascending: false }),
+    sb.from('sessions_formation').select('*, formations(id, titre)').order('date_debut')
+  ]);
+
+  const enErreur = [pr, org, fo, se].find(r => r.error);
+  const boite = document.getElementById('adminErreur');
+  if (enErreur) {
+    boite.textContent = "Chargement impossible : " + enErreur.error.message
+      + " — vérifie que admin_et_organismes.sql a bien été passé et que ton compte est en role = 'admin'.";
+    boite.classList.add('show');
+    return;
+  }
+  boite.classList.remove('show');
+
+  adminPraticiens = pr.data  || [];
+  adminOrganismes = org.data || [];
+  adminFormations = fo.data  || [];
+  adminSessions   = se.data  || [];
+
+  renderAdminDash();
+  renderAdminInscrits();
+  renderAdminOrganismes();
+  renderAdminFormations();
+  renderAdminSessions();
+  remplirSelectsAdmin();
+}
+
+// ─────────── Tableau de bord ───────────
+function renderAdminDash() {
+  const parStatut = { liberal: 0, collaborateur: 0, interne: 0 };
+  adminPraticiens.forEach(p => {
+    if (Object.prototype.hasOwnProperty.call(parStatut, p.statut)) parStatut[p.statut]++;
+  });
+
+  const aujourdhui = new Date().toISOString().slice(0, 10);
+  const brouillons = adminFormations.filter(f => f.statut === 'brouillon');
+
+  setStat('admStatInscrits',   adminPraticiens.length);
+  setStat('admStatLiberal',    parStatut.liberal);
+  setStat('admStatCollab',     parStatut.collaborateur);
+  setStat('admStatInterne',    parStatut.interne);
+  setStat('admStatPubliees',   adminFormations.filter(f => f.statut === 'publie').length);
+  setStat('admStatBrouillons', brouillons.length);
+  setStat('admStatOrganismes', adminOrganismes.length);
+  setStat('admStatSessions',   adminSessions.filter(s => s.date_debut >= aujourdhui).length);
+
+  const zone = document.getElementById('admBrouillons');
+  if (!brouillons.length) {
+    zone.innerHTML = '<div class="admin-empty">Aucun brouillon en attente.</div>';
+    return;
+  }
+  zone.innerHTML = brouillons.map(f => `
+    <div class="item-row">
+      <div>
+        <div class="item-title">${esc(f.titre)}</div>
+        <div class="item-meta">${esc(nomOrganisme(f) || 'Sans organisme')}</div>
+      </div>
+      <div style="display:flex; gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="ouvrirFormFormation(${f.id})">Éditer</button>
+        <button class="btn btn-turquoise btn-sm" onclick="changerStatutFormation(${f.id}, 'publie')">Publier</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─────────── Inscrits ───────────
+function rechercherInscrits(valeur) {
+  rechercheInscrits = valeur;
+  renderAdminInscrits();
+}
+
+function renderAdminInscrits() {
+  const q = rechercheInscrits.trim().toLowerCase();
+  const lignes = adminPraticiens.filter(p => !q ||
+    [p.nom, p.ville, p.email].some(v => (v || '').toLowerCase().includes(q)));
+
+  document.getElementById('admInscritsCompte').textContent =
+    lignes.length + ' / ' + adminPraticiens.length + ' inscrit' + (adminPraticiens.length > 1 ? 's' : '');
+
+  const zone = document.getElementById('admInscritsListe');
+  if (!lignes.length) {
+    zone.innerHTML = '<div class="admin-empty">' +
+      (adminPraticiens.length ? 'Aucun inscrit ne correspond à cette recherche.' : 'Aucun inscrit pour le moment.') +
+      '</div>';
+    return;
+  }
+
+  zone.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Nom</th><th>Statut</th><th>Ville</th><th>RPPS</th><th>Inscrit le</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${lignes.map(p => `
+            <tr>
+              <td>
+                <div class="admin-nom">${esc(p.nom || '—')}${p.role === 'admin' ? ' <span class="admin-badge">Admin</span>' : ''}</div>
+                <div style="font-size:12px; color:var(--text-light)">${esc(p.email || '')}</div>
+              </td>
+              <td>${esc(libelleStatut(p.statut))}</td>
+              <td>${esc(p.ville || '—')}</td>
+              <td>${renderRpps(p)}</td>
+              <td style="white-space:nowrap">${esc(formatDate(p.created_at))}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function libelleStatut(s) {
+  return { liberal: 'Libéral', collaborateur: 'Collaborateur', interne: 'Interne' }[s] || (s || '—');
+}
+
+// Le RPPS n'est pas rendu en clair : il est présent dans le DOM mais
+// masqué en CSS, et ne se dévoile qu'au survol, au focus ou au clic.
+function renderRpps(p) {
+  if (!p.rpps) return '<span style="color:var(--text-light)">—</span>';
+  return `<span class="rpps" tabindex="0" title="Survoler ou cliquer pour afficher"
+    onclick="this.classList.toggle('revele')"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('revele')}"
+    ><span class="rpps-masque">•••••••••••</span><span class="rpps-clair">${esc(p.rpps)}</span></span>`;
+}
+
+// ─────────── Organismes ───────────
+function renderAdminOrganismes() {
+  const zone = document.getElementById('admOrganismesListe');
+  if (!adminOrganismes.length) {
+    zone.innerHTML = '<div class="admin-empty">Aucun organisme. Commence par en créer un.</div>';
+    return;
+  }
+  const typeLbl = { formation: 'Formation', fournisseur: 'Fournisseur', les_deux: 'Les deux' };
+  zone.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Nom</th><th>Type</th><th>Offre</th><th>Formations</th><th class="col-actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          ${adminOrganismes.map(o => `
+            <tr>
+              <td>
+                <div class="admin-nom">${esc(o.nom)}</div>
+                <div style="font-size:12px; color:var(--text-light)">
+                  ${o.qualiopi ? 'Qualiopi · ' : ''}${o.partenaire ? 'Partenaire · ' : ''}${o.actif ? 'Actif' : 'Inactif'}
+                </div>
+              </td>
+              <td>${esc(typeLbl[o.type] || o.type)}</td>
+              <td>${o.niveau_offre === 'aucun' ? '—' : esc(o.niveau_offre)}</td>
+              <td>${adminFormations.filter(f => f.organisme_id === o.id).length}</td>
+              <td class="col-actions">
+                <button class="btn btn-outline btn-sm" onclick="ouvrirFormOrganisme(${o.id})">Éditer</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function ouvrirFormOrganisme(id) {
+  orgEnCours = id;
+  const o = id ? adminOrganismes.find(x => x.id === id) : null;
+
+  document.getElementById('orgFormTitre').textContent = o ? 'Éditer ' + o.nom : 'Nouvel organisme';
+  document.getElementById('orgNom').value          = o ? (o.nom || '') : '';
+  document.getElementById('orgType').value         = o ? (o.type || 'formation') : 'formation';
+  document.getElementById('orgSite').value         = o ? (o.site_web || '') : '';
+  document.getElementById('orgLogo').value         = o ? (o.logo_url || '') : '';
+  document.getElementById('orgNiveau').value       = o ? (o.niveau_offre || 'aucun') : 'aucun';
+  document.getElementById('orgQualiopi').checked   = o ? !!o.qualiopi : false;
+  document.getElementById('orgPartenaire').checked = o ? !!o.partenaire : false;
+  document.getElementById('orgActif').checked      = o ? !!o.actif : true;
+  document.getElementById('orgDescription').value  = o ? (o.description || '') : '';
+  document.getElementById('orgContactNom').value   = o ? (o.contact_nom || '') : '';
+  document.getElementById('orgContactEmail').value = o ? (o.contact_email || '') : '';
+  document.getElementById('orgContactTel').value   = o ? (o.contact_tel || '') : '';
+
+  const f = document.getElementById('orgForm');
+  f.style.display = 'block';
+  f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function fermerFormOrganisme() {
+  orgEnCours = null;
+  document.getElementById('orgForm').style.display = 'none';
+}
+
+async function enregistrerOrganisme() {
+  const nom = document.getElementById('orgNom').value.trim();
+  if (!nom) return adminMessage('Le nom de l\'organisme est obligatoire.', true);
+
+  const payload = {
+    nom,
+    type:          document.getElementById('orgType').value,
+    site_web:      document.getElementById('orgSite').value.trim() || null,
+    logo_url:      document.getElementById('orgLogo').value.trim() || null,
+    niveau_offre:  document.getElementById('orgNiveau').value,
+    qualiopi:      document.getElementById('orgQualiopi').checked,
+    partenaire:    document.getElementById('orgPartenaire').checked,
+    actif:         document.getElementById('orgActif').checked,
+    description:   document.getElementById('orgDescription').value.trim() || null,
+    contact_nom:   document.getElementById('orgContactNom').value.trim() || null,
+    contact_email: document.getElementById('orgContactEmail').value.trim() || null,
+    contact_tel:   document.getElementById('orgContactTel').value.trim() || null
+  };
+
+  if (await ecrireAdmin('organismes', payload, orgEnCours)) fermerFormOrganisme();
+}
+
+// ─────────── Formations ───────────
+function filtrerFormationsAdmin(statut, btn) {
+  filtreStatutFormation = statut;
+  document.querySelectorAll('#adminPanel-formations .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAdminFormations();
+}
+
+function renderAdminFormations() {
+  const lignes = filtreStatutFormation === 'tous'
+    ? adminFormations
+    : adminFormations.filter(f => f.statut === filtreStatutFormation);
+
+  const zone = document.getElementById('admFormationsListe');
+  if (!lignes.length) {
+    zone.innerHTML = '<div class="admin-empty">Aucune formation dans cette catégorie.</div>';
+    return;
+  }
+  const lbl = { brouillon: 'Brouillon', publie: 'Publiée', archive: 'Archivée' };
+  zone.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Titre</th><th>Organisme</th><th>Statut</th><th>Sessions</th><th class="col-actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          ${lignes.map(f => `
+            <tr>
+              <td>
+                <div class="admin-nom">${esc(f.titre)}</div>
+                <div style="font-size:12px; color:var(--text-light)">
+                  ${esc(f.thematique || 'Sans thématique')} · ${esc(f.duree || '—')} · ${f.prix != null ? esc(f.prix) + '€' : '—'}${f.dpc ? ' · DPC' : ''}
+                </div>
+              </td>
+              <td>${esc(nomOrganisme(f) || '—')}</td>
+              <td><span class="badge badge-${esc(f.statut)}">${esc(lbl[f.statut] || f.statut)}</span></td>
+              <td>${adminSessions.filter(s => s.formation_id === f.id).length}</td>
+              <td class="col-actions">
+                <button class="btn btn-outline btn-sm" onclick="ouvrirFormFormation(${f.id})">Éditer</button>
+                ${f.statut === 'publie'
+                  ? `<button class="btn btn-outline btn-sm" onclick="changerStatutFormation(${f.id}, 'archive')">Archiver</button>`
+                  : `<button class="btn btn-turquoise btn-sm" onclick="changerStatutFormation(${f.id}, 'publie')">Publier</button>`}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function ouvrirFormFormation(id) {
+  formEnCours = id;
+  const f = id ? adminFormations.find(x => x.id === id) : null;
+
+  remplirSelectsAdmin();
+
+  document.getElementById('formFormTitre').textContent = f ? 'Éditer la formation' : 'Nouvelle formation';
+  document.getElementById('fmTitre').value       = f ? (f.titre || '') : '';
+  document.getElementById('fmOrganisme').value   = f && f.organisme_id ? String(f.organisme_id) : '';
+  document.getElementById('fmThematique').value  = f ? (f.thematique || '') : '';
+  document.getElementById('fmNiveau').value      = f ? (f.niveau || '') : '';
+  document.getElementById('fmFormat').value      = f ? (f.format || 'presentiel') : 'presentiel';
+  document.getElementById('fmDuree').value       = f ? (f.duree || '') : '';
+  document.getElementById('fmPrix').value        = f && f.prix != null ? f.prix : '';
+  document.getElementById('fmDpcNumero').value   = f ? (f.dpc_numero || '') : '';
+  document.getElementById('fmVerifieLe').value   = f ? (f.verifie_le || '') : '';
+  document.getElementById('fmDpc').checked       = f ? !!f.dpc : false;
+  document.getElementById('fmPrerequis').value   = f ? (f.prerequis || '') : '';
+  document.getElementById('fmDescription').value = f ? (f.description || '') : '';
+  document.getElementById('fmUrlSource').value   = f ? (f.url_source || '') : '';
+  document.getElementById('fmStatut').value      = f ? (f.statut || 'brouillon') : 'brouillon';
+
+  showAdminPanel('formations');
+  document.querySelectorAll('#page-admin .dash-nav button').forEach(b => {
+    const oc = b.getAttribute('onclick');
+    if (oc && oc.includes("'formations'")) b.classList.add('active');
+  });
+
+  const zone = document.getElementById('formForm');
+  zone.style.display = 'block';
+  zone.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function fermerFormFormation() {
+  formEnCours = null;
+  document.getElementById('formForm').style.display = 'none';
+}
+
+async function enregistrerFormation() {
+  const titre = document.getElementById('fmTitre').value.trim();
+  if (!titre) return adminMessage('Le titre est obligatoire.', true);
+
+  const prix = document.getElementById('fmPrix').value;
+  const payload = {
+    titre,
+    organisme_id: document.getElementById('fmOrganisme').value || null,
+    thematique:   document.getElementById('fmThematique').value.trim() || null,
+    niveau:       document.getElementById('fmNiveau').value || null,
+    format:       document.getElementById('fmFormat').value,
+    duree:        document.getElementById('fmDuree').value.trim() || null,
+    prix:         prix === '' ? null : Number(prix),
+    dpc:          document.getElementById('fmDpc').checked,
+    dpc_numero:   document.getElementById('fmDpcNumero').value.trim() || null,
+    verifie_le:   document.getElementById('fmVerifieLe').value || null,
+    prerequis:    document.getElementById('fmPrerequis').value.trim() || null,
+    description:  document.getElementById('fmDescription').value.trim() || null,
+    url_source:   document.getElementById('fmUrlSource').value.trim() || null,
+    statut:       document.getElementById('fmStatut').value
+  };
+
+  if (await ecrireAdmin('formations', payload, formEnCours)) fermerFormFormation();
+}
+
+async function changerStatutFormation(id, statut) {
+  await ecrireAdmin('formations', { statut }, id);
+}
+
+// ─────────── Sessions ───────────
+function renderAdminSessions() {
+  const zone = document.getElementById('admSessionsListe');
+  if (!adminSessions.length) {
+    zone.innerHTML = '<div class="admin-empty">Aucune session programmée.</div>';
+    return;
+  }
+  zone.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Formation</th><th>Dates</th><th>Ville</th><th>Places</th><th class="col-actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          ${adminSessions.map(s => `
+            <tr>
+              <td>
+                <div class="admin-nom">${esc(s.formations ? s.formations.titre : 'Formation #' + s.formation_id)}</div>
+                ${s.actif ? '' : '<div style="font-size:12px; color:var(--text-light)">Inactive</div>'}
+              </td>
+              <td style="white-space:nowrap">
+                ${esc(formatDate(s.date_debut))}${s.date_fin ? ' → ' + esc(formatDate(s.date_fin)) : ''}
+              </td>
+              <td>${esc(s.ville || '—')}</td>
+              <td>${s.places != null ? esc(s.places) : '—'}</td>
+              <td class="col-actions">
+                <button class="btn btn-outline btn-sm" onclick="ouvrirFormSession(${s.id})">Éditer</button>
+                <button class="btn btn-outline btn-sm" onclick="supprimerSession(${s.id})">Supprimer</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function ouvrirFormSession(id) {
+  sessEnCours = id;
+  const s = id ? adminSessions.find(x => x.id === id) : null;
+
+  remplirSelectsAdmin();
+
+  document.getElementById('sessFormTitre').textContent = s ? 'Éditer la session' : 'Nouvelle session';
+  document.getElementById('seFormation').value = s ? String(s.formation_id) : '';
+  document.getElementById('seDebut').value     = s ? (s.date_debut || '') : '';
+  document.getElementById('seFin').value       = s ? (s.date_fin || '') : '';
+  document.getElementById('seVille').value     = s ? (s.ville || '') : '';
+  document.getElementById('sePlaces').value    = s && s.places != null ? s.places : '';
+  document.getElementById('seUrl').value       = s ? (s.url_inscription || '') : '';
+  document.getElementById('seActif').checked   = s ? !!s.actif : true;
+
+  const zone = document.getElementById('sessForm');
+  zone.style.display = 'block';
+  zone.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function fermerFormSession() {
+  sessEnCours = null;
+  document.getElementById('sessForm').style.display = 'none';
+}
+
+async function enregistrerSession() {
+  const formation_id = document.getElementById('seFormation').value;
+  const date_debut   = document.getElementById('seDebut').value;
+  const date_fin     = document.getElementById('seFin').value || null;
+
+  if (!formation_id) return adminMessage('Choisis une formation.', true);
+  if (!date_debut)   return adminMessage('La date de début est obligatoire.', true);
+  if (date_fin && date_fin < date_debut) {
+    return adminMessage('La date de fin ne peut pas précéder la date de début.', true);
+  }
+
+  const places = document.getElementById('sePlaces').value;
+  const payload = {
+    formation_id: Number(formation_id),
+    date_debut,
+    date_fin,
+    ville:           document.getElementById('seVille').value.trim() || null,
+    places:          places === '' ? null : Number(places),
+    url_inscription: document.getElementById('seUrl').value.trim() || null,
+    actif:           document.getElementById('seActif').checked
+  };
+
+  if (await ecrireAdmin('sessions_formation', payload, sessEnCours)) fermerFormSession();
+}
+
+async function supprimerSession(id) {
+  const s = adminSessions.find(x => x.id === id);
+  const quoi = s && s.formations ? s.formations.titre : 'cette session';
+  if (!window.confirm('Supprimer la session du ' + (s ? formatDate(s.date_debut) : '') + ' pour « ' + quoi + ' » ?')) return;
+
+  const { error } = await sb.from('sessions_formation').delete().eq('id', id);
+  if (error) return adminMessage("Suppression refusée : " + error.message, true);
+
+  adminMessage('Session supprimée.');
+  await chargerAdmin();
+}
+
+// ─────────── Écriture commune ───────────
+async function ecrireAdmin(table, payload, id) {
+  const { error } = id
+    ? await sb.from(table).update(payload).eq('id', id)
+    : await sb.from(table).insert(payload);
+
+  if (error) {
+    adminMessage("Enregistrement refusé : " + error.message, true);
+    return false;
+  }
+  adminMessage(id ? 'Modifications enregistrées.' : 'Créé.');
+  await chargerAdmin();
+  // Le catalogue public dépend de statut et des organismes : on le
+  // recharge pour que la publication soit visible sans rechargement.
+  await loadCatalogues();
+  return true;
+}
+
+function remplirSelectsAdmin() {
+  const so = document.getElementById('fmOrganisme');
+  if (so) {
+    const garde = so.value;
+    so.innerHTML = '<option value="">Aucun organisme</option>' +
+      adminOrganismes.map(o => `<option value="${o.id}">${esc(o.nom)}</option>`).join('');
+    so.value = garde;
+  }
+
+  const sf = document.getElementById('seFormation');
+  if (sf) {
+    const garde = sf.value;
+    sf.innerHTML = '<option value="">Choisir une formation</option>' +
+      adminFormations.map(f => `<option value="${f.id}">${esc(f.titre)}</option>`).join('');
+    sf.value = garde;
+  }
+}
+
+// ═══════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════
 function showPage(page) {
+  // Garde d'interface. La vraie barrière est en base : sans role='admin',
+  // les policies RLS ne renvoient rien et n'acceptent aucune écriture.
+  if (page === 'admin' && !estAdmin()) page = currentUser ? 'dashboard' : 'landing';
+
+  setNoindex(page === 'admin');
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = document.getElementById('page-' + page);
   if (el) el.classList.add('active');
