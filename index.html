@@ -986,6 +986,14 @@
     .page-hero-meta { gap: 12px; }
   }
 
+  /* Petits mobiles. « Indépendant » en 40 px mesure 190 px : deux
+     colonnes de ce gabarit ne tiennent pas dans 320 px, et un mot ne
+     se coupe pas — la grille poussait la page hors de l'écran. */
+  @media (max-width: 480px) {
+    .metrics-grid { grid-template-columns: 1fr; gap: 22px; }
+    .metric-value { font-size: 32px; }
+  }
+
   /* ===== ANIMATIONS ===== */
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(16px); }
@@ -1268,6 +1276,23 @@
     top: -1px;
   }
   .detail-tarif-bande strong { color: var(--white); font-weight: 700; }
+
+  /* Les montants ne voyagent pas avec le catalogue : ils arrivent par
+     la requête d'ouverture de la fiche. Le mot qui les précède, lui,
+     est connu tout de suite — seule la valeur attend, dans une place
+     à sa taille, pour que rien ne se décale quand elle arrive. */
+  .detail-squelette {
+    display: inline-block; vertical-align: middle;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.18);
+    animation: squelettePouls 1.4s ease-in-out infinite;
+  }
+  .detail-meta-item .detail-squelette { width: 64px; height: 18px; }
+  .detail-tarif-bande .detail-squelette { width: 52px; height: 13px; }
+  @keyframes squelettePouls {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+  }
   .detail-tarif-lien {
     background: none; border: none; padding: 0;
     font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
@@ -1292,6 +1317,10 @@
 
   .detail-body { padding: 44px 0 80px; }
   .detail-grid { display: grid; grid-template-columns: 1fr 320px; gap: 40px; align-items: start; }
+  /* Sans ce min-width, la largeur minimale d'une colonne est celle de
+     son contenu le moins compressible — un bouton en nowrap — et la
+     grille pousse toute la page hors de l'écran sur un petit mobile. */
+  .detail-grid > * { min-width: 0; }
   .detail-grid.pleine-largeur { grid-template-columns: 1fr; }
 
   .detail-bloc { margin-bottom: 40px; }
@@ -1383,6 +1412,22 @@
       background: rgba(0,184,200,0.2);
     }
     .detail-tarif-lien { font-size: 14px; }
+    .detail-tarif-bande .detail-squelette { height: 14px; }
+  }
+
+  /* iPhone SE et mini. Les libellés longs des boutons de la colonne
+     latérale (« Voir sur le site de l'organisme ») mesuraient 283 px
+     en nowrap : c'est ce qui débordait, pas les badges ni les
+     chiffres, qui passaient déjà à la ligne. On les laisse se plier. */
+  @media (max-width: 430px) {
+    .detail-meta { gap: 14px 20px; }
+    .detail-carte .btn,
+    .tarif-carte .btn {
+      white-space: normal;
+      justify-content: center;
+      text-align: center;
+      padding: 13px 16px;
+    }
   }
 
   /* Titre de carte cliquable : un vrai bouton, donc atteignable au
@@ -4668,10 +4713,18 @@ async function chargerTarifFormation(f) {
 
   // Tarif introuvable : la fiche s'affiche sans montant plutôt que
   // pas du tout, comme pour le programme et les sessions.
-  if (r.error) { console.warn('Tarif indisponible :', r.error.message); return; }
+  // tarifRepondu dit que la requête est retombée, tarifCharge qu'elle a
+  // rapporté quelque chose : un échec doit pouvoir être retenté à la
+  // prochaine ouverture, sans pour autant laisser l'attente à l'écran.
+  if (r.error) {
+    console.warn('Tarif indisponible :', r.error.message);
+    f.tarifRepondu = true;
+    return;
+  }
 
   Object.assign(f, r.data || {});
   f.tarifCharge = true;
+  f.tarifRepondu = true;
 }
 
 async function ouvrirFormation(id) {
@@ -4724,10 +4777,7 @@ function renderDetailFormation(f, sections, sessions) {
 
   const meta = [
     f.duree ? `<div class="detail-meta-item"><strong>${esc(f.duree)}</strong>Durée</div>` : '',
-    f.prix != null
-      ? `<div class="detail-meta-item"><strong>${esc(f.prix)} €</strong>${
-          aTarifPrefere(f) ? 'Tarif public' : 'Par personne'}</div>`
-      : '',
+    renderMetaPrix(f),
     f.participants_max ? `<div class="detail-meta-item"><strong>${esc(f.participants_max)}</strong>Participants max</div>` : '',
     f.dpc_numero ? `<div class="detail-meta-item"><strong>${esc(f.dpc_numero)}</strong>Référence DPC</div>` : ''
   ].filter(Boolean).join('');
@@ -4855,6 +4905,26 @@ function codeValidePour(formationId) {
     && c.statut === 'genere' && new Date(c.expire_le).getTime() > maintenant) || null;
 }
 
+// Ni le prix public ni le tarif négocié ne voyagent avec le catalogue :
+// ils arrivent par la requête d'ouverture de la fiche. Tant qu'elle
+// n'est pas retombée, le chiffre garde sa place au lieu d'apparaître
+// après coup et de décaler tout ce qui le suit.
+function tarifEnAttente(f) {
+  return !f.tarifRepondu;
+}
+
+function renderMetaPrix(f) {
+  const libelle = aTarifPrefere(f) ? 'Tarif public' : 'Par personne';
+
+  if (f.prix == null) {
+    return tarifEnAttente(f)
+      ? `<div class="detail-meta-item"><strong><span class="detail-squelette"></span></strong>${libelle}</div>`
+      : '';
+  }
+
+  return `<div class="detail-meta-item"><strong>${esc(f.prix)} €</strong>${libelle}</div>`;
+}
+
 // L'en-tête annonce le prix plein. Sans ce rappel juste en dessous, un
 // praticien sur mobile lit « 2500 € » et peut quitter la page avant
 // d'atteindre l'encart, relégué sous toute la colonne principale. La
@@ -4872,12 +4942,18 @@ function renderBandeauTarif(f) {
   }
 
   // Le code en poche, le montant a déjà été obtenu : on le redonne ici
-  // plutôt qu'un lien. Tant que le tarif n'est pas revenu de la base,
-  // la bande annonce la remise sans chiffre au lieu d'un montant vide.
+  // plutôt qu'un lien. C'est la seule formulation qui dépende d'un
+  // chiffre : tant qu'il n'est pas revenu de la base, sa place est
+  // tenue par une pastille de même gabarit, et la ligne ne bouge pas
+  // quand la valeur s'y installe. Une remise sans montant, affichée
+  // puis corrigée, donnerait un site qui se ravise tout seul.
   const code = codeValidePour(f.id);
   if (code) {
+    const montant = f.tarif_prefere != null
+      ? `<strong>${esc(f.tarif_prefere)} €</strong>`
+      : (tarifEnAttente(f) ? '<span class="detail-squelette"></span>' : '');
     return bande(`<span class="detail-tarif-texte">Votre tarif préférentiel${
-        f.tarif_prefere != null ? ` : <strong>${esc(f.tarif_prefere)} €</strong>` : ''}</span>
+        montant ? ' : ' + montant : ''}</span>
         <span class="detail-tarif-code">${esc(code.code)}</span>`);
   }
 
