@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230F2B4D'/><text font-size='58' font-family='Arial,Helvetica,sans-serif' font-weight='700' fill='white' x='6' y='68'>O</text><text font-size='58' font-family='Arial,Helvetica,sans-serif' font-weight='700' fill='%2300B8C8' x='46' y='64'>C</text></svg>">
 <title>OrthoConnect | Formations, matériel et postes en orthodontie</title>
+<meta name="description" id="metaDescription" content="La plateforme des orthodontistes : formations DPC vérifiées, comparatif de matériel et offres d'emploi en ODF.">
+<link rel="canonical" id="lienCanonique" href="https://orthoconnect.fr/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Raleway:wght@900&display=swap" rel="stylesheet">
 <style>
@@ -950,6 +952,21 @@
   input:focus, select:focus, textarea:focus { border-color: var(--turquoise); }
   textarea { resize: vertical; min-height: 120px; }
   .form-note { font-size: 12px; color: var(--text-light); margin-top: 6px; }
+  /* L'adresse publique du contenu, sous son titre : lisible, copiable,
+     jamais saisissable — c'est la base qui la pose. */
+  .form-slug { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .form-slug-url {
+    font-family: 'Courier New', monospace; font-size: 12px;
+    color: var(--text-secondary); word-break: break-all;
+  }
+  .form-slug-copier {
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    color: var(--navy); background: var(--white);
+    border: 1px solid var(--grey-border); border-radius: 4px;
+    padding: 2px 8px; cursor: pointer;
+  }
+  .form-slug-copier:hover { border-color: var(--turquoise); color: var(--turquoise); }
+  .form-slug-apercu { font-style: italic; }
   .form-submit { text-align: center; margin-top: 32px; }
   .form-success {
     display: none;
@@ -1473,7 +1490,7 @@
   /* Titre de carte cliquable : un vrai bouton, donc atteignable au
      clavier, mais rendu comme le titre qu'il remplace. */
   .formation-title-btn {
-    display: block; width: 100%; text-align: left;
+    display: block; width: 100%; text-align: left; text-decoration: none;
     background: none; border: none; padding: 0;
     font-family: 'Inter', sans-serif;
     font-size: 15px; font-weight: 700; color: var(--navy);
@@ -1485,6 +1502,7 @@
   /* ===== EMPLOI ===== */
   .job-card { cursor: pointer; }
   .job-title-btn {
+    text-decoration: none;
     display: block; width: 100%; text-align: left;
     background: none; border: none; padding: 0;
     font-family: 'Inter', sans-serif;
@@ -1859,7 +1877,7 @@
 
 <nav>
   <div class="nav-inner">
-    <a class="logo" onclick="showPage('landing')">
+    <a href="/" class="logo" onclick="showPage('landing')">
       <div class="logo-oc">
         <span class="lo">O</span><span class="lc">C</span>
       </div>
@@ -1868,10 +1886,10 @@
       </div>
     </a>
     <ul class="nav-links">
-      <li><a href="#" onclick="showPage('formations')" id="nav-formations">Formations</a></li>
-      <li><a href="#" onclick="showPage('produits')" id="nav-produits">Produits &amp; matériels</a></li>
-      <li><a href="#" onclick="showPage('emploi')" id="nav-emploi">Emploi</a></li>
-      <li><a href="#" onclick="requireAuth('actus')" id="nav-actu">Actualités</a></li>
+      <li><a href="/formations" onclick="showPage('formations')" id="nav-formations">Formations</a></li>
+      <li><a href="/produits" onclick="showPage('produits')" id="nav-produits">Produits &amp; matériels</a></li>
+      <li><a href="/emploi" onclick="showPage('emploi')" id="nav-emploi">Emploi</a></li>
+      <li><a href="/actualites" onclick="requireAuth('actus')" id="nav-actu">Actualités</a></li>
       <li id="navLoginItem"><a href="#" class="nav-cta btn nav-login-btn" onclick="openAuth('signup')">Espace praticien</a></li>
       <li>
         <div class="nav-user" id="navUser">
@@ -1880,7 +1898,7 @@
                   aria-haspopup="true" aria-expanded="false" aria-controls="userMenu"
                   aria-label="Menu du compte">--</button>
           <div class="user-menu" id="userMenu">
-            <a href="#" onclick="fermerUserMenu(); showPage('dashboard')">Mon espace</a>
+            <a href="/mon-espace" onclick="fermerUserMenu(); showPage('dashboard')">Mon espace</a>
             <a href="#" id="userMenuAdmin" style="display:none" onclick="fermerUserMenu(); ouvrirAdmin()">Admin</a>
             <div class="user-menu-sep"></div>
             <a href="#" onclick="fermerUserMenu(); doLogout()">Se déconnecter</a>
@@ -1895,14 +1913,14 @@
 </nav>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#" onclick="showPage('landing'); toggleMenu()">Accueil</a>
-  <a href="#" onclick="showPage('formations'); toggleMenu()">Formations</a>
-  <a href="#" onclick="showPage('produits'); toggleMenu()">Produits &amp; matériels</a>
-  <a href="#" onclick="showPage('emploi'); toggleMenu()">Emploi</a>
-  <a href="#" onclick="requireAuth('actus'); toggleMenu()">Actualités</a>
+  <a href="/" onclick="showPage('landing'); toggleMenu()">Accueil</a>
+  <a href="/formations" onclick="showPage('formations'); toggleMenu()">Formations</a>
+  <a href="/produits" onclick="showPage('produits'); toggleMenu()">Produits &amp; matériels</a>
+  <a href="/emploi" onclick="showPage('emploi'); toggleMenu()">Emploi</a>
+  <a href="/actualites" onclick="requireAuth('actus'); toggleMenu()">Actualités</a>
   <div class="mobile-menu-sep"></div>
   <a href="#" id="mobLogin" onclick="openAuth('signup'); toggleMenu()" style="color:var(--turquoise); font-weight:600">Espace praticien</a>
-  <a href="#" id="mobDash" onclick="showPage('dashboard'); toggleMenu()" style="display:none; color:var(--navy); font-weight:600">Mon espace</a>
+  <a href="/mon-espace" id="mobDash" onclick="showPage('dashboard'); toggleMenu()" style="display:none; color:var(--navy); font-weight:600">Mon espace</a>
   <a href="#" id="mobAdmin" onclick="ouvrirAdmin(); toggleMenu()" style="display:none; color:var(--navy); font-weight:600">Admin</a>
 </div>
 
@@ -1923,7 +1941,7 @@
           <a class="btn btn-turquoise" onclick="openAuth('signup')">
             Rejoindre gratuitement
           </a>
-          <a class="btn btn-outline-white" onclick="showPage('formations')">
+          <a href="/formations" class="btn btn-outline-white" onclick="showPage('formations')">
             Découvrir
           </a>
         </div>
@@ -2082,7 +2100,7 @@
       <p>Vérification par numéro RPPS. Aucune cotisation, aucune donnée transmise à des tiers.</p>
       <div class="cta-band-buttons">
         <a class="btn btn-turquoise" onclick="openAuth('signup')">Ouvrir mon compte</a>
-        <a class="btn btn-outline" onclick="showPage('formations')">Parcourir d'abord</a>
+        <a href="/formations" class="btn btn-outline" onclick="showPage('formations')">Parcourir d'abord</a>
       </div>
     </div>
   </section>
@@ -2102,15 +2120,15 @@
       </div>
       <div class="footer-col">
         <h4>Ressources</h4>
-        <a href="#" onclick="showPage('formations')">Formations DPC</a>
-        <a href="#" onclick="showPage('produits')">Comparatifs produits</a>
+        <a href="/formations" onclick="showPage('formations')">Formations DPC</a>
+        <a href="/produits" onclick="showPage('produits')">Comparatifs produits</a>
         <a href="#">Offres d'emploi</a>
         <a href="#">Actualités du secteur</a>
       </div>
       <div class="footer-col">
         <h4>Produits</h4>
-        <a href="#" onclick="showPage('produits')">Aligneurs</a>
-        <a href="#" onclick="showPage('produits')">Brackets</a>
+        <a href="/produits" onclick="showPage('produits')">Aligneurs</a>
+        <a href="/produits" onclick="showPage('produits')">Brackets</a>
         <a href="#">Caméras intra-orales</a>
         <a href="#">Logiciels</a>
       </div>
@@ -2125,7 +2143,7 @@
     <div class="footer-bottom">
       <span>© 2026 OrthoConnect · orthoconnect.fr</span>
       <span>
-        <a href="#" onclick="showPage('marques')" style="color:rgba(255,255,255,0.25); font-size:12px; text-decoration:none">Espace partenaires</a>
+        <a href="/partenaires" onclick="showPage('marques')" style="color:rgba(255,255,255,0.25); font-size:12px; text-decoration:none">Espace partenaires</a>
         &nbsp;·&nbsp;
         <span>Indépendant de tout syndicat et de toute société savante</span>
       </span>
@@ -2190,9 +2208,9 @@
       </div>
       <div class="footer-col">
         <h4>Navigation</h4>
-        <a href="#" onclick="showPage('landing')">Accueil</a>
-        <a href="#" onclick="showPage('produits')">Produits</a>
-        <a href="#" onclick="showPage('marques')">Pour les marques</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+        <a href="/produits" onclick="showPage('produits')">Produits</a>
+        <a href="/partenaires" onclick="showPage('marques')">Pour les marques</a>
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
@@ -2261,9 +2279,9 @@
       </div>
       <div class="footer-col">
         <h4>Navigation</h4>
-        <a href="#" onclick="showPage('landing')">Accueil</a>
-        <a href="#" onclick="showPage('formations')">Formations</a>
-        <a href="#" onclick="showPage('marques')">Pour les marques</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
+        <a href="/partenaires" onclick="showPage('marques')">Pour les marques</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -2325,9 +2343,9 @@
       </div>
       <div class="footer-col">
         <h4>Navigation</h4>
-        <a href="#" onclick="showPage('landing')">Accueil</a>
-        <a href="#" onclick="showPage('formations')">Formations</a>
-        <a href="#" onclick="showPage('produits')">Produits</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
+        <a href="/produits" onclick="showPage('produits')">Produits</a>
       </div>
       <div class="footer-col">
         <h4>Publier</h4>
@@ -2375,8 +2393,46 @@
       </div>
       <div class="footer-col">
         <h4>Navigation</h4>
-        <a href="#" onclick="showPage('emploi')">Toutes les offres</a>
-        <a href="#" onclick="showPage('landing')">Accueil</a>
+        <a href="/emploi" onclick="showPage('emploi')">Toutes les offres</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ==================== -->
+<!-- PAGE : CONTENU INTROUVABLE                                     -->
+<!-- Une URL qui ne mène à rien vaut mieux qu'une page blanche :     -->
+<!-- on dit ce qui manque et on renvoie au catalogue concerné.       -->
+<!-- ==================== -->
+<div class="page" id="page-introuvable">
+  <section class="detail-body">
+    <div class="container">
+      <div id="introuvableContenu"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, matériel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
+        <a href="/emploi" onclick="showPage('emploi')">Offres d'emploi</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -2421,9 +2477,9 @@
       </div>
       <div class="footer-col">
         <h4>Navigation</h4>
-        <a href="#" onclick="showPage('formations')">Catalogue des formations</a>
-        <a href="#" onclick="showPage('produits')">Produits</a>
-        <a href="#" onclick="showPage('landing')">Accueil</a>
+        <a href="/formations" onclick="showPage('formations')">Catalogue des formations</a>
+        <a href="/produits" onclick="showPage('produits')">Produits</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
@@ -2630,7 +2686,7 @@
             <div class="admin-toolbar">
               <button class="btn btn-turquoise btn-sm" onclick="ouvrirFormAnnonce(null)">+ Déposer une annonce</button>
               <span class="spacer"></span>
-              <a class="btn btn-outline btn-sm" href="#" onclick="showPage('emploi')">Voir toutes les offres</a>
+              <a class="btn btn-outline btn-sm" href="/emploi" onclick="showPage('emploi')">Voir toutes les offres</a>
             </div>
 
             <div class="admin-form" id="annonceForm" style="display:none">
@@ -2638,7 +2694,9 @@
 
               <div class="form-group">
                 <label for="anTitre">Intitulé du poste</label>
-                <input type="text" id="anTitre" placeholder="Collaboration libérale 3 jours par semaine">
+                <input type="text" id="anTitre" placeholder="Collaboration libérale 3 jours par semaine"
+                       oninput="majSlugAnnonce()">
+                <div class="form-note form-slug" id="anSlugInfo"></div>
                 <div class="form-note">
                   Évitez d'y mettre le nom de votre cabinet : il est masqué aux visiteurs
                   non inscrits partout ailleurs, mais l'intitulé, lui, s'affiche tel quel.
@@ -2954,7 +3012,9 @@
               <h3 id="formFormTitre">Nouvelle formation</h3>
               <div class="form-group">
                 <label for="fmTitre">Titre</label>
-                <input type="text" id="fmTitre" placeholder="Aligneurs : biomécanique et planification">
+                <input type="text" id="fmTitre" placeholder="Aligneurs : biomécanique et planification"
+                       oninput="majSlugFormation()">
+                <div class="form-note form-slug" id="fmSlugInfo"></div>
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -3398,9 +3458,9 @@
       </div>
       <div class="footer-col">
         <h4>Navigation</h4>
-        <a href="#" onclick="showPage('landing')">Accueil</a>
-        <a href="#" onclick="showPage('formations')">Formations</a>
-        <a href="#" onclick="showPage('produits')">Produits</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
+        <a href="/produits" onclick="showPage('produits')">Produits</a>
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
@@ -3477,6 +3537,13 @@ const COLONNES_VUE = COLONNES_CARTE + ', a_tarif_prefere, organisme_nom, ' +
 // lire tarif_prefere pour savoir qu'un tarif existe.
 const COLONNES_TABLE = COLONNES_CARTE + ', tarif_prefere, ' + COLONNES_ORGANISME;
 
+// Le slug n'existe qu'une fois slugs_et_urls.sql passé. On le demande,
+// et une seule fois : au premier refus, on cesse de le réclamer pour
+// toute la session plutôt que de vider le catalogue. L'URL retombe
+// alors sur le slug calculé depuis le titre, qui est la même règle.
+let colonneSlug = true;
+function avecSlug(colonnes) { return colonneSlug ? colonnes + ', slug' : colonnes; }
+
 function sourceTarif() {
   // Connecté : la table, seule à porter le tarif négocié et ses
   // conditions. Sinon la source qui a effectivement répondu pour la
@@ -3488,8 +3555,18 @@ async function chargerFormationsPubliques() {
   sourceCatalogue = 'formations_publiques';
   sessionCatalogue = !!currentUser;
 
-  const r = await sb.from('formations_publiques').select(COLONNES_VUE)
+  const lireVue = () => sb.from('formations_publiques').select(avecSlug(COLONNES_VUE))
     .eq('statut', 'publie').order('id');
+
+  let r = await lireVue();
+
+  // Colonne slug pas encore en base : on redemande sans elle avant de
+  // conclure que la vue est indisponible.
+  if (r.error && colonneSlug) {
+    console.warn('Colonne slug absente, lecture sans elle :', r.error.message);
+    colonneSlug = false;
+    r = await lireVue();
+  }
   if (!r.error) return r;
 
   // Vue absente parce que le SQL n'est pas passé : on retombe sur la
@@ -3498,7 +3575,7 @@ async function chargerFormationsPubliques() {
   console.warn('Vue formations_publiques indisponible, repli sur la table :', r.error.message);
 
   const t = await sb.from('formations')
-    .select(COLONNES_TABLE).eq('statut', 'publie').order('id');
+    .select(avecSlug(COLONNES_TABLE)).eq('statut', 'publie').order('id');
   if (!t.error) { sourceCatalogue = 'formations'; return t; }
 
   // Dernier filet, sur un schéma antérieur aux statuts : là, et là
@@ -3868,12 +3945,20 @@ async function refreshAuthUI() {
 // ═══════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════
+// Seules les actualités ont une adresse à elles dans l'espace
+// praticien ; les autres panneaux restent sur /mon-espace. On remplace
+// l'entrée plutôt que d'en ajouter une : passer d'un onglet à l'autre
+// n'est pas une navigation qu'on veut refaire au Précédent.
+const CHEMINS_PANNEAU = { actus: '/actualites' };
+
 function showDashPanel(name, btn) {
   // Sélecteurs limités à #page-dashboard : l'admin réutilise les mêmes
   // classes et serait sinon désactivée au passage.
   document.querySelectorAll('#page-dashboard .dash-panel').forEach(p => p.classList.remove('active'));
   const panel = document.getElementById('panel-' + name);
   if (panel) panel.classList.add('active');
+
+  majUrl(CHEMINS_PANNEAU[name] || CHEMINS_PAGE.dashboard, true);
 
   document.querySelectorAll('#page-dashboard .dash-nav button').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
@@ -4219,8 +4304,8 @@ function renderAnnonces() {
     <div class="job-card" onclick="ouvrirAnnonce(${j.id})">
       <div class="job-head">
         <div>
-          <button type="button" class="job-title-btn"
-                  onclick="event.stopPropagation(); ouvrirAnnonce(${j.id})">${esc(j.titre)}</button>
+          <a class="job-title-btn" href="${cheminAnnonce(j)}"
+             onclick="event.preventDefault(); event.stopPropagation(); ouvrirAnnonce(${j.id})">${esc(j.titre)}</a>
           ${renderCabinetAnnonce(j, 'job-cab')}
         </div>
         <span class="badge badge-contrat">${esc(libelleContrat(j.type_contrat))}</span>
@@ -4262,7 +4347,10 @@ function ouvrirAnnonce(id) {
   if (!j || !annonceActive(j)) return;
 
   annonceOuverte = j;
-  showPage('annonce');
+  showPage('annonce', cheminAnnonce(j));
+  majMeta(j.titre + ' | Emploi | OrthoConnect',
+    resumeMeta(j.description, "Offre d'emploi en orthodontie publiée sur OrthoConnect."),
+    cheminAnnonce(j));
 
   document.getElementById('annonceHero').innerHTML = `
     <div class="detail-badges">
@@ -4433,6 +4521,11 @@ function ouvrirFormAnnonce(id) {
 
   document.getElementById('annonceFormTitre').textContent = j ? 'Modifier l\'annonce' : 'Nouvelle annonce';
   document.getElementById('anTitre').value       = j ? (j.titre || '') : '';
+
+  const zoneSlugAnnonce = document.getElementById('anSlugInfo');
+  zoneSlugAnnonce.dataset.slug  = (j && j.slug) || '';
+  zoneSlugAnnonce.dataset.titre = (j && j.titre) || '';
+  majSlugAnnonce();
   document.getElementById('anCabinet').value     = j ? (j.cabinet || '') : (p.cabinet_nom || '');
   document.getElementById('anVille').value       = j ? (j.ville || '') : (p.cabinet_ville || p.ville || '');
   document.getElementById('anDept').value        = j ? (j.departement || '') : '';
@@ -4589,8 +4682,8 @@ function renderFormationsDB(data) {
       </div>
       <div class="formation-card-body">
         ${renderOrgaCarte(f)}
-        <button type="button" class="formation-title-btn"
-                onclick="event.stopPropagation(); ouvrirFormation(${f.id})">${f.titre}</button>
+        <a class="formation-title-btn" href="${cheminFormation(f)}"
+           onclick="event.preventDefault(); event.stopPropagation(); ouvrirFormation(${f.id})">${f.titre}</a>
         <div class="formation-desc">${f.description || ''}</div>
         <div class="formation-meta">
           <span class="formation-meta-item">⏱ ${f.duree}</span>
@@ -4852,7 +4945,10 @@ async function ouvrirFormation(id) {
 
   annulerGardeTarif();
   formationOuverte = f;
-  showPage('formation');
+  showPage('formation', cheminFormation(f));
+  majMeta(f.titre + ' | OrthoConnect',
+    resumeMeta(f.description, 'Formation en orthodontie référencée sur OrthoConnect.'),
+    cheminFormation(f));
   renderDetailFormation(f, null, []);
 
   // Programme, sessions et tarif arrivent après le premier rendu : la
@@ -5635,6 +5731,12 @@ function ouvrirFormFormation(id) {
 
   document.getElementById('formFormTitre').textContent = f ? 'Éditer la formation' : 'Nouvelle formation';
   document.getElementById('fmTitre').value       = f ? (f.titre || '') : '';
+
+  // Le slug en base fait foi tant que le titre n'a pas bougé.
+  const zoneSlug = document.getElementById('fmSlugInfo');
+  zoneSlug.dataset.slug  = (f && f.slug) || '';
+  zoneSlug.dataset.titre = (f && f.titre) || '';
+  majSlugFormation();
   document.getElementById('fmOrganisme').value   = f && f.organisme_id ? String(f.organisme_id) : '';
   document.getElementById('fmThematique').value  = f ? (f.thematique || '') : '';
   document.getElementById('fmNiveau').value      = f ? (f.niveau || '') : '';
@@ -6275,12 +6377,332 @@ function remplirSelectsAdmin() {
 // ═══════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════
-function showPage(page) {
+// ═══════════════════════════════════════════════
+// URL ET NAVIGATION
+//
+// Une page = une URL. showPage bascule la vue et écrit l'adresse qui
+// va avec, appliquerRoute fait le chemin inverse : à l'ouverture d'une
+// URL directe et à chaque Précédent du navigateur. Rien n'est
+// rechargé, l'History API suffit.
+//
+// Côté hébergement, _redirects renvoie toutes les URL sur index.html,
+// sans quoi /formations/... donnerait un 404 de serveur avant même que
+// ce code s'exécute.
+// ═══════════════════════════════════════════════
+const ORIGINE = 'https://orthoconnect.fr';
+
+const CHEMINS_PAGE = {
+  landing:    '/',
+  formations: '/formations',
+  produits:   '/produits',
+  emploi:     '/emploi',
+  marques:    '/partenaires',
+  dashboard:  '/mon-espace',
+  admin:      '/admin'
+};
+
+// Titre d'onglet et description par vue. Une fiche écrase les deux
+// avec les siennes : un onglet ouvert sur une formation doit porter le
+// nom de la formation, pas celui du site.
+const META_PAGES = {
+  landing: {
+    titre: 'OrthoConnect | Formations, matériel et postes en orthodontie',
+    description: "La plateforme des orthodontistes : formations DPC vérifiées, comparatif de matériel et offres d'emploi en ODF."
+  },
+  formations: {
+    titre: 'Formations en orthodontie et DPC | OrthoConnect',
+    description: "Le catalogue des formations en orthodontie : organismes vérifiés, éligibilité DPC, dates, tarifs et tarif préférentiel réservé aux praticiens inscrits."
+  },
+  produits: {
+    titre: 'Comparatif du matériel orthodontique | OrthoConnect',
+    description: "Aligneurs, brackets et matériel d'orthodontie comparés sur pièces : caractéristiques techniques et avis de praticiens en exercice."
+  },
+  emploi: {
+    titre: "Offres d'emploi en orthodontie | OrthoConnect",
+    description: "Collaboration, remplacement, association et cession de cabinet en orthodontie. Annonces déposées par les praticiens, sans intermédiaire."
+  },
+  marques: {
+    titre: 'Espace partenaires | OrthoConnect',
+    description: "Présenter votre matériel aux orthodontistes : audience, formats de visibilité et prise de contact avec l'équipe OrthoConnect."
+  },
+  dashboard: {
+    titre: 'Mon espace praticien | OrthoConnect',
+    description: "Vos formations enregistrées, vos codes de tarif préférentiel et vos annonces d'emploi."
+  },
+  admin: { titre: 'Administration | OrthoConnect', description: '' },
+  introuvable: {
+    titre: 'Contenu introuvable | OrthoConnect',
+    description: "Cette adresse ne correspond à aucun contenu publié."
+  }
+};
+
+// Règle jumelle de la fonction slugifier() de slugs_et_urls.sql : si
+// tu touches à l'une, touche à l'autre. C'est elle qui permet aux URL
+// d'être justes avant même que le SQL soit passé, la colonne slug
+// prenant ensuite le relais avec ses suffixes anti-collision.
+function slugifier(texte) {
+  return String(texte == null ? '' : texte)
+    .replace(/[œŒ]/g, 'oe')
+    .replace(/[æÆ]/g, 'ae')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .slice(0, 80)
+    .replace(/^-+|-+$/g, '') || 'sans-titre';
+}
+
+function slugFormation(f) { return f.slug || slugifier(f.titre); }
+function slugAnnonce(j)   { return j.slug || slugifier(j.titre); }
+function cheminFormation(f) { return '/formations/' + slugFormation(f); }
+function cheminAnnonce(j)   { return '/emploi/' + slugAnnonce(j); }
+
+// Vrai pendant qu'on applique une adresse lue dans la barre : les
+// vues déclenchées ne doivent pas la réempiler par-dessus elle-même.
+let routageEnCours = false;
+
+function cheminCourant() {
+  const c = location.pathname.replace(/\/{2,}/g, '/').replace(/(.)\/+$/, '$1');
+  return c || '/';
+}
+
+// Pendant qu'on applique une adresse lue dans la barre, on ne réempile
+// rien — sauf une correction : quand la vue affichée n'est pas celle
+// que l'adresse annonçait, c'est l'adresse qui doit céder.
+function majUrl(chemin, remplacer) {
+  if (!chemin) return;
+  if (routageEnCours && !remplacer) return;
+  // Rejouer la même adresse ne doit pas créer une entrée d'historique
+  // qu'il faudrait franchir deux fois au retour.
+  const memeAdresse = chemin === cheminCourant();
+  history[(remplacer || memeAdresse) ? 'replaceState' : 'pushState']({ chemin }, '', chemin);
+}
+
+// Une description de 155 signes environ, coupée sur un mot : au-delà,
+// les moteurs tronquent eux-mêmes, en plein milieu.
+function resumeMeta(texte, repli) {
+  const t = String(texte || '').replace(/\s+/g, ' ').trim();
+  if (!t) return repli || '';
+  if (t.length <= 155) return t;
+  const coupe = t.slice(0, 155);
+  return coupe.slice(0, coupe.lastIndexOf(' ')).trimEnd() + '…';
+}
+
+function majMeta(titre, description, chemin) {
+  if (titre) document.title = titre;
+
+  const desc = document.getElementById('metaDescription');
+  if (desc && description != null) desc.setAttribute('content', description);
+
+  const canonique = document.getElementById('lienCanonique');
+  if (canonique) canonique.setAttribute('href', ORIGINE + (chemin || cheminCourant()));
+}
+
+// ─────── L'adresse publique, montrée à qui rédige ───────
+//
+// Le slug n'est pas saisissable : c'est la base qui le pose, avec son
+// suffixe en cas de collision. On montre donc l'adresse plutôt que de
+// la faire écrire — celle qui est en base sur un contenu déjà
+// enregistré, un aperçu tant que le titre est en cours de frappe.
+
+function renderApercuSlug(idZone, prefixe, titre, slugStocke, titreStocke) {
+  const zone = document.getElementById(idZone);
+  if (!zone) return;
+
+  const t = String(titre || '').trim();
+  if (!t) {
+    zone.innerHTML = "<span class=\"form-slug-apercu\">L'adresse publique est tirée du titre.</span>";
+    return;
+  }
+
+  const inchange = !!slugStocke && String(titreStocke || '').trim() === t;
+  const url = ORIGINE + prefixe + (inchange ? slugStocke : slugifier(t));
+
+  zone.innerHTML = `<span class="form-slug-url" id="${idZone}Url">${esc(url)}</span>
+      <button type="button" class="form-slug-copier"
+              onclick="copierTexte('${idZone}Url', this)">Copier</button>
+      ${inchange ? '' : '<span class="form-slug-apercu">aperçu, posé à l\'enregistrement</span>'}`;
+}
+
+function majSlugFormation() {
+  const z = document.getElementById('fmSlugInfo');
+  if (!z) return;
+  renderApercuSlug('fmSlugInfo', '/formations/',
+    document.getElementById('fmTitre').value, z.dataset.slug, z.dataset.titre);
+}
+
+function majSlugAnnonce() {
+  const z = document.getElementById('anSlugInfo');
+  if (!z) return;
+  renderApercuSlug('anSlugInfo', '/emploi/',
+    document.getElementById('anTitre').value, z.dataset.slug, z.dataset.titre);
+}
+
+// Le presse-papier peut être refusé (page non sécurisée, permission) :
+// on sélectionne alors l'adresse, il reste un Ctrl+C à faire.
+function copierTexte(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  const retour = () => {
+    const avant = btn.textContent;
+    btn.textContent = 'Copié';
+    setTimeout(() => { btn.textContent = avant; }, 1500);
+  };
+  const selectionner = () => {
+    const sel = window.getSelection();
+    const plage = document.createRange();
+    plage.selectNodeContents(el);
+    sel.removeAllRanges();
+    sel.addRange(plage);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(el.textContent).then(retour, selectionner);
+  } else {
+    selectionner();
+  }
+}
+
+// ─────── Le routeur ───────
+
+function appliquerRoute(chemin) {
+  const seg = String(chemin || '/').split('/').filter(Boolean)
+    .map(x => { try { return decodeURIComponent(x); } catch (e) { return x; } });
+
+  routageEnCours = true;
+  try {
+    if (!seg.length) { showPage('landing'); return; }
+
+    switch (seg[0]) {
+      case 'formations':
+        if (!seg[1]) { showPage('formations'); return; }
+        ouvrirParSlug(formationsDB, seg[1], slugFormation, ouvrirFormation, 'formation');
+        return;
+
+      case 'produits':
+        showPage('produits'); return;
+
+      case 'emploi':
+        if (!seg[1]) { showPage('emploi'); return; }
+        ouvrirParSlug(jobsDB, seg[1], slugAnnonce, ouvrirAnnonce, 'annonce');
+        return;
+
+      case 'partenaires':
+        showPage('marques'); return;
+
+      case 'actualites':
+        // Les actualités vivent dans l'espace praticien : sans compte,
+        // l'adresse mène à l'inscription plutôt qu'à une page vide, et
+        // l'adresse suit ce qui est réellement à l'écran.
+        if (!currentUser) { showPage('landing'); majUrl('/', true); openAuth('signup'); return; }
+        showPage('dashboard');
+        showDashPanel('actus');
+        return;
+
+      case 'mon-espace':
+        if (!currentUser) { showPage('landing'); majUrl('/', true); openAuth('login'); return; }
+        showPage('dashboard');
+        return;
+
+      case 'admin':
+        showPage('admin'); return;
+
+      default:
+        pageIntrouvable();
+    }
+  } finally {
+    routageEnCours = false;
+  }
+}
+
+// Le slug d'abord, l'identifiant ensuite : les liens partagés avant
+// cette refonte pointaient sur des identifiants, ils continuent de
+// tomber juste.
+function ouvrirParSlug(collection, slug, slugDe, ouvrir, genre) {
+  const item = (collection || []).find(x => slugDe(x) === slug || String(x.id) === slug);
+  if (item) ouvrir(item.id);
+  else pageIntrouvable(genre);
+}
+
+function pageIntrouvable(genre) {
+  const retours = {
+    formation: {
+      titre: 'Cette formation est introuvable',
+      texte: "Elle n'existe pas, ou elle n'est plus publiée. Le catalogue est à jour, la vôtre y est peut-être sous un autre intitulé.",
+      lien: 'Voir toutes les formations', chemin: '/formations', page: 'formations'
+    },
+    annonce: {
+      titre: 'Cette annonce est introuvable',
+      texte: "Elle n'existe pas, ou elle a expiré : les offres quittent le site d'elles-mêmes à leur date de fin.",
+      lien: 'Voir toutes les offres', chemin: '/emploi', page: 'emploi'
+    },
+    defaut: {
+      titre: 'Cette page est introuvable',
+      texte: "L'adresse demandée ne correspond à aucune page du site.",
+      lien: "Retour à l'accueil", chemin: '/', page: 'landing'
+    }
+  };
+  const r = retours[genre] || retours.defaut;
+
+  const zone = document.getElementById('introuvableContenu');
+  if (zone) {
+    zone.innerHTML = `<div class="catalogue-vide">
+        <div class="catalogue-vide-icone" aria-hidden="true">🧭</div>
+        <div class="catalogue-vide-titre">${esc(r.titre)}</div>
+        <p>${esc(r.texte)}</p>
+        <p style="margin-top:18px">
+          <a class="btn btn-turquoise" href="${r.chemin}"
+             onclick="showPage('${r.page}')">${esc(r.lien)}</a>
+        </p>
+      </div>`;
+  }
+
+  // Aucune adresse n'est poussée : celle que le visiteur a tapée reste
+  // dans la barre, il peut la corriger ou la partager telle quelle.
+  showPage('introuvable', null);
+}
+
+// Les liens internes sont de vrais href — pour être suivis par un
+// moteur et ouvrables dans un nouvel onglet — mais restent gérés sans
+// rechargement. Ceux qui portent déjà un onclick s'en chargent
+// eux-mêmes, on se contente d'annuler la navigation du navigateur.
+document.addEventListener('click', (e) => {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+  const a = e.target.closest('a');
+  if (!a) return;
+
+  const href = a.getAttribute('href');
+  if (!href || a.target === '_blank' || a.hasAttribute('download')) return;
+  if (/^(https?:|mailto:|tel:)/.test(href)) return;
+
+  if (href === '#') { e.preventDefault(); return; }
+  if (!href.startsWith('/')) return;
+
+  e.preventDefault();
+  if (!a.hasAttribute('onclick')) naviguer(href);
+});
+
+// Aller à une adresse : on l'applique, puis on l'écrit. Dans cet
+// ordre, une adresse qui ne mène à rien reste quand même dans la barre.
+function naviguer(chemin) {
+  appliquerRoute(chemin);
+  majUrl(chemin);
+}
+
+window.addEventListener('popstate', () => appliquerRoute(cheminCourant()));
+
+// Le second argument est l'adresse à écrire : les fiches passent la
+// leur, construite sur le slug. Passer null n'écrit rien — c'est le cas
+// de la page « introuvable », qui laisse l'adresse demandée en place.
+function showPage(page, chemin) {
+  const demandee = page;
+
   // Garde d'interface. La vraie barrière est en base : sans role='admin',
   // les policies RLS ne renvoient rien et n'acceptent aucune écriture.
   if (page === 'admin' && !estAdmin()) page = currentUser ? 'dashboard' : 'landing';
 
-  setNoindex(page === 'admin');
+  setNoindex(page === 'admin' || page === 'introuvable');
 
   // Sortir de la fiche démonte l'attente du tarif restée en cours.
   if (page !== 'formation') annulerGardeTarif();
@@ -6291,6 +6713,16 @@ function showPage(page) {
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
   const navEl = document.getElementById('nav-' + page);
   if (navEl) navEl.classList.add('active');
+
+  // L'adresse suit la vue réellement affichée : quand la garde renvoie
+  // ailleurs, elle corrige l'URL au lieu de la laisser mentir, et
+  // remplace l'entrée plutôt que d'en ajouter une.
+  const adresse = chemin !== undefined ? chemin : CHEMINS_PAGE[page];
+  majUrl(adresse, page !== demandee);
+
+  const meta = META_PAGES[page];
+  if (meta) majMeta(meta.titre, meta.description, adresse || cheminCourant());
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -6313,6 +6745,11 @@ document.addEventListener('keydown', (e) => {
 (async function init() {
   await loadCatalogues();
   await refreshAuthUI();
+
+  // Le catalogue est là : l'adresse ouverte peut être résolue, slug
+  // compris. Avant ça, /formations/<slug> n'aurait rien trouvé.
+  history.replaceState({ chemin: cheminCourant() }, '', cheminCourant());
+  appliquerRoute(cheminCourant());
 
   sb.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') refreshAuthUI();
