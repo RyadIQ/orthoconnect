@@ -1497,6 +1497,15 @@
     border: 1px solid var(--turquoise); background: var(--turquoise-light);
     border-radius: var(--radius); padding: 20px; margin-bottom: 18px;
   }
+  /* La colonne de contact ne fait que 320 px, moins encore sur mobile :
+     un libellé en nowrap y sortait du fond turquoise au lieu de tenir
+     dans le bouton. Ici, il passe à la ligne. */
+  .contact-carte .btn {
+    white-space: normal;
+    text-align: center;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
   .contact-titre {
     font-size: 12px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.06em; color: #007A86; margin-bottom: 14px;
@@ -4267,7 +4276,7 @@ function renderContactAnnonce(j) {
           Les coordonnées du cabinet sont réservées aux praticiens inscrits.
         </div>
         <button type="button" class="btn btn-turquoise" style="width:100%; justify-content:center"
-                onclick="openAuth('login')">Se connecter pour voir les coordonnées</button>
+                onclick="openAuth('login')">Se connecter pour voir le contact</button>
         <div class="contact-note">
           L'inscription est gratuite et réservée aux orthodontistes et internes en ODF.
         </div>
