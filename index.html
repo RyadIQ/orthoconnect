@@ -1318,6 +1318,45 @@
   .formation-title-btn:hover { color: var(--turquoise); }
   .formation-card { cursor: pointer; }
 
+  /* ===== TARIF PRÉFÉRENTIEL ===== */
+  .tarif-carte {
+    border: 1px solid var(--turquoise);
+    background: var(--turquoise-light);
+    border-radius: var(--radius);
+    padding: 20px; margin-bottom: 18px;
+  }
+  .tarif-titre {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: #007A86; margin-bottom: 12px;
+  }
+  .tarif-economie { font-size: 26px; font-weight: 800; color: var(--navy); line-height: 1.1; }
+  .tarif-economie-lbl { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .tarif-prix { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+  .tarif-public { font-size: 16px; color: var(--text-light); text-decoration: line-through; }
+  .tarif-oc { font-size: 26px; font-weight: 800; color: var(--navy); }
+  .tarif-oc span { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+  .tarif-conditions {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,184,200,0.3);
+  }
+  .tarif-carte .btn { width: 100%; justify-content: center; margin-top: 14px; }
+
+  .code-boite {
+    background: var(--white); border: 1px dashed var(--turquoise);
+    border-radius: var(--radius-sm); padding: 16px; text-align: center; margin-top: 14px;
+  }
+  .code-valeur {
+    font-family: 'Courier New', monospace; font-size: 26px; font-weight: 700;
+    letter-spacing: 3px; color: var(--navy);
+  }
+  .code-expire { font-size: 12px; color: var(--text-light); margin-top: 6px; }
+  .code-marche { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top: 12px; text-align: left; }
+
+  .badge-genere  { background: var(--turquoise-light); color: #007A86; }
+  .badge-utilise { background: #E8F5E9; color: #2E7D32; }
+  .badge-expire  { background: var(--grey-bg); color: var(--text-secondary); }
+  .code-mono { font-family: 'Courier New', monospace; font-weight: 700; letter-spacing: 1px; color: var(--navy); }
+
   /* ===== MÉDIAS ===== */
   .detail-formateur-photo {
     width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0;
@@ -1590,48 +1629,6 @@
       </div>
     </div>
 
-  </div>
-</div>
-
-<!-- ==================== -->
-<!-- MODALE MISE EN RELATION -->
-<!-- ==================== -->
-<div class="auth-overlay" id="relationOverlay" onclick="if(event.target===this) fermerMiseEnRelation()">
-  <div class="auth-box">
-    <button class="auth-close" onclick="fermerMiseEnRelation()" aria-label="Fermer">&times;</button>
-
-    <h3>Être recontacté</h3>
-    <p class="auth-sub" id="relationSousTitre">Votre demande est transmise à l'organisme.</p>
-
-    <div class="auth-badge">
-      <span aria-hidden="true">🔒</span>
-      <span>Seules ces coordonnées sont transmises, et uniquement à cet organisme.</span>
-    </div>
-
-    <div class="auth-error" id="relationMessage"></div>
-
-    <div class="auth-field">
-      <label for="relNom">Nom</label>
-      <input type="text" id="relNom" autocomplete="name">
-    </div>
-    <div class="auth-field">
-      <label for="relEmail">Email</label>
-      <input type="email" id="relEmail" readonly style="background:var(--grey-bg)">
-      <div class="auth-hint">Votre adresse de connexion, non modifiable ici.</div>
-    </div>
-    <div class="auth-field">
-      <label for="relTelephone">Téléphone</label>
-      <input type="tel" id="relTelephone" placeholder="+33 6 00 00 00 00" autocomplete="tel">
-      <div class="auth-hint">Enregistré dans votre profil pour vos prochaines demandes.</div>
-    </div>
-    <div class="auth-field">
-      <label for="relMessage">Message (optionnel)</label>
-      <textarea id="relMessage" style="min-height:90px"
-                placeholder="Précisez votre question : dates, financement DPC, prérequis..."></textarea>
-    </div>
-
-    <button class="btn btn-turquoise" id="relationBtn" style="width:100%; justify-content:center; margin-top:8px"
-            onclick="envoyerMiseEnRelation()">Envoyer ma demande</button>
   </div>
 </div>
 
@@ -2129,6 +2126,7 @@
           <button class="active" onclick="showDashPanel('accueil', this)">🏠 Tableau de bord</button>
           <button onclick="showDashPanel('cabinet', this)">🏥 Ma fiche cabinet</button>
           <button onclick="showDashPanel('formations', this)">📚 Mes formations</button>
+          <button onclick="showDashPanel('codes', this)">🎟 Mes codes</button>
           <button onclick="showDashPanel('emploi', this)">💼 Offres d'emploi</button>
           <button onclick="showDashPanel('actus', this)">📰 Actualités</button>
           <button onclick="doLogout()" style="margin-top:12px; color:var(--text-light)">↩ Se déconnecter</button>
@@ -2193,7 +2191,7 @@
               <div class="form-group">
                 <label for="cabTelephone">Téléphone</label>
                 <input type="tel" id="cabTelephone" placeholder="+33 6 00 00 00 00" autocomplete="tel">
-                <div class="form-note">Transmis uniquement si vous demandez à être recontacté par un organisme.</div>
+                <div class="form-note">Sert à vous joindre au sujet de vos démarches auprès des organismes.</div>
               </div>
 
               <div class="form-row">
@@ -2280,6 +2278,13 @@
             <div id="savedFormationsList"></div>
           </div>
 
+          <!-- MES CODES -->
+          <div class="dash-panel" id="panel-codes">
+            <h2>Mes codes</h2>
+            <p class="panel-sub">Les codes de tarif préférentiel que vous avez générés. Donnez-les à l'organisme au moment de vous inscrire.</p>
+            <div id="mesCodesListe"></div>
+          </div>
+
           <!-- EMPLOI -->
           <div class="dash-panel" id="panel-emploi">
             <h2>Offres d'emploi</h2>
@@ -2328,7 +2333,7 @@
           <button onclick="showAdminPanel('organismes', this)">🏢 Organismes</button>
           <button onclick="showAdminPanel('formations', this)">📚 Formations</button>
           <button onclick="showAdminPanel('sessions', this)">🗓 Sessions</button>
-          <button onclick="showAdminPanel('demandes', this)">📨 Demandes</button>
+          <button onclick="showAdminPanel('codes', this)">🎟 Codes</button>
           <button onclick="showPage('dashboard')" style="margin-top:12px; color:var(--text-light)">↩ Mon espace</button>
         </div>
 
@@ -2378,8 +2383,8 @@
                 <div class="stat-lbl">Sessions à venir</div>
               </div>
               <div class="stat-card">
-                <div class="stat-val" id="admStatDemandes">0</div>
-                <div class="stat-lbl">Demandes nouvelles</div>
+                <div class="stat-val" id="admStatCodes">0</div>
+                <div class="stat-lbl">Codes générés ce mois-ci</div>
               </div>
             </div>
 
@@ -2580,6 +2585,17 @@
               </div>
               <div class="form-row">
                 <div class="form-group">
+                  <label for="fmTarifPrefere">Tarif préférentiel (€)</label>
+                  <input type="number" id="fmTarifPrefere" min="0" step="1" placeholder="1490">
+                  <div class="form-note">Ne s'affiche que si l'organisme est aussi marqué partenaire.</div>
+                </div>
+                <div class="form-group">
+                  <label for="fmConditionsTarif">Conditions du tarif</label>
+                  <input type="text" id="fmConditionsTarif" placeholder="Mentionner le code à l'inscription">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
                   <label for="fmParticipants">Participants maximum</label>
                   <input type="number" id="fmParticipants" min="1" step="1" placeholder="16">
                 </div>
@@ -2719,20 +2735,20 @@
             <div id="admSessionsListe"></div>
           </div>
 
-          <!-- DEMANDES -->
-          <div class="dash-panel" id="adminPanel-demandes">
-            <h2>Demandes de mise en relation</h2>
-            <p class="panel-sub">Praticiens souhaitant être recontactés par un organisme partenaire.</p>
+          <!-- CODES -->
+          <div class="dash-panel" id="adminPanel-codes">
+            <h2>Codes de réduction</h2>
+            <p class="panel-sub">Codes générés par les praticiens. Marquez « Utilisé » quand l'organisme confirme l'avoir honoré.</p>
 
             <div class="admin-toolbar">
               <span class="filter-label">Statut :</span>
-              <button class="filter-btn active" onclick="filtrerDemandes('tous', this)">Toutes</button>
-              <button class="filter-btn" onclick="filtrerDemandes('nouvelle', this)">Nouvelles</button>
-              <button class="filter-btn" onclick="filtrerDemandes('transmise', this)">Transmises</button>
-              <button class="filter-btn" onclick="filtrerDemandes('traitee', this)">Traitées</button>
+              <button class="filter-btn active" onclick="filtrerCodes('tous', this)">Tous</button>
+              <button class="filter-btn" onclick="filtrerCodes('genere', this)">Valables</button>
+              <button class="filter-btn" onclick="filtrerCodes('utilise', this)">Utilisés</button>
+              <button class="filter-btn" onclick="filtrerCodes('expire', this)">Expirés</button>
             </div>
 
-            <div id="admDemandesListe"></div>
+            <div id="admCodesListe"></div>
           </div>
 
         </div>
@@ -2970,6 +2986,7 @@ let produitsDB = [];
 let jobsDB = [];
 let actusDB = [];
 let savedIds = [];
+let codesPraticien = [];
 
 // ═══════════════════════════════════════════════
 // CHARGEMENT DES CATALOGUES (public, sans auth)
@@ -3221,6 +3238,7 @@ async function doLogout() {
   currentUser = null;
   currentProfile = null;
   savedIds = [];
+  codesPraticien = [];
   await refreshAuthUI();
   showPage('landing');
 }
@@ -3281,6 +3299,14 @@ async function refreshAuthUI() {
       .select('formation_id').eq('praticien_id', currentUser.id);
     savedIds = (sv || []).map(r => r.formation_id);
 
+    // Tolérant : tant que tarif_prefere.sql n'est pas passé, la table
+    // n'existe pas et l'espace praticien doit rester utilisable.
+    const cd = await sb.from('codes_reduction')
+      .select('*, formations(id, titre)').eq('praticien_id', currentUser.id)
+      .order('created_at', { ascending: false });
+    if (cd.error) console.warn('Codes indisponibles :', cd.error.message);
+    codesPraticien = cd.data || [];
+
     navUser.classList.add('show');
     if (loginBtn) loginBtn.classList.add('hide');
     if (mobLogin) mobLogin.style.display = 'none';
@@ -3294,6 +3320,7 @@ async function refreshAuthUI() {
   } else {
     currentProfile = null;
     savedIds = [];
+    codesPraticien = [];
     navUser.classList.remove('show');
     if (loginBtn) loginBtn.classList.remove('hide');
     if (mobLogin) mobLogin.style.display = 'block';
@@ -3394,6 +3421,46 @@ function renderDashboard() {
   `).join('');
 
   renderSavedFormations();
+  renderMesCodes();
+}
+
+// Un code dont la date est dépassée est traité comme expiré, sans
+// attendre que son statut ait été mis à jour en base.
+function etatCode(c) {
+  if (c.statut === 'utilise') return { cle: 'utilise', libelle: 'Utilisé' };
+  if (c.statut === 'expire' || new Date(c.expire_le).getTime() <= Date.now()) {
+    return { cle: 'expire', libelle: 'Expiré' };
+  }
+  return { cle: 'genere', libelle: 'Valable' };
+}
+
+function renderMesCodes() {
+  const liste = document.getElementById('mesCodesListe');
+  if (!liste) return;
+
+  if (!codesPraticien.length) {
+    liste.innerHTML = `<div style="padding:32px; text-align:center; border:1px dashed var(--grey-border); border-radius:var(--radius); color:var(--text-secondary)">
+      <p style="margin-bottom:14px">Vous n'avez pas encore généré de code.</p>
+      <p style="font-size:13px; margin-bottom:14px">Certaines formations d'organismes partenaires donnent droit à un tarif négocié.</p>
+      <button class="btn btn-turquoise btn-sm" onclick="showPage('formations')">Parcourir le catalogue</button>
+    </div>`;
+    return;
+  }
+
+  liste.innerHTML = codesPraticien.map(c => {
+    const e = etatCode(c);
+    return `<div class="item-row">
+      <div>
+        <div class="item-title">${esc(c.formations ? c.formations.titre : 'Formation retirée')}</div>
+        <div class="item-meta">
+          <span class="code-mono">${esc(c.code)}</span> ·
+          généré le ${esc(formatDate(c.created_at))} ·
+          valable jusqu'au ${esc(formatDate(c.expire_le))}
+        </div>
+      </div>
+      <span class="badge badge-${e.cle}">${esc(e.libelle)}</span>
+    </div>`;
+  }).join('');
 }
 
 async function saveProfile() {
@@ -3872,6 +3939,103 @@ function renderCarteOrganisme(f) {
     </div>`;
 }
 
+// Les DEUX conditions, pas une seule : un tarif saisi sur une
+// formation dont l'organisme n'est pas partenaire reste invisible.
+function aTarifPrefere(f) {
+  return f.tarif_prefere != null && !!(f.organismes && f.organismes.partenaire);
+}
+
+function economieTarif(f) {
+  if (!aTarifPrefere(f) || f.prix == null) return null;
+  const e = f.prix - f.tarif_prefere;
+  return e > 0 ? e : null;
+}
+
+function codeValidePour(formationId) {
+  const maintenant = Date.now();
+  return codesPraticien.find(c => c.formation_id === formationId
+    && c.statut === 'genere' && new Date(c.expire_le).getTime() > maintenant) || null;
+}
+
+function renderCarteTarif(f) {
+  if (!aTarifPrefere(f)) return '';
+
+  const economie = economieTarif(f);
+  const organisme = nomOrganisme(f) || "l'organisme";
+
+  // Hors session : on annonce le montant réel de la remise, sans le
+  // prix négocié. La promesse est chiffrée, donc vérifiable.
+  if (!currentUser) {
+    return `<div class="tarif-carte">
+        <div class="tarif-titre">Tarif préférentiel OrthoConnect</div>
+        ${economie
+          ? `<div class="tarif-economie">&minus;${esc(economie)} &euro;</div>
+             <div class="tarif-economie-lbl">négociés pour les praticiens inscrits sur cette formation.</div>`
+          : `<div class="tarif-economie-lbl">Un tarif négocié s'applique à cette formation pour les praticiens inscrits.</div>`}
+        <button type="button" class="btn btn-turquoise" onclick="openAuth('signup')">
+          Créer mon compte gratuitement
+        </button>
+      </div>`;
+  }
+
+  const code = codeValidePour(f.id);
+  return `<div class="tarif-carte">
+      <div class="tarif-titre">Tarif préférentiel OrthoConnect</div>
+      <div class="tarif-prix">
+        ${f.prix != null ? `<span class="tarif-public">${esc(f.prix)} &euro;</span>` : ''}
+        <span class="tarif-oc">${esc(f.tarif_prefere)} &euro; <span>/ pers.</span></span>
+      </div>
+      ${economie ? `<div class="tarif-economie-lbl">Soit ${esc(economie)} &euro; d'économie.</div>` : ''}
+      ${f.conditions_tarif ? `<div class="tarif-conditions">${esc(f.conditions_tarif)}</div>` : ''}
+      <div id="tarifZoneCode">
+        ${code
+          ? renderBoiteCode(code, organisme)
+          : `<button type="button" class="btn btn-turquoise" id="btnObtenirCode"
+                     onclick="obtenirCode(${f.id})">Obtenir mon code</button>`}
+      </div>
+    </div>`;
+}
+
+function renderBoiteCode(code, organisme) {
+  return `<div class="code-boite">
+      <div class="code-valeur">${esc(code.code)}</div>
+      <div class="code-expire">Valable jusqu'au ${esc(formatDate(code.expire_le))}</div>
+      <div class="code-marche">
+        Contactez ${esc(organisme)} pour vous inscrire et donnez-lui ce code :
+        il applique le tarif négocié. Vous retrouvez ce code dans votre espace praticien.
+      </div>
+    </div>`;
+}
+
+async function obtenirCode(formationId) {
+  if (!currentUser) { openAuth('signup'); return; }
+
+  const btn = document.getElementById('btnObtenirCode');
+  if (btn) { btn.disabled = true; btn.textContent = 'Génération...'; }
+
+  // La génération passe par une fonction SQL : c'est elle qui vérifie
+  // les conditions et attribue un code unique, pas le navigateur.
+  const { data, error } = await sb.rpc('generer_code_reduction', { p_formation_id: formationId });
+
+  if (error || !data) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Obtenir mon code'; }
+    const zone = document.getElementById('tarifZoneCode');
+    if (zone) {
+      zone.insertAdjacentHTML('beforeend',
+        `<div class="code-marche" style="color:#B91C1C">Code non généré : ${esc(error ? error.message : 'réponse vide')}</div>`);
+    }
+    return;
+  }
+
+  const code = Array.isArray(data) ? data[0] : data;
+  codesPraticien = codesPraticien.filter(c => c.id !== code.id).concat(code);
+
+  const f = formationsDB.find(x => x.id === formationId);
+  const zone = document.getElementById('tarifZoneCode');
+  if (zone) zone.innerHTML = renderBoiteCode(code, (f && nomOrganisme(f)) || "l'organisme");
+  renderMesCodes();
+}
+
 function renderDetailAside(f, sessions) {
   const enregistree = savedIds.includes(f.id);
   const partenaire = !!(f.organismes && f.organismes.partenaire);
@@ -3882,11 +4046,6 @@ function renderDetailAside(f, sessions) {
           ? `<a class="btn btn-turquoise" href="${esc(f.url_source)}" target="_blank" rel="noopener noreferrer">Voir sur le site de l'organisme</a>`
           : `<button type="button" class="btn btn-turquoise" disabled
                      title="Aucun lien source renseigné pour cette formation">Voir sur le site de l'organisme</button>`}
-        ${partenaire
-          ? `<button type="button" class="btn btn-primary" onclick="ouvrirMiseEnRelation(${f.id})">
-               Être recontacté par l'organisme
-             </button>`
-          : ''}
         <button type="button" class="btn ${enregistree ? 'btn-outline' : 'btn-primary'}"
                 onclick="enregistrerDepuisFiche(${f.id})" id="detailBtnSave">
           ${enregistree ? '✓ Enregistrée dans mon espace' : 'Enregistrer'}
@@ -3915,100 +4074,7 @@ function renderDetailAside(f, sessions) {
     ? `<div class="detail-carte"><h3>Prochaines sessions</h3>${listeSessions}</div>`
     : '';
 
-  return renderCarteOrganisme(f) + actions + carteSessions;
-}
-
-// ─────── Mise en relation avec un organisme partenaire ───────
-let relationFormation = null;
-
-async function ouvrirMiseEnRelation(formationId) {
-  const f = formationsDB.find(x => x.id === formationId);
-  if (!f) return;
-
-  // La demande porte l'identité du praticien : sans compte, il n'y a
-  // rien à transmettre à l'organisme.
-  if (!currentUser) { openAuth('signup'); return; }
-
-  relationFormation = f;
-  document.getElementById('relationSousTitre').textContent =
-    'Votre demande sera transmise à ' + (nomOrganisme(f) || "l'organisme") + ' au sujet de « ' + f.titre + ' ».';
-
-  const p = currentProfile || {};
-  document.getElementById('relNom').value       = p.nom || '';
-  document.getElementById('relEmail').value     = p.email || currentUser.email || '';
-  document.getElementById('relTelephone').value = p.telephone || '';
-  document.getElementById('relMessage').value   = '';
-  clearMessage('relationMessage');
-
-  const btn = document.getElementById('relationBtn');
-  btn.disabled = false;
-  btn.textContent = 'Envoyer ma demande';
-
-  document.getElementById('relationOverlay').classList.add('open');
-
-  // Une demande antérieure ne bloque pas : on la signale, une relance
-  // avec un message différent reste légitime.
-  const { data } = await sb.from('demandes_contact')
-    .select('created_at').eq('formation_id', formationId)
-    .eq('praticien_id', currentUser.id)
-    .order('created_at', { ascending: false }).limit(1);
-
-  if (data && data.length && relationFormation && relationFormation.id === formationId) {
-    showNotice('relationMessage',
-      'Vous avez déjà demandé à être recontacté pour cette formation le '
-      + formatDate(data[0].created_at) + '. Vous pouvez relancer avec un nouveau message.');
-    btn.textContent = 'Envoyer une nouvelle demande';
-  }
-}
-
-function fermerMiseEnRelation() {
-  relationFormation = null;
-  document.getElementById('relationOverlay').classList.remove('open');
-  clearMessage('relationMessage');
-}
-
-async function envoyerMiseEnRelation() {
-  if (!relationFormation || !currentUser) return;
-  const f = relationFormation;
-
-  const nom = document.getElementById('relNom').value.trim();
-  const tel = document.getElementById('relTelephone').value.trim();
-  const msg = document.getElementById('relMessage').value.trim();
-
-  if (!nom) return showError('relationMessage', 'Indiquez votre nom.');
-  if (!tel) return showError('relationMessage', 'Indiquez un téléphone : c\'est par là que l\'organisme vous rappellera.');
-
-  const btn = document.getElementById('relationBtn');
-  btn.disabled = true;
-  btn.textContent = 'Envoi en cours...';
-
-  const { error } = await sb.from('demandes_contact').insert({
-    formation_id: f.id,
-    organisme_id: f.organisme_id || (f.organismes && f.organismes.id) || null,
-    praticien_id: currentUser.id,
-    message: msg || null
-  });
-
-  if (error) {
-    btn.disabled = false;
-    btn.textContent = 'Envoyer ma demande';
-    return showError('relationMessage', "Envoi impossible : " + error.message);
-  }
-
-  // Les corrections saisies ici sont reportées au profil, sinon elles
-  // seraient perdues et le champ redeviendrait vide à la demande
-  // suivante.
-  if (nom !== (currentProfile && currentProfile.nom) || tel !== (currentProfile && currentProfile.telephone)) {
-    const { error: pErr } = await sb.from('praticiens')
-      .update({ nom, telephone: tel }).eq('id', currentUser.id);
-    if (pErr) console.warn('Profil non mis à jour :', pErr.message);
-    else if (currentProfile) { currentProfile.nom = nom; currentProfile.telephone = tel; }
-  }
-
-  showNotice('relationMessage',
-    'Demande envoyée. ' + (nomOrganisme(f) || "L'organisme") + ' vous recontactera directement.');
-  btn.textContent = 'Demande envoyée';
-  setTimeout(fermerMiseEnRelation, 2600);
+  return renderCarteOrganisme(f) + renderCarteTarif(f) + actions + carteSessions;
 }
 
 async function enregistrerDepuisFiche(id) {
@@ -4033,8 +4099,8 @@ let adminPraticiens = [];
 let adminOrganismes = [];
 let adminFormations = [];
 let adminSessions   = [];
-let adminDemandes   = [];
-let filtreStatutDemande = 'tous';
+let adminCodes      = [];
+let filtreStatutCode = 'tous';
 let filtreStatutFormation = 'tous';
 let rechercheInscrits = '';
 let orgEnCours  = null;
@@ -4120,18 +4186,18 @@ function adminMessage(texte, estErreur) {
 }
 
 async function chargerAdmin() {
-  const [pr, org, fo, se, de] = await Promise.all([
+  const [pr, org, fo, se, co] = await Promise.all([
     sb.from('praticiens').select('id, nom, email, ville, statut, rpps, role, created_at')
       .order('created_at', { ascending: false }),
     sb.from('organismes').select('*').order('nom'),
     sb.from('formations').select('*, organismes(id, nom, logo_url, partenaire)').order('id', { ascending: false }),
     sb.from('sessions_formation').select('*, formations(id, titre)').order('date_debut'),
-    sb.from('demandes_contact')
-      .select('*, praticiens(nom, email, ville, telephone), formations(id, titre), organismes(id, nom)')
+    sb.from('codes_reduction')
+      .select('*, praticiens(nom, email), formations(id, titre, organismes(id, nom))')
       .order('created_at', { ascending: false })
   ]);
 
-  const enErreur = [pr, org, fo, se, de].find(r => r.error);
+  const enErreur = [pr, org, fo, se, co].find(r => r.error);
   const boite = document.getElementById('adminErreur');
   if (enErreur) {
     boite.textContent = "Chargement impossible : " + enErreur.error.message
@@ -4145,14 +4211,14 @@ async function chargerAdmin() {
   adminOrganismes = org.data || [];
   adminFormations = fo.data  || [];
   adminSessions   = se.data  || [];
-  adminDemandes   = de.data  || [];
+  adminCodes      = co.data  || [];
 
   renderAdminDash();
   renderAdminInscrits();
   renderAdminOrganismes();
   renderAdminFormations();
   renderAdminSessions();
-  renderAdminDemandes();
+  renderAdminCodes();
   remplirSelectsAdmin();
 }
 
@@ -4174,7 +4240,9 @@ function renderAdminDash() {
   setStat('admStatBrouillons', brouillons.length);
   setStat('admStatOrganismes', adminOrganismes.length);
   setStat('admStatSessions',   adminSessions.filter(s => s.date_debut >= aujourdhui).length);
-  setStat('admStatDemandes',   adminDemandes.filter(d => d.statut === 'nouvelle').length);
+  const debutMois = new Date();
+  debutMois.setDate(1); debutMois.setHours(0, 0, 0, 0);
+  setStat('admStatCodes', adminCodes.filter(c => new Date(c.created_at) >= debutMois).length);
 
   const zone = document.getElementById('admBrouillons');
   if (!brouillons.length) {
@@ -4416,6 +4484,8 @@ function ouvrirFormFormation(id) {
   document.getElementById('fmDescription').value = f ? (f.description || '') : '';
   document.getElementById('fmUrlSource').value   = f ? (f.url_source || '') : '';
   document.getElementById('fmStatut').value      = f ? (f.statut || 'brouillon') : 'brouillon';
+  document.getElementById('fmTarifPrefere').value    = f && f.tarif_prefere != null ? f.tarif_prefere : '';
+  document.getElementById('fmConditionsTarif').value = f ? (f.conditions_tarif || '') : '';
   document.getElementById('fmParticipants').value    = f && f.participants_max != null ? f.participants_max : '';
   document.getElementById('fmUrlInscription').value  = f ? (f.url_inscription || '') : '';
   document.getElementById('fmObjectifs').value       = f ? (f.objectifs || []).join('\n') : '';
@@ -4451,6 +4521,7 @@ async function enregistrerFormation() {
 
   const prix = document.getElementById('fmPrix').value;
   const participants = document.getElementById('fmParticipants').value;
+  const tarifPref = document.getElementById('fmTarifPrefere').value;
   const payload = {
     titre,
     organisme_id: document.getElementById('fmOrganisme').value || null,
@@ -4467,6 +4538,8 @@ async function enregistrerFormation() {
     url_source:   document.getElementById('fmUrlSource').value.trim() || null,
     statut:       document.getElementById('fmStatut').value,
     participants_max: participants === '' ? null : Number(participants),
+    tarif_prefere:    tarifPref === '' ? null : Number(tarifPref),
+    conditions_tarif: document.getElementById('fmConditionsTarif').value.trim() || null,
     url_inscription:  document.getElementById('fmUrlInscription').value.trim() || null,
     objectifs:        lignesEnTableau('fmObjectifs'),
     inclus:           lignesEnTableau('fmInclus'),
@@ -4840,56 +4913,63 @@ async function supprimerSession(id) {
   await chargerAdmin();
 }
 
-// ─────────── Demandes de mise en relation ───────────
-function filtrerDemandes(statut, btn) {
-  filtreStatutDemande = statut;
-  document.querySelectorAll('#adminPanel-demandes .filter-btn').forEach(b => b.classList.remove('active'));
+// ─────────── Codes de réduction ───────────
+function filtrerCodes(statut, btn) {
+  filtreStatutCode = statut;
+  document.querySelectorAll('#adminPanel-codes .filter-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  renderAdminDemandes();
+  renderAdminCodes();
 }
 
-function renderAdminDemandes() {
-  const lignes = filtreStatutDemande === 'tous'
-    ? adminDemandes
-    : adminDemandes.filter(d => d.statut === filtreStatutDemande);
+function renderAdminCodes() {
+  const lignes = filtreStatutCode === 'tous'
+    ? adminCodes
+    : adminCodes.filter(c => etatCode(c).cle === filtreStatutCode);
 
-  const zone = document.getElementById('admDemandesListe');
+  const zone = document.getElementById('admCodesListe');
   if (!zone) return;
 
   if (!lignes.length) {
     zone.innerHTML = '<div class="admin-empty">'
-      + (adminDemandes.length ? 'Aucune demande dans cette catégorie.' : 'Aucune demande pour le moment.')
+      + (adminCodes.length ? 'Aucun code dans cette catégorie.' : 'Aucun code généré pour le moment.')
       + '</div>';
     return;
   }
 
-  const statuts = { nouvelle: 'Nouvelle', transmise: 'Transmise', traitee: 'Traitée' };
+  const statuts = { genere: 'Généré', utilise: 'Utilisé', expire: 'Expiré' };
   zone.innerHTML = `
     <div class="admin-table-wrap">
       <table class="admin-table">
         <thead>
-          <tr><th>Praticien</th><th>Formation</th><th>Organisme</th><th>Reçue le</th><th>Statut</th></tr>
+          <tr><th>Code</th><th>Praticien</th><th>Formation</th><th>Organisme</th><th>Généré le</th><th>Statut</th></tr>
         </thead>
         <tbody>
-          ${lignes.map(d => {
-            const p = d.praticiens || {};
+          ${lignes.map(c => {
+            const p = c.praticiens || {};
+            const f = c.formations || null;
+            const o = f && f.organismes ? f.organismes : null;
+            const e = etatCode(c);
             return `
             <tr>
               <td>
-                <div class="admin-nom">${esc(p.nom || 'Praticien supprimé')}</div>
-                <div style="font-size:12px; color:var(--text-light)">
-                  ${esc(p.email || '')}${p.telephone ? ' · ' + esc(p.telephone) : ''}${p.ville ? ' · ' + esc(p.ville) : ''}
-                </div>
-                ${d.message ? `<div style="font-size:12px; color:var(--text-secondary); margin-top:6px; line-height:1.55">&laquo; ${esc(d.message)} &raquo;</div>` : ''}
+                <div class="code-mono">${esc(c.code)}</div>
+                <div style="font-size:12px; color:var(--text-light)">jusqu'au ${esc(formatDate(c.expire_le))}</div>
               </td>
-              <td>${esc(d.formations ? d.formations.titre : '—')}</td>
-              <td>${esc(d.organismes ? d.organismes.nom : '—')}</td>
-              <td style="white-space:nowrap">${esc(formatDate(d.created_at))}</td>
               <td>
-                <select onchange="changerStatutDemande(${d.id}, this.value)" style="font-size:13px; padding:7px 10px">
+                <div class="admin-nom">${esc(p.nom || 'Praticien supprimé')}</div>
+                <div style="font-size:12px; color:var(--text-light)">${esc(p.email || '')}</div>
+              </td>
+              <td>${esc(f ? f.titre : '—')}</td>
+              <td>${esc(o ? o.nom : '—')}</td>
+              <td style="white-space:nowrap">${esc(formatDate(c.created_at))}</td>
+              <td>
+                <select onchange="changerStatutCode(${c.id}, this.value)" style="font-size:13px; padding:7px 10px">
                   ${Object.keys(statuts).map(s =>
-                    `<option value="${s}"${d.statut === s ? ' selected' : ''}>${statuts[s]}</option>`).join('')}
+                    `<option value="${s}"${c.statut === s ? ' selected' : ''}>${statuts[s]}</option>`).join('')}
                 </select>
+                ${c.statut === 'genere' && e.cle === 'expire'
+                  ? '<div style="font-size:11px; color:var(--text-light); margin-top:4px">date dépassée</div>'
+                  : ''}
               </td>
             </tr>`;
           }).join('')}
@@ -4898,8 +4978,8 @@ function renderAdminDemandes() {
     </div>`;
 }
 
-async function changerStatutDemande(id, statut) {
-  const { error } = await sb.from('demandes_contact').update({ statut }).eq('id', id);
+async function changerStatutCode(id, statut) {
+  const { error } = await sb.from('codes_reduction').update({ statut }).eq('id', id);
   if (error) { adminMessage('Statut non modifié : ' + error.message, true); return; }
   adminMessage('Statut mis à jour.');
   await chargerAdmin();
