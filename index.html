@@ -1235,6 +1235,61 @@
   .detail-meta-item { font-size: 14px; color: rgba(255,255,255,0.8); }
   .detail-meta-item strong { display: block; font-size: 18px; font-weight: 700; color: var(--white); }
 
+  /* Rappel du tarif négocié sous les chiffres de l'en-tête. Sur
+     desktop l'encart complet est déjà à droite, à hauteur d'œil : la
+     bande y reste une ligne discrète. Sur mobile cet encart tombe
+     trois écrans plus bas, sous toute la colonne principale — la
+     bande est alors le seul endroit où le praticien apprend, au
+     moment où il lit le prix plein, qu'une remise existe. */
+  .detail-tarif-bande {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px 12px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    padding: 9px 14px;
+    border: 1px solid rgba(0,184,200,0.4);
+    border-radius: var(--radius-sm);
+    background: rgba(0,184,200,0.1);
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.85);
+  }
+  .detail-tarif-texte::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--turquoise);
+    margin-right: 9px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  .detail-tarif-bande strong { color: var(--white); font-weight: 700; }
+  .detail-tarif-lien {
+    background: none; border: none; padding: 0;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--turquoise); text-decoration: underline;
+    text-underline-offset: 3px; cursor: pointer;
+  }
+  .detail-tarif-lien:hover { color: var(--white); }
+  .detail-tarif-code {
+    font-family: 'Courier New', monospace; font-weight: 700;
+    letter-spacing: 2px; color: var(--white);
+    background: rgba(255,255,255,0.12);
+    border-radius: 4px; padding: 2px 9px;
+  }
+
+  /* L'encart visé par la bande : sur desktop il est déjà à l'écran,
+     un repère bref évite de chercher ce qui a bougé. */
+  .tarif-carte-vise { animation: tarifVise 1.6s ease; }
+  @keyframes tarifVise {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,184,200,0); }
+    15%, 65% { box-shadow: 0 0 0 4px rgba(0,184,200,0.35); }
+  }
+
   .detail-body { padding: 44px 0 80px; }
   .detail-grid { display: grid; grid-template-columns: 1fr 320px; gap: 40px; align-items: start; }
   .detail-grid.pleine-largeur { grid-template-columns: 1fr; }
@@ -1320,6 +1375,14 @@
     .detail-grid { grid-template-columns: 1fr; }
     .detail-aside { position: static; }
     .detail-hero h1 { font-size: 25px; }
+    .detail-tarif-bande {
+      display: flex;
+      font-size: 14px;
+      padding: 12px 14px;
+      border-color: var(--turquoise);
+      background: rgba(0,184,200,0.2);
+    }
+    .detail-tarif-lien { font-size: 14px; }
   }
 
   /* Titre de carte cliquable : un vrai bouton, donc atteignable au
@@ -4661,7 +4724,10 @@ function renderDetailFormation(f, sections, sessions) {
 
   const meta = [
     f.duree ? `<div class="detail-meta-item"><strong>${esc(f.duree)}</strong>Durée</div>` : '',
-    f.prix != null ? `<div class="detail-meta-item"><strong>${esc(f.prix)} €</strong>Par personne</div>` : '',
+    f.prix != null
+      ? `<div class="detail-meta-item"><strong>${esc(f.prix)} €</strong>${
+          aTarifPrefere(f) ? 'Tarif public' : 'Par personne'}</div>`
+      : '',
     f.participants_max ? `<div class="detail-meta-item"><strong>${esc(f.participants_max)}</strong>Participants max</div>` : '',
     f.dpc_numero ? `<div class="detail-meta-item"><strong>${esc(f.dpc_numero)}</strong>Référence DPC</div>` : ''
   ].filter(Boolean).join('');
@@ -4670,7 +4736,8 @@ function renderDetailFormation(f, sections, sessions) {
     <div class="detail-badges">${badges}</div>
     <h1>${esc(f.titre)}</h1>
     ${nomOrganisme(f) ? `<div class="detail-orga">${esc(nomOrganisme(f))}</div>` : ''}
-    ${meta ? `<div class="detail-meta">${meta}</div>` : ''}`;
+    ${meta ? `<div class="detail-meta">${meta}</div>` : ''}
+    ${renderBandeauTarif(f)}`;
 
   // ── Colonne principale ──
   const principal = [
@@ -4788,6 +4855,57 @@ function codeValidePour(formationId) {
     && c.statut === 'genere' && new Date(c.expire_le).getTime() > maintenant) || null;
 }
 
+// L'en-tête annonce le prix plein. Sans ce rappel juste en dessous, un
+// praticien sur mobile lit « 2500 € » et peut quitter la page avant
+// d'atteindre l'encart, relégué sous toute la colonne principale. La
+// bande signale la remise à cet endroit-là ; elle renvoie vers l'encart
+// plutôt que d'en recopier le contenu, qui serait redondant sur desktop.
+function renderBandeauTarif(f) {
+  if (!aTarifPrefere(f)) return '';
+
+  const bande = contenu =>
+    `<div class="detail-tarif-bande" id="detailTarifBande">${contenu}</div>`;
+
+  if (!currentUser) {
+    return bande(`<span class="detail-tarif-texte">Un tarif négocié est disponible pour les praticiens inscrits</span>
+        <button type="button" class="detail-tarif-lien" onclick="allerAuTarif()">Créer mon compte</button>`);
+  }
+
+  // Le code en poche, le montant a déjà été obtenu : on le redonne ici
+  // plutôt qu'un lien. Tant que le tarif n'est pas revenu de la base,
+  // la bande annonce la remise sans chiffre au lieu d'un montant vide.
+  const code = codeValidePour(f.id);
+  if (code) {
+    return bande(`<span class="detail-tarif-texte">Votre tarif préférentiel${
+        f.tarif_prefere != null ? ` : <strong>${esc(f.tarif_prefere)} €</strong>` : ''}</span>
+        <span class="detail-tarif-code">${esc(code.code)}</span>`);
+  }
+
+  return bande(`<span class="detail-tarif-texte">Tarif préférentiel OrthoConnect disponible</span>
+      <button type="button" class="detail-tarif-lien" onclick="allerAuTarif()">Voir le tarif</button>`);
+}
+
+// La bande ne dit pas tout : elle mène à l'encart, qui porte le
+// montant, les conditions et le bouton. Sur desktop cet encart est
+// déjà visible — d'où le repère, sans quoi le clic semble sans effet.
+function allerAuTarif() {
+  const cible = document.getElementById('tarifCarte');
+  if (!cible) return;
+
+  const doux = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  cible.scrollIntoView({ behavior: doux ? 'smooth' : 'auto', block: 'center' });
+
+  cible.classList.remove('tarif-carte-vise');
+  void cible.offsetWidth;   // force le redémarrage de l'animation
+  cible.classList.add('tarif-carte-vise');
+}
+
+// Obtenir un code change ce que la bande doit dire, comme l'encart.
+function majBandeauTarif(f) {
+  const bande = document.getElementById('detailTarifBande');
+  if (bande) bande.outerHTML = renderBandeauTarif(f);
+}
+
 function renderCarteTarif(f) {
   if (!aTarifPrefere(f)) return '';
 
@@ -4797,7 +4915,7 @@ function renderCarteTarif(f) {
   // de la remise n'entrent dans le HTML produit. Ce n'est pas un
   // masquage visuel, les deux valeurs sont absentes du rendu.
   if (!currentUser) {
-    return `<div class="tarif-carte">
+    return `<div class="tarif-carte" id="tarifCarte">
         <div class="tarif-titre">Tarif préférentiel OrthoConnect</div>
         <div class="tarif-economie-lbl">
           Un tarif négocié est disponible sur cette formation pour les praticiens inscrits.
@@ -4819,7 +4937,7 @@ function renderCarteTarif(f) {
 
   const economie = economieTarif(f);
   const code = codeValidePour(f.id);
-  return `<div class="tarif-carte">
+  return `<div class="tarif-carte" id="tarifCarte">
       <div class="tarif-titre">Tarif préférentiel OrthoConnect</div>
       ${montants ? `<div class="tarif-prix">${montants}</div>` : ''}
       ${economie ? `<div class="tarif-economie-lbl">Soit ${esc(economie)} &euro; d'économie.</div>` : ''}
@@ -4870,6 +4988,7 @@ async function obtenirCode(formationId) {
   const f = formationsDB.find(x => x.id === formationId);
   const zone = document.getElementById('tarifZoneCode');
   if (zone) zone.innerHTML = renderBoiteCode(code, (f && nomOrganisme(f)) || "l'organisme");
+  if (f) majBandeauTarif(f);
   renderMesCodes();
 }
 
