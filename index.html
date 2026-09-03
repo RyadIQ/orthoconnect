@@ -1318,6 +1318,56 @@
   .formation-title-btn:hover { color: var(--turquoise); }
   .formation-card { cursor: pointer; }
 
+  /* ===== EMPLOI ===== */
+  .job-card { cursor: pointer; }
+  .job-title-btn {
+    display: block; width: 100%; text-align: left;
+    background: none; border: none; padding: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px; font-weight: 700; color: var(--navy);
+    line-height: 1.3; cursor: pointer;
+  }
+  .job-title-btn:hover { color: var(--turquoise); }
+  .badge-contrat { background: #EEF2FF; color: #3730A3; }
+
+  .filtres-selects { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .filtres-selects select {
+    width: auto; min-width: 190px; padding: 9px 14px; font-size: 14px;
+  }
+
+  .contact-carte {
+    border: 1px solid var(--turquoise); background: var(--turquoise-light);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 18px;
+  }
+  .contact-titre {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: #007A86; margin-bottom: 14px;
+  }
+  .contact-nom { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 12px; }
+  .contact-lien {
+    display: flex; align-items: center; gap: 9px;
+    padding: 10px 12px; margin-bottom: 8px;
+    background: var(--white); border: 1px solid var(--grey-border);
+    border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 600; color: var(--navy); text-decoration: none;
+    word-break: break-all;
+  }
+  .contact-lien:hover { border-color: var(--turquoise); }
+  .contact-note { font-size: 12px; color: var(--text-secondary); margin-top: 10px; line-height: 1.55; }
+
+  .annonce-alerte {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    background: #FFF8E6; border: 1px solid #F5E0B0; color: #8A6100;
+    border-radius: var(--radius-sm); padding: 11px 14px;
+    font-size: 13px; margin-top: 10px;
+  }
+
+  .badge-brouillon2 { background: #FFF3E6; color: #B26A00; }
+  .badge-publiee    { background: #E8F5E9; color: #2E7D32; }
+  .badge-pourvue    { background: var(--turquoise-light); color: #007A86; }
+  .badge-expiree    { background: var(--grey-bg); color: var(--text-secondary); }
+
   /* ===== TARIF PRÉFÉRENTIEL ===== */
   .tarif-carte {
     border: 1px solid var(--turquoise);
@@ -1647,7 +1697,7 @@
     <ul class="nav-links">
       <li><a href="#" onclick="showPage('formations')" id="nav-formations">Formations</a></li>
       <li><a href="#" onclick="showPage('produits')" id="nav-produits">Produits &amp; matériels</a></li>
-      <li><a href="#" onclick="requireAuth('emploi')" id="nav-emploi">Emploi</a></li>
+      <li><a href="#" onclick="showPage('emploi')" id="nav-emploi">Emploi</a></li>
       <li><a href="#" onclick="requireAuth('actus')" id="nav-actu">Actualités</a></li>
       <li id="navLoginItem"><a href="#" class="nav-cta btn nav-login-btn" onclick="openAuth('signup')">Espace praticien</a></li>
       <li>
@@ -1675,7 +1725,7 @@
   <a href="#" onclick="showPage('landing'); toggleMenu()">Accueil</a>
   <a href="#" onclick="showPage('formations'); toggleMenu()">Formations</a>
   <a href="#" onclick="showPage('produits'); toggleMenu()">Produits &amp; matériels</a>
-  <a href="#" onclick="requireAuth('emploi'); toggleMenu()">Emploi</a>
+  <a href="#" onclick="showPage('emploi'); toggleMenu()">Emploi</a>
   <a href="#" onclick="requireAuth('actus'); toggleMenu()">Actualités</a>
   <div class="mobile-menu-sep"></div>
   <a href="#" id="mobLogin" onclick="openAuth('signup'); toggleMenu()" style="color:var(--turquoise); font-weight:600">Espace praticien</a>
@@ -1788,7 +1838,7 @@
           <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Aligneurs, brackets, scanners. Fiches techniques et retours de praticiens qui les utilisent au fauteuil.</p>
           <div style="margin-top:14px; color:var(--turquoise); font-size:13px; font-weight:600">Comparer</div>
         </div>
-        <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="requireAuth('emploi')">
+        <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="showPage('emploi')">
           <div style="font-size:36px; margin-bottom:14px">💼</div>
           <h3 style="font-size:16px; margin-bottom:8px">Postes</h3>
           <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Collaboration libérale ou salariée, remplacement, association, cession de cabinet.</p>
@@ -2050,6 +2100,118 @@
 </div>
 
 
+<!-- ==================== -->
+<!-- PAGE : EMPLOI        -->
+<!-- ==================== -->
+<div class="page" id="page-emploi">
+  <section class="page-hero">
+    <div class="container">
+      <h1>Offres d'emploi</h1>
+      <p>Collaboration, remplacement, association et cession de cabinet en orthodontie</p>
+      <div class="page-hero-meta">
+        <div class="page-hero-stat">
+          <div class="page-hero-stat-val" id="statPageAnnonces">&mdash;</div>
+          <div class="page-hero-stat-lbl">Annonces en ligne</div>
+        </div>
+        <div class="page-hero-stat">
+          <div class="page-hero-stat-val" id="statPageDepts">&mdash;</div>
+          <div class="page-hero-stat-lbl">Départements</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="filters-bar">
+    <div class="filters-inner filtres-selects">
+      <label for="filtreContrat" class="filter-label">Contrat :</label>
+      <select id="filtreContrat" onchange="filtrerAnnonces()"></select>
+      <label for="filtreDept" class="filter-label">Département :</label>
+      <select id="filtreDept" onchange="filtrerAnnonces()"></select>
+      <button class="btn btn-outline btn-sm" onclick="reinitialiserFiltresAnnonces()">Tout afficher</button>
+    </div>
+  </div>
+
+  <section class="catalogue-section">
+    <div class="container">
+      <div id="annoncesListe"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, matériel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="#" onclick="showPage('landing')">Accueil</a>
+        <a href="#" onclick="showPage('formations')">Formations</a>
+        <a href="#" onclick="showPage('produits')">Produits</a>
+      </div>
+      <div class="footer-col">
+        <h4>Publier</h4>
+        <a href="#" onclick="ouvrirMesAnnonces()">Déposer une annonce</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ==================== -->
+<!-- PAGE : FICHE ANNONCE -->
+<!-- ==================== -->
+<div class="page" id="page-annonce">
+  <section class="detail-hero">
+    <div class="container">
+      <button type="button" class="detail-retour" onclick="showPage('emploi')">&larr; Retour aux offres</button>
+      <div id="annonceHero"></div>
+    </div>
+  </section>
+
+  <section class="detail-body">
+    <div class="container">
+      <div class="detail-grid" id="annonceGrid">
+        <div id="annoncePrincipal"></div>
+        <aside class="detail-aside" id="annonceAside"></aside>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, matériel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="#" onclick="showPage('emploi')">Toutes les offres</a>
+        <a href="#" onclick="showPage('landing')">Accueil</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
 <!-- ======================= -->
 <!-- PAGE : FICHE FORMATION  -->
 <!-- Contenu injecte par ouvrirFormation()                          -->
@@ -2127,7 +2289,7 @@
           <button onclick="showDashPanel('cabinet', this)">🏥 Ma fiche cabinet</button>
           <button onclick="showDashPanel('formations', this)">📚 Mes formations</button>
           <button onclick="showDashPanel('codes', this)">🎟 Mes codes</button>
-          <button onclick="showDashPanel('emploi', this)">💼 Offres d'emploi</button>
+          <button onclick="showDashPanel('annonces', this)">💼 Mes annonces</button>
           <button onclick="showDashPanel('actus', this)">📰 Actualités</button>
           <button onclick="doLogout()" style="margin-top:12px; color:var(--text-light)">↩ Se déconnecter</button>
         </div>
@@ -2285,11 +2447,95 @@
             <div id="mesCodesListe"></div>
           </div>
 
-          <!-- EMPLOI -->
-          <div class="dash-panel" id="panel-emploi">
-            <h2>Offres d'emploi</h2>
-            <p class="panel-sub">Postes en cabinet, collaborations et remplacements partout en France.</p>
-            <div id="jobsList"></div>
+          <!-- MES ANNONCES -->
+          <div class="dash-panel" id="panel-annonces">
+            <h2>Mes annonces</h2>
+            <p class="panel-sub">Vos offres publiées sur OrthoConnect. La publication est immédiate, sans validation préalable.</p>
+
+            <div class="admin-message" id="annonceMessage"></div>
+
+            <div class="admin-toolbar">
+              <button class="btn btn-turquoise btn-sm" onclick="ouvrirFormAnnonce(null)">+ Déposer une annonce</button>
+              <span class="spacer"></span>
+              <a class="btn btn-outline btn-sm" href="#" onclick="showPage('emploi')">Voir toutes les offres</a>
+            </div>
+
+            <div class="admin-form" id="annonceForm" style="display:none">
+              <h3 id="annonceFormTitre">Nouvelle annonce</h3>
+
+              <div class="form-group">
+                <label for="anTitre">Intitulé du poste</label>
+                <input type="text" id="anTitre" placeholder="Collaboration libérale 3 jours par semaine">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="anCabinet">Cabinet</label>
+                  <input type="text" id="anCabinet" placeholder="Cabinet Dupont Orthodontie">
+                </div>
+                <div class="form-group">
+                  <label for="anType">Type de contrat</label>
+                  <select id="anType"></select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="anVille">Ville</label>
+                  <input type="text" id="anVille" placeholder="Lyon 2e">
+                </div>
+                <div class="form-group">
+                  <label for="anDept">Département</label>
+                  <input type="text" id="anDept" placeholder="69" maxlength="3">
+                  <div class="form-note">Numéro à deux ou trois chiffres, il sert au filtre.</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="anDescription">Description du poste</label>
+                <textarea id="anDescription" placeholder="Présentation du cabinet, de l'équipe, du poste..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="anProfil">Profil recherché</label>
+                <textarea id="anProfil" placeholder="Diplôme, expérience, techniques maîtrisées..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="anConditions">Conditions</label>
+                <textarea id="anConditions" placeholder="Rétrocession, jours travaillés, date de début..."></textarea>
+              </div>
+
+              <div class="dash-section-title" style="margin-top:22px">Coordonnées</div>
+              <p class="form-note" style="margin-bottom:12px">
+                Visibles uniquement par les praticiens connectés. Elles ne sont pas transmises aux visiteurs non inscrits.
+              </p>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="anContactNom">Nom du contact</label>
+                  <input type="text" id="anContactNom" placeholder="Dr Marie Dupont">
+                </div>
+                <div class="form-group">
+                  <label for="anContactEmail">Email</label>
+                  <input type="email" id="anContactEmail" placeholder="cabinet@exemple.fr">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="anContactTel">Téléphone</label>
+                <input type="tel" id="anContactTel" placeholder="+33 4 00 00 00 00">
+              </div>
+
+              <div class="form-group">
+                <label for="anStatut">Statut</label>
+                <select id="anStatut">
+                  <option value="publiee">Publiée</option>
+                  <option value="brouillon">Brouillon</option>
+                  <option value="pourvue">Pourvue</option>
+                </select>
+              </div>
+
+              <div class="admin-form-actions">
+                <button class="btn btn-turquoise btn-sm" onclick="enregistrerAnnonce()">Enregistrer</button>
+                <button class="btn btn-outline btn-sm" onclick="fermerFormAnnonce()">Annuler</button>
+              </div>
+            </div>
+
+            <div id="mesAnnoncesListe"></div>
           </div>
 
           <!-- ACTUS -->
@@ -2334,6 +2580,7 @@
           <button onclick="showAdminPanel('formations', this)">📚 Formations</button>
           <button onclick="showAdminPanel('sessions', this)">🗓 Sessions</button>
           <button onclick="showAdminPanel('codes', this)">🎟 Codes</button>
+          <button onclick="showAdminPanel('annonces', this)">💼 Annonces</button>
           <button onclick="showPage('dashboard')" style="margin-top:12px; color:var(--text-light)">↩ Mon espace</button>
         </div>
 
@@ -2385,6 +2632,14 @@
               <div class="stat-card">
                 <div class="stat-val" id="admStatCodes">0</div>
                 <div class="stat-lbl">Codes générés ce mois-ci</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="admStatAnnonces">0</div>
+                <div class="stat-lbl">Annonces publiées</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="admStatAnnoncesMois">0</div>
+                <div class="stat-lbl">Annonces publiées ce mois-ci</div>
               </div>
             </div>
 
@@ -2735,6 +2990,23 @@
             <div id="admSessionsListe"></div>
           </div>
 
+          <!-- ANNONCES -->
+          <div class="dash-panel" id="adminPanel-annonces">
+            <h2>Annonces</h2>
+            <p class="panel-sub">Toutes les offres déposées, y compris les brouillons et les annonces pourvues.</p>
+
+            <div class="admin-toolbar">
+              <span class="filter-label">Statut :</span>
+              <button class="filter-btn active" onclick="filtrerAnnoncesAdmin('tous', this)">Toutes</button>
+              <button class="filter-btn" onclick="filtrerAnnoncesAdmin('publiee', this)">Publiées</button>
+              <button class="filter-btn" onclick="filtrerAnnoncesAdmin('brouillon2', this)">Brouillons</button>
+              <button class="filter-btn" onclick="filtrerAnnoncesAdmin('pourvue', this)">Pourvues</button>
+              <button class="filter-btn" onclick="filtrerAnnoncesAdmin('expiree', this)">Expirées</button>
+            </div>
+
+            <div id="admAnnoncesListe"></div>
+          </div>
+
           <!-- CODES -->
           <div class="dash-panel" id="adminPanel-codes">
             <h2>Codes de réduction</h2>
@@ -2984,6 +3256,7 @@ let currentProfile = null;   // ligne dans praticiens
 let formationsDB = [];
 let produitsDB = [];
 let jobsDB = [];
+let annonceEnCours = null;
 let actusDB = [];
 let savedIds = [];
 let codesPraticien = [];
@@ -3002,6 +3275,7 @@ let codesPraticien = [];
 // même par un appel direct à l'API — anon n'a plus le droit de lire
 // la table (voir vue_formations_publiques.sql).
 let sourceCatalogue = null;
+let sourceEmploi = null;
 
 function sourceAttendue() {
   return currentUser ? 'formations' : 'formations_publiques';
@@ -3090,7 +3364,7 @@ async function loadCatalogues() {
     const [f, p, j, a, av] = await Promise.all([
       chargerFormationsPubliques(),
       sb.from('produits').select('*').eq('actif', true).order('id'),
-      sb.from('offres_emploi').select('*').eq('actif', true).order('publie_le', { ascending: false }),
+      chargerAnnonces(),
       sb.from('actualites').select('*').eq('actif', true).order('publie_le', { ascending: false }),
       sb.from('avis').select('id', { count: 'exact', head: true })
     ]);
@@ -3102,7 +3376,8 @@ async function loadCatalogues() {
 
     renderFormationsDB(formationsDB);
     renderProduitsDB(produitsDB);
-    renderJobs();
+    remplirFiltresAnnonces();
+    renderAnnonces();
     renderActus();
 
     const distinct = (rows, champ) => new Set(rows.map(r => r[champ]).filter(Boolean)).size;
@@ -3288,6 +3563,7 @@ async function doLogout() {
   currentProfile = null;
   savedIds = [];
   codesPraticien = [];
+  mesAnnonces = [];
   await refreshAuthUI();
   showPage('landing');
 }
@@ -3363,6 +3639,8 @@ async function refreshAuthUI() {
     if (cd.error) console.warn('Codes indisponibles :', cd.error.message);
     codesPraticien = cd.data || [];
 
+    await chargerMesAnnonces();
+
     navUser.classList.add('show');
     if (loginBtn) loginBtn.classList.add('hide');
     if (mobLogin) mobLogin.style.display = 'none';
@@ -3377,6 +3655,7 @@ async function refreshAuthUI() {
     currentProfile = null;
     savedIds = [];
     codesPraticien = [];
+    mesAnnonces = [];
     navUser.classList.remove('show');
     if (loginBtn) loginBtn.classList.remove('hide');
     if (mobLogin) mobLogin.style.display = 'block';
@@ -3478,6 +3757,7 @@ function renderDashboard() {
 
   renderSavedFormations();
   renderMesCodes();
+  renderMesAnnonces();
 }
 
 // Un code dont la date est dépassée est traité comme expiré, sans
@@ -3603,25 +3883,456 @@ function formatDate(d) {
   return dt.getDate() + ' ' + mois[dt.getMonth()] + ' ' + dt.getFullYear();
 }
 
-function renderJobs() {
-  const list = document.getElementById('jobsList');
-  if (!list) return;
-  list.innerHTML = jobsDB.map(j => `
-    <div class="job-card">
+// ═══════════════════════════════════════════════
+// EMPLOI (public)
+//
+// Deux sources selon la session, comme pour le tarif négocié : la vue
+// offres_emploi_publiques n'expose aucune coordonnée, la table oui, et
+// anon n'a plus le droit de lire la table. Les contacts ne quittent
+// donc pas la base pour un visiteur non connecté, ils ne sont pas
+// seulement masqués à l'écran.
+// ═══════════════════════════════════════════════
+const TYPES_CONTRAT = {
+  collaboration_liberale: 'Collaboration libérale',
+  collaboration_salariee: 'Collaboration salariée',
+  remplacement:           'Remplacement',
+  association:            'Association',
+  cession:                'Cession de cabinet',
+  assistant_dentaire:     'Assistant dentaire',
+  autre:                  'Autre'
+};
+
+const STATUTS_ANNONCE = {
+  brouillon: 'Brouillon',
+  publiee:   'Publiée',
+  pourvue:   'Pourvue',
+  expiree:   'Expirée'
+};
+
+let annonceOuverte = null;
+let mesAnnonces = [];
+let filtreContrat = 'tous';
+let filtreDept = 'tous';
+
+function libelleContrat(t) {
+  return TYPES_CONTRAT[t] || t || 'Autre';
+}
+
+function sourceAnnonces() {
+  return currentUser ? 'offres_emploi' : 'offres_emploi_publiques';
+}
+
+async function chargerAnnonces() {
+  const source = sourceAnnonces();
+  sourceEmploi = source;
+  const maintenant = new Date().toISOString();
+
+  // Le filtre est répété côté requête même quand la vue le porte déjà :
+  // sur la table, la policy « praticien gere ses annonces » ferait
+  // aussi remonter les brouillons de l'auteur dans le catalogue public.
+  const r = await sb.from(source).select('*')
+    .eq('statut', 'publiee').gt('expire_le', maintenant)
+    .order('publie_le', { ascending: false });
+
+  if (!r.error) return r;
+
+  console.warn('Source « ' + source + ' » indisponible pour l\'emploi :', r.error.message);
+  sourceEmploi = 'offres_emploi';
+  return sb.from('offres_emploi').select('*').eq('actif', true)
+    .order('publie_le', { ascending: false });
+}
+
+// Filet côté client : une annonce périmée ne doit jamais s'afficher,
+// même si la source en laissait passer une.
+function annonceActive(j) {
+  if (!j.expire_le) return true;
+  return new Date(j.expire_le).getTime() > Date.now();
+}
+
+function reinitialiserFiltresAnnonces() {
+  filtreContrat = 'tous';
+  filtreDept = 'tous';
+  const c = document.getElementById('filtreContrat');
+  const d = document.getElementById('filtreDept');
+  if (c) c.value = 'tous';
+  if (d) d.value = 'tous';
+  renderAnnonces();
+}
+
+function filtrerAnnonces() {
+  const c = document.getElementById('filtreContrat');
+  const d = document.getElementById('filtreDept');
+  filtreContrat = c ? c.value : 'tous';
+  filtreDept = d ? d.value : 'tous';
+  renderAnnonces();
+}
+
+// Les listes de filtres sont construites depuis les annonces réelles :
+// proposer un département sans aucune offre ne mène qu'à une liste vide.
+function remplirFiltresAnnonces() {
+  const actives = jobsDB.filter(annonceActive);
+
+  const selC = document.getElementById('filtreContrat');
+  if (selC) {
+    const presents = [...new Set(actives.map(j => j.type_contrat).filter(Boolean))]
+      .sort((a, b) => libelleContrat(a).localeCompare(libelleContrat(b), 'fr'));
+    selC.innerHTML = '<option value="tous">Tous les contrats</option>' +
+      presents.map(t => `<option value="${esc(t)}">${esc(libelleContrat(t))}</option>`).join('');
+    selC.value = presents.includes(filtreContrat) ? filtreContrat : 'tous';
+    filtreContrat = selC.value;
+  }
+
+  const selD = document.getElementById('filtreDept');
+  if (selD) {
+    const depts = [...new Set(actives.map(j => j.departement).filter(Boolean))]
+      .sort((a, b) => String(a).localeCompare(String(b), 'fr', { numeric: true }));
+    selD.innerHTML = '<option value="tous">Tous les départements</option>' +
+      depts.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
+    selD.value = depts.includes(filtreDept) ? filtreDept : 'tous';
+    filtreDept = selD.value;
+  }
+
+  setStat('statPageAnnonces', actives.length);
+  setStat('statPageDepts', new Set(actives.map(j => j.departement).filter(Boolean)).size);
+}
+
+function renderAnnonces() {
+  const zone = document.getElementById('annoncesListe');
+  if (!zone) return;
+
+  const actives = jobsDB.filter(annonceActive);
+  const lignes = actives.filter(j =>
+    (filtreContrat === 'tous' || j.type_contrat === filtreContrat) &&
+    (filtreDept === 'tous' || j.departement === filtreDept));
+
+  if (!lignes.length) {
+    zone.innerHTML = actives.length
+      ? catalogueVide('🔍', 'Aucune annonce ne correspond',
+          "Aucune offre ne correspond à ces critères pour l'instant. Élargissez le contrat ou le département, ou revenez sur « Tout afficher ».")
+      : catalogueVide('💼', 'Aucune annonce en ligne',
+          "Aucune offre n'est publiée pour le moment. Les annonces sont déposées directement par les praticiens : si vous recrutez, la vôtre peut être la première.");
+    return;
+  }
+
+  zone.innerHTML = lignes.map(j => `
+    <div class="job-card" onclick="ouvrirAnnonce(${j.id})">
       <div class="job-head">
         <div>
-          <div class="job-title">${j.titre}</div>
-          <div class="job-cab">${j.cabinet}</div>
+          <button type="button" class="job-title-btn"
+                  onclick="event.stopPropagation(); ouvrirAnnonce(${j.id})">${esc(j.titre)}</button>
+          <div class="job-cab">${esc(j.cabinet || '')}</div>
         </div>
-        <span class="badge badge-new">${j.type_contrat}</span>
+        <span class="badge badge-contrat">${esc(libelleContrat(j.type_contrat))}</span>
       </div>
-      <div class="job-desc">${j.description || ''}</div>
+      <div class="job-desc">${esc(extraitTexte(j.description, 220))}</div>
       <div class="job-meta">
-        <span>📍 ${j.ville}</span>
-        <span>🗓 ${formatDate(j.publie_le)}</span>
+        <span>📍 ${esc(j.ville || '')}${j.departement ? ' (' + esc(j.departement) + ')' : ''}</span>
+        <span>🗓 ${esc(formatDate(j.publie_le || j.created_at))}</span>
       </div>
     </div>
   `).join('');
+}
+
+function extraitTexte(t, max) {
+  const s = String(t || '').trim();
+  return s.length > max ? s.slice(0, max).trimEnd() + '…' : s;
+}
+
+// ─────── Fiche annonce ───────
+function ouvrirAnnonce(id) {
+  const j = jobsDB.find(x => x.id === id);
+  if (!j || !annonceActive(j)) return;
+
+  annonceOuverte = j;
+  showPage('annonce');
+
+  document.getElementById('annonceHero').innerHTML = `
+    <div class="detail-badges">
+      <span class="badge badge-contrat">${esc(libelleContrat(j.type_contrat))}</span>
+    </div>
+    <h1>${esc(j.titre)}</h1>
+    ${j.cabinet ? `<div class="detail-orga">${esc(j.cabinet)}</div>` : ''}
+    <div class="detail-meta">
+      ${j.ville ? `<div class="detail-meta-item"><strong>${esc(j.ville)}</strong>${j.departement ? 'Département ' + esc(j.departement) : 'Lieu'}</div>` : ''}
+      <div class="detail-meta-item"><strong>${esc(formatDate(j.publie_le || j.created_at))}</strong>Publiée le</div>
+    </div>`;
+
+  document.getElementById('annoncePrincipal').innerHTML = [
+    blocDetail('Le poste', j.description ? `<div class="detail-texte">${esc(j.description)}</div>` : ''),
+    blocDetail('Profil recherché', j.profil_recherche ? `<div class="detail-texte">${esc(j.profil_recherche)}</div>` : ''),
+    blocDetail('Conditions', j.conditions ? `<div class="detail-texte">${esc(j.conditions)}</div>` : '')
+  ].filter(Boolean).join('') ||
+    '<div class="detail-texte">Le détail de cette annonce n\'a pas été renseigné.</div>';
+
+  const aside = document.getElementById('annonceAside');
+  aside.innerHTML = renderContactAnnonce(j);
+  document.getElementById('annonceGrid')
+    .classList.toggle('pleine-largeur', !aside.innerHTML.trim());
+}
+
+// L'objet du mail est pré-rempli pour que le praticien n'ait plus qu'à
+// écrire son message, et pour que le cabinet identifie l'annonce.
+function objetCandidature(j) {
+  return 'Candidature : ' + (j.titre || 'Annonce') + (j.ville ? ' - ' + j.ville : '');
+}
+
+function renderContactAnnonce(j) {
+  // Non connecté : la vue publique n'a même pas renvoyé les
+  // coordonnées, il n'y a rien à masquer, il n'y a rien à afficher.
+  if (!currentUser) {
+    return `<div class="contact-carte">
+        <div class="contact-titre">Contacter le cabinet</div>
+        <div class="contact-note" style="margin-top:0; margin-bottom:14px">
+          Les coordonnées du cabinet sont réservées aux praticiens inscrits.
+        </div>
+        <button type="button" class="btn btn-turquoise" style="width:100%; justify-content:center"
+                onclick="openAuth('login')">Se connecter pour voir les coordonnées</button>
+        <div class="contact-note">
+          L'inscription est gratuite et réservée aux orthodontistes et internes en ODF.
+        </div>
+      </div>`;
+  }
+
+  if (!j.contact_email && !j.contact_tel && !j.contact_nom) {
+    return `<div class="contact-carte">
+        <div class="contact-titre">Contacter le cabinet</div>
+        <div class="contact-note" style="margin-top:0">
+          Aucune coordonnée n'a été renseignée sur cette annonce.
+        </div>
+      </div>`;
+  }
+
+  const objet = encodeURIComponent(objetCandidature(j));
+  return `<div class="contact-carte">
+      <div class="contact-titre">Contacter le cabinet</div>
+      ${j.contact_nom ? `<div class="contact-nom">${esc(j.contact_nom)}</div>` : ''}
+      ${j.contact_tel
+        ? `<a class="contact-lien" href="tel:${esc(String(j.contact_tel).replace(/[^+0-9]/g, ''))}">
+             <span aria-hidden="true">📞</span> ${esc(j.contact_tel)}
+           </a>` : ''}
+      ${j.contact_email
+        ? `<a class="contact-lien" href="mailto:${esc(j.contact_email)}?subject=${objet}">
+             <span aria-hidden="true">✉️</span> ${esc(j.contact_email)}
+           </a>` : ''}
+      <div class="contact-note">
+        La candidature se fait en direct auprès du cabinet. OrthoConnect ne reçoit ni ne transmet de candidature.
+      </div>
+    </div>`;
+}
+
+// ─────── Mes annonces (espace praticien) ───────
+const JOURS_ALERTE_EXPIRATION = 15;
+
+function joursAvantExpiration(j) {
+  if (!j.expire_le) return null;
+  return Math.ceil((new Date(j.expire_le).getTime() - Date.now()) / 86400000);
+}
+
+function etatAnnonce(j) {
+  if (j.statut === 'pourvue')   return { cle: 'pourvue',   libelle: 'Pourvue' };
+  if (j.statut === 'brouillon') return { cle: 'brouillon2', libelle: 'Brouillon' };
+  if (j.statut === 'expiree' || !annonceActive(j)) return { cle: 'expiree', libelle: 'Expirée' };
+  return { cle: 'publiee', libelle: 'Publiée' };
+}
+
+async function chargerMesAnnonces() {
+  if (!currentUser) { mesAnnonces = []; return; }
+  const { data, error } = await sb.from('offres_emploi').select('*')
+    .eq('auteur_id', currentUser.id).order('created_at', { ascending: false });
+  if (error) { console.warn('Mes annonces indisponibles :', error.message); mesAnnonces = []; return; }
+  mesAnnonces = data || [];
+}
+
+async function ouvrirMesAnnonces() {
+  if (!currentUser) { openAuth('signup'); return; }
+  showPage('dashboard');
+  showDashPanel('annonces');
+  await chargerMesAnnonces();
+  renderMesAnnonces();
+}
+
+function renderMesAnnonces() {
+  const zone = document.getElementById('mesAnnoncesListe');
+  if (!zone) return;
+
+  if (!mesAnnonces.length) {
+    zone.innerHTML = `<div style="padding:32px; text-align:center; border:1px dashed var(--grey-border); border-radius:var(--radius); color:var(--text-secondary)">
+      <p style="margin-bottom:14px">Vous n'avez pas encore déposé d'annonce.</p>
+      <p style="font-size:13px; margin-bottom:14px">La publication est immédiate et l'annonce reste en ligne 90 jours.</p>
+      <button class="btn btn-turquoise btn-sm" onclick="ouvrirFormAnnonce(null)">Déposer une annonce</button>
+    </div>`;
+    return;
+  }
+
+  zone.innerHTML = mesAnnonces.map(j => {
+    const e = etatAnnonce(j);
+    const jours = joursAvantExpiration(j);
+    // L'alerte ne concerne que ce qui est encore en ligne : prévenir de
+    // l'expiration d'un brouillon ou d'un poste pourvu n'a pas de sens.
+    const alerte = e.cle === 'publiee' && jours !== null && jours <= JOURS_ALERTE_EXPIRATION;
+
+    return `<div class="item-row" style="display:block">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap">
+        <div>
+          <div class="item-title">${esc(j.titre)}</div>
+          <div class="item-meta">
+            ${esc(libelleContrat(j.type_contrat))} ·
+            ${esc(j.ville || '')}${j.departement ? ' (' + esc(j.departement) + ')' : ''} ·
+            expire le ${esc(formatDate(j.expire_le))}
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+          <span class="badge badge-${e.cle}">${esc(e.libelle)}</span>
+          <button class="btn btn-outline btn-sm" onclick="ouvrirFormAnnonce(${j.id})">Modifier</button>
+          ${e.cle === 'publiee'
+            ? `<button class="btn btn-outline btn-sm" onclick="marquerPourvue(${j.id})">Marquer pourvue</button>`
+            : ''}
+          <button class="btn btn-outline btn-sm" onclick="supprimerAnnonce(${j.id})">Retirer</button>
+        </div>
+      </div>
+      ${alerte ? `<div class="annonce-alerte">
+          <span>${jours <= 0 ? 'Cette annonce expire aujourd\'hui.' : 'Cette annonce expire dans ' + jours + ' jour' + (jours > 1 ? 's' : '') + '.'}</span>
+          <button class="btn btn-turquoise btn-sm" onclick="prolongerAnnonce(${j.id})">Prolonger de 90 jours</button>
+        </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function remplirSelectContrat(id, valeur) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.innerHTML = Object.keys(TYPES_CONTRAT)
+    .map(t => `<option value="${esc(t)}">${esc(TYPES_CONTRAT[t])}</option>`).join('');
+  sel.value = valeur || 'collaboration_liberale';
+}
+
+function ouvrirFormAnnonce(id) {
+  if (!currentUser) { openAuth('signup'); return; }
+
+  annonceEnCours = id;
+  const j = id ? mesAnnonces.find(x => x.id === id) : null;
+  const p = currentProfile || {};
+
+  document.getElementById('annonceFormTitre').textContent = j ? 'Modifier l\'annonce' : 'Nouvelle annonce';
+  document.getElementById('anTitre').value       = j ? (j.titre || '') : '';
+  document.getElementById('anCabinet').value     = j ? (j.cabinet || '') : (p.cabinet_nom || '');
+  document.getElementById('anVille').value       = j ? (j.ville || '') : (p.cabinet_ville || p.ville || '');
+  document.getElementById('anDept').value        = j ? (j.departement || '') : '';
+  document.getElementById('anDescription').value = j ? (j.description || '') : '';
+  document.getElementById('anProfil').value      = j ? (j.profil_recherche || '') : '';
+  document.getElementById('anConditions').value  = j ? (j.conditions || '') : '';
+  document.getElementById('anStatut').value      = j ? (j.statut === 'expiree' ? 'publiee' : j.statut) : 'publiee';
+  remplirSelectContrat('anType', j ? j.type_contrat : null);
+
+  // Coordonnées pré-remplies depuis le profil pour une nouvelle
+  // annonce : c'est la saisie la plus fastidieuse, et le praticien
+  // reste libre de mettre celles du cabinet.
+  document.getElementById('anContactNom').value   = j ? (j.contact_nom || '') : (p.nom || '');
+  document.getElementById('anContactEmail').value = j ? (j.contact_email || '') : (p.email || (currentUser && currentUser.email) || '');
+  document.getElementById('anContactTel').value   = j ? (j.contact_tel || '') : (p.telephone || '');
+
+  const f = document.getElementById('annonceForm');
+  f.style.display = 'block';
+  f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function fermerFormAnnonce() {
+  annonceEnCours = null;
+  document.getElementById('annonceForm').style.display = 'none';
+}
+
+function messageAnnonce(texte, erreur) {
+  const el = document.getElementById('annonceMessage');
+  if (!el) return;
+  el.textContent = texte;
+  el.className = 'admin-message show ' + (erreur ? 'ko' : 'ok');
+  if (!erreur) setTimeout(() => { el.className = 'admin-message'; }, 4000);
+}
+
+async function enregistrerAnnonce() {
+  if (!currentUser) { openAuth('signup'); return; }
+
+  const titre = document.getElementById('anTitre').value.trim();
+  const ville = document.getElementById('anVille').value.trim();
+  if (!titre) return messageAnnonce("L'intitulé du poste est obligatoire.", true);
+  if (!ville) return messageAnnonce('Indiquez la ville du poste.', true);
+
+  const email = document.getElementById('anContactEmail').value.trim();
+  const tel   = document.getElementById('anContactTel').value.trim();
+  if (!email && !tel) {
+    return messageAnnonce('Indiquez au moins un email ou un téléphone : sans coordonnées, personne ne peut vous joindre.', true);
+  }
+
+  const payload = {
+    auteur_id:        currentUser.id,
+    titre,
+    cabinet:          document.getElementById('anCabinet').value.trim() || null,
+    ville,
+    departement:      document.getElementById('anDept').value.trim() || null,
+    type_contrat:     document.getElementById('anType').value,
+    description:      document.getElementById('anDescription').value.trim() || null,
+    profil_recherche: document.getElementById('anProfil').value.trim() || null,
+    conditions:       document.getElementById('anConditions').value.trim() || null,
+    contact_nom:      document.getElementById('anContactNom').value.trim() || null,
+    contact_email:    email || null,
+    contact_tel:      tel || null,
+    statut:           document.getElementById('anStatut').value
+  };
+
+  // Une annonce republiée après expiration repart pour 90 jours,
+  // sinon elle resterait invisible malgré son statut « publiée ».
+  const j = annonceEnCours ? mesAnnonces.find(x => x.id === annonceEnCours) : null;
+  if (!annonceEnCours) {
+    payload.publie_le = new Date().toISOString();
+  } else if (payload.statut === 'publiee' && j && !annonceActive(j)) {
+    payload.expire_le = dansNJours(90);
+  }
+
+  const { error } = annonceEnCours
+    ? await sb.from('offres_emploi').update(payload).eq('id', annonceEnCours)
+    : await sb.from('offres_emploi').insert(payload);
+
+  if (error) return messageAnnonce('Enregistrement refusé : ' + error.message, true);
+
+  messageAnnonce(annonceEnCours ? 'Annonce mise à jour.' : 'Annonce publiée.');
+  fermerFormAnnonce();
+  await rafraichirAnnonces();
+}
+
+function dansNJours(n) {
+  return new Date(Date.now() + n * 86400000).toISOString();
+}
+
+async function marquerPourvue(id) {
+  const { error } = await sb.from('offres_emploi').update({ statut: 'pourvue' }).eq('id', id);
+  if (error) return messageAnnonce('Modification refusée : ' + error.message, true);
+  messageAnnonce('Annonce marquée pourvue, elle ne figure plus dans les offres.');
+  await rafraichirAnnonces();
+}
+
+async function prolongerAnnonce(id) {
+  const { error } = await sb.from('offres_emploi')
+    .update({ expire_le: dansNJours(90), statut: 'publiee' }).eq('id', id);
+  if (error) return messageAnnonce('Prolongation refusée : ' + error.message, true);
+  messageAnnonce('Annonce prolongée de 90 jours.');
+  await rafraichirAnnonces();
+}
+
+async function supprimerAnnonce(id) {
+  const j = mesAnnonces.find(x => x.id === id);
+  if (!window.confirm('Retirer définitivement « ' + (j ? j.titre : 'cette annonce') + ' » ?')) return;
+  const { error } = await sb.from('offres_emploi').delete().eq('id', id);
+  if (error) return messageAnnonce('Suppression refusée : ' + error.message, true);
+  messageAnnonce('Annonce retirée.');
+  await rafraichirAnnonces();
+}
+
+// Le catalogue public est rechargé en même temps : publier, pourvoir
+// ou retirer change ce que voient les autres praticiens.
+async function rafraichirAnnonces() {
+  await chargerMesAnnonces();
+  renderMesAnnonces();
+  await loadCatalogues();
 }
 
 function renderActus() {
@@ -4159,6 +4870,8 @@ let adminOrganismes = [];
 let adminFormations = [];
 let adminSessions   = [];
 let adminCodes      = [];
+let adminAnnonces   = [];
+let filtreStatutAnnonce = 'tous';
 let filtreStatutCode = 'tous';
 let filtreStatutFormation = 'tous';
 let rechercheInscrits = '';
@@ -4245,7 +4958,7 @@ function adminMessage(texte, estErreur) {
 }
 
 async function chargerAdmin() {
-  const [pr, org, fo, se, co] = await Promise.all([
+  const [pr, org, fo, se, co, an] = await Promise.all([
     sb.from('praticiens').select('id, nom, email, ville, statut, rpps, role, created_at')
       .order('created_at', { ascending: false }),
     sb.from('organismes').select('*').order('nom'),
@@ -4253,10 +4966,13 @@ async function chargerAdmin() {
     sb.from('sessions_formation').select('*, formations(id, titre)').order('date_debut'),
     sb.from('codes_reduction')
       .select('*, praticiens(nom, email), formations(id, titre, organismes(id, nom))')
+      .order('created_at', { ascending: false }),
+    sb.from('offres_emploi')
+      .select('*, praticiens(nom, email)')
       .order('created_at', { ascending: false })
   ]);
 
-  const enErreur = [pr, org, fo, se, co].find(r => r.error);
+  const enErreur = [pr, org, fo, se, co, an].find(r => r.error);
   const boite = document.getElementById('adminErreur');
   if (enErreur) {
     boite.textContent = "Chargement impossible : " + enErreur.error.message
@@ -4271,6 +4987,7 @@ async function chargerAdmin() {
   adminFormations = fo.data  || [];
   adminSessions   = se.data  || [];
   adminCodes      = co.data  || [];
+  adminAnnonces   = an.data  || [];
 
   renderAdminDash();
   renderAdminInscrits();
@@ -4278,6 +4995,7 @@ async function chargerAdmin() {
   renderAdminFormations();
   renderAdminSessions();
   renderAdminCodes();
+  renderAdminAnnonces();
   remplirSelectsAdmin();
 }
 
@@ -4302,6 +5020,11 @@ function renderAdminDash() {
   const debutMois = new Date();
   debutMois.setDate(1); debutMois.setHours(0, 0, 0, 0);
   setStat('admStatCodes', adminCodes.filter(c => new Date(c.created_at) >= debutMois).length);
+
+  const enLigne = adminAnnonces.filter(a => etatAnnonce(a).cle === 'publiee');
+  setStat('admStatAnnonces', enLigne.length);
+  setStat('admStatAnnoncesMois',
+    enLigne.filter(a => new Date(a.publie_le || a.created_at) >= debutMois).length);
 
   const zone = document.getElementById('admBrouillons');
   if (!brouillons.length) {
@@ -5042,6 +5765,93 @@ async function changerStatutCode(id, statut) {
   if (error) { adminMessage('Statut non modifié : ' + error.message, true); return; }
   adminMessage('Statut mis à jour.');
   await chargerAdmin();
+}
+
+// ─────────── Annonces (admin) ───────────
+function filtrerAnnoncesAdmin(statut, btn) {
+  filtreStatutAnnonce = statut;
+  document.querySelectorAll('#adminPanel-annonces .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAdminAnnonces();
+}
+
+function renderAdminAnnonces() {
+  // Le filtre porte sur l'état affiché, pas sur la colonne statut :
+  // une annonce « publiee » dont la date est passée est expirée.
+  const lignes = filtreStatutAnnonce === 'tous'
+    ? adminAnnonces
+    : adminAnnonces.filter(a => etatAnnonce(a).cle === filtreStatutAnnonce);
+
+  const zone = document.getElementById('admAnnoncesListe');
+  if (!zone) return;
+
+  if (!lignes.length) {
+    zone.innerHTML = '<div class="admin-empty">'
+      + (adminAnnonces.length ? 'Aucune annonce dans cette catégorie.' : 'Aucune annonce déposée pour le moment.')
+      + '</div>';
+    return;
+  }
+
+  zone.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Annonce</th><th>Auteur</th><th>Lieu</th><th>Expire le</th><th>Statut</th><th class="col-actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          ${lignes.map(a => {
+            const p = a.praticiens || null;
+            const e = etatAnnonce(a);
+            return `
+            <tr>
+              <td>
+                <div class="admin-nom">${esc(a.titre)}</div>
+                <div style="font-size:12px; color:var(--text-light)">
+                  ${esc(libelleContrat(a.type_contrat))}${a.cabinet ? ' · ' + esc(a.cabinet) : ''}
+                </div>
+              </td>
+              <td>
+                ${p ? `<div>${esc(p.nom || '')}</div>
+                       <div style="font-size:12px; color:var(--text-light)">${esc(p.email || '')}</div>`
+                    : '<span style="color:var(--text-light)">Saisie admin</span>'}
+              </td>
+              <td>${esc(a.ville || '—')}${a.departement ? ' (' + esc(a.departement) + ')' : ''}</td>
+              <td style="white-space:nowrap">${esc(formatDate(a.expire_le))}</td>
+              <td>
+                <select onchange="changerStatutAnnonce(${a.id}, this.value)" style="font-size:13px; padding:7px 10px">
+                  ${Object.keys(STATUTS_ANNONCE).map(s =>
+                    `<option value="${s}"${a.statut === s ? ' selected' : ''}>${STATUTS_ANNONCE[s]}</option>`).join('')}
+                </select>
+                ${a.statut === 'publiee' && e.cle === 'expiree'
+                  ? '<div style="font-size:11px; color:var(--text-light); margin-top:4px">date dépassée</div>'
+                  : ''}
+              </td>
+              <td class="col-actions">
+                ${e.cle === 'publiee'
+                  ? `<button class="btn btn-outline btn-sm" onclick="depublierAnnonce(${a.id})">Dépublier</button>`
+                  : ''}
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function changerStatutAnnonce(id, statut) {
+  const { error } = await sb.from('offres_emploi').update({ statut }).eq('id', id);
+  if (error) { adminMessage('Statut non modifié : ' + error.message, true); return; }
+  adminMessage('Statut mis à jour.');
+  await chargerAdmin();
+  await loadCatalogues();
+}
+
+// Dépublier repasse en brouillon plutôt que de supprimer : l'annonce
+// sort du catalogue mais son auteur la retrouve dans son espace.
+async function depublierAnnonce(id) {
+  const a = adminAnnonces.find(x => x.id === id);
+  if (!window.confirm('Dépublier « ' + (a ? a.titre : 'cette annonce') + ' » ? Elle repassera en brouillon chez son auteur.')) return;
+  await changerStatutAnnonce(id, 'brouillon');
 }
 
 // ─────────── Écriture commune ───────────
