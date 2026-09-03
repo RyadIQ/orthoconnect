@@ -701,12 +701,28 @@
     justify-content: space-between;
     align-items: center;
   }
-  .formation-price {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--navy);
+  /* Le prix ne figure plus sur les cartes. À son emplacement, et
+     seulement sur les formations à tarif négocié, une mention sans
+     chiffre ; le bouton reste calé à droite quand il n'y a rien. */
+  .formation-footer .btn { margin-left: auto; }
+  .formation-tarif-oc {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: #007A86;
+    line-height: 1.3;
   }
-  .formation-price span { font-size: 12px; font-weight: 400; color: var(--text-light); }
+  .formation-tarif-oc::before {
+    content: '';
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--turquoise);
+  }
   .btn-sm {
     padding: 8px 16px;
     font-size: 13px;
@@ -3269,40 +3285,62 @@ let codesPraticien = [];
 // passé, ces colonnes n'existent pas : on retombe alors sur l'ancien
 // schéma pour ne pas vider le catalogue entre le déploiement du front
 // et l'exécution du SQL.
-// Deux sources selon la session, et c'est le fond de l'affaire : la
-// vue formations_publiques n'expose pas tarif_prefere, la table oui.
-// Un visiteur non connecté n'a donc aucun chemin vers le montant, pas
-// même par un appel direct à l'API — anon n'a plus le droit de lire
-// la table (voir vue_formations_publiques.sql).
+// La liste vient de la vue formations_publiques, connecté ou non, et
+// n'y prend que des colonnes sans montant : ni le prix public ni le
+// tarif négocié ne circulent dans la réponse qui alimente le
+// catalogue. La vue porte le booléen a_tarif_prefere, de quoi poser la
+// mention sur la carte sans le moindre chiffre.
+// Le tarif n'est lu qu'à l'ouverture d'une fiche, formation par
+// formation (chargerTarifFormation) : la table pour un praticien
+// connecté, seule à porter le montant négocié — anon n'a plus le droit
+// de la lire, même par un appel direct à l'API (voir
+// vue_formations_publiques.sql) —, la vue pour les autres, qui n'y
+// trouvent que le prix public.
 let sourceCatalogue = null;
 let sourceEmploi = null;
+let sessionCatalogue = null;   // état de la session au dernier chargement
 
-function sourceAttendue() {
-  return currentUser ? 'formations' : 'formations_publiques';
-}
+// Ce que la carte et la fiche affichent, montants exclus.
+const COLONNES_CARTE =
+  'id, titre, description, format, duree, dpc, dpc_numero, thematique, ' +
+  'niveau, prerequis, objectifs, inclus, participants_max, formateur_nom, ' +
+  'formateur_titre, formateur_bio, formateur_photo_url, url_source, organisme_id';
 
 const COLONNES_ORGANISME = 'organismes(id, nom, logo_url, partenaire, site_web)';
 
+const COLONNES_VUE = COLONNES_CARTE + ', a_tarif_prefere, organisme_nom, ' +
+  'organisme_logo_url, organisme_partenaire, organisme_site_web';
+
+// Repli seulement : la table n'a pas de booléen équivalent, il faut y
+// lire tarif_prefere pour savoir qu'un tarif existe.
+const COLONNES_TABLE = COLONNES_CARTE + ', tarif_prefere, ' + COLONNES_ORGANISME;
+
+function sourceTarif() {
+  // Connecté : la table, seule à porter le tarif négocié et ses
+  // conditions. Sinon la source qui a effectivement répondu pour la
+  // liste — la vue en temps normal, la table si le SQL n'est pas passé.
+  return currentUser ? 'formations' : (sourceCatalogue || 'formations_publiques');
+}
+
 async function chargerFormationsPubliques() {
-  const source = sourceAttendue();
-  sourceCatalogue = source;
+  sourceCatalogue = 'formations_publiques';
+  sessionCatalogue = !!currentUser;
 
-  const requete = source === 'formations'
-    ? sb.from('formations').select('*, ' + COLONNES_ORGANISME)
-    : sb.from('formations_publiques').select('*');
-
-  const r = await requete.eq('statut', 'publie').order('id');
+  const r = await sb.from('formations_publiques').select(COLONNES_VUE)
+    .eq('statut', 'publie').order('id');
   if (!r.error) return r;
 
   // Vue absente parce que le SQL n'est pas passé : on retombe sur la
   // table, quitte à perdre l'étanchéité, plutôt que de vider le
   // catalogue. Le repli suivant couvre le schéma d'avant les statuts.
-  console.warn('Source « ' + source + ' » indisponible, repli sur la table :', r.error.message);
+  console.warn('Vue formations_publiques indisponible, repli sur la table :', r.error.message);
 
   const t = await sb.from('formations')
-    .select('*, ' + COLONNES_ORGANISME).eq('statut', 'publie').order('id');
+    .select(COLONNES_TABLE).eq('statut', 'publie').order('id');
   if (!t.error) { sourceCatalogue = 'formations'; return t; }
 
+  // Dernier filet, sur un schéma antérieur aux statuts : là, et là
+  // seulement, la réponse porte encore les montants.
   console.warn('Schéma formations non migré, repli sur actif/organisme :', t.error.message);
   sourceCatalogue = 'formations';
   return sb.from('formations').select('*').eq('actif', true).order('id');
@@ -3612,10 +3650,11 @@ async function refreshAuthUI() {
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
 
-  // Connexion ou déconnexion change la source du catalogue : sans ce
-  // rechargement, un praticien qui vient de se connecter garderait les
-  // lignes de la vue, donc sans tarif négocié.
-  if (sourceCatalogue && sourceCatalogue !== sourceAttendue()) {
+  // La liste est la même dans les deux cas — elle ne transporte aucun
+  // montant. Ce qui change, c'est le tarif lisible sur une fiche : on
+  // repart de lignes neuves pour qu'aucun montant lu sous l'ancienne
+  // session ne survive à la bascule.
+  if (sessionCatalogue !== null && sessionCatalogue !== !!session) {
     await loadCatalogues();
   }
 
@@ -3739,7 +3778,7 @@ function renderDashboard() {
     <div class="item-row">
       <div>
         <div class="item-title">${f.titre}</div>
-        <div class="item-meta">${f.organisme} · ${f.duree} · ${f.prix}€</div>
+        <div class="item-meta">${esc(nomOrganisme(f))} · ${esc(f.duree || '')}</div>
       </div>
       <button class="btn btn-outline btn-sm" onclick="saveFormation(${f.id})">
         ${savedIds.includes(f.id) ? '✓ Enregistrée' : 'Enregistrer'}
@@ -3869,7 +3908,7 @@ function renderSavedFormations() {
     <div class="item-row">
       <div>
         <div class="item-title">${f.titre}</div>
-        <div class="item-meta">${f.organisme} · ${f.duree} · ${f.prix}€${f.dpc ? ' · DPC éligible' : ''}</div>
+        <div class="item-meta">${esc(nomOrganisme(f))} · ${esc(f.duree || '')}${f.dpc ? ' · DPC éligible' : ''}</div>
       </div>
       <button class="btn btn-outline btn-sm" onclick="removeFormation(${f.id})">Retirer</button>
     </div>
@@ -4380,7 +4419,9 @@ function renderFormationsDB(data) {
         </div>
       </div>
       <div class="formation-footer">
-        <div class="formation-price">${f.prix}€ <span>/ pers.</span></div>
+        ${aTarifPrefere(f)
+          ? '<span class="formation-tarif-oc">Tarif préférentiel OrthoConnect</span>'
+          : ''}
         <button class="btn ${savedIds.includes(f.id) ? 'btn-outline' : 'btn-turquoise'} btn-sm"
                 onclick="event.stopPropagation(); saveFormation(${f.id})">
           ${savedIds.includes(f.id) ? '✓ Enregistrée' : 'Enregistrer'}
@@ -4551,6 +4592,25 @@ function listeDetail(valeurs) {
     items.map(v => `<li>${esc(v)}</li>`).join('') + '</ul>';
 }
 
+// Le catalogue ne transporte plus aucun montant : c'est l'ouverture
+// d'une fiche qui va chercher le tarif, pour cette formation-là. Un
+// visiteur non connecté n'obtient que le prix public ; le tarif négocié
+// et ses conditions ne sortent de la base que pour un praticien
+// connecté, qui les lit sur la table.
+async function chargerTarifFormation(f) {
+  if (f.tarifCharge) return;
+
+  const colonnes = currentUser ? 'prix, tarif_prefere, conditions_tarif' : 'prix';
+  const r = await sb.from(sourceTarif()).select(colonnes).eq('id', f.id).maybeSingle();
+
+  // Tarif introuvable : la fiche s'affiche sans montant plutôt que
+  // pas du tout, comme pour le programme et les sessions.
+  if (r.error) { console.warn('Tarif indisponible :', r.error.message); return; }
+
+  Object.assign(f, r.data || {});
+  f.tarifCharge = true;
+}
+
 async function ouvrirFormation(id) {
   const f = formationsDB.find(x => x.id === id);
   if (!f) return;
@@ -4559,13 +4619,14 @@ async function ouvrirFormation(id) {
   showPage('formation');
   renderDetailFormation(f, null, []);
 
-  // Programme et sessions arrivent après le premier rendu : la fiche
-  // s'affiche tout de suite avec ce qu'on a déjà en mémoire.
+  // Programme, sessions et tarif arrivent après le premier rendu : la
+  // fiche s'affiche tout de suite avec ce qu'on a déjà en mémoire.
   const [prog, sess] = await Promise.all([
     sb.from('programme_sections')
       .select('*, programme_sequences(*)').eq('formation_id', id).order('ordre'),
     sb.from('sessions_formation')
-      .select('*').eq('formation_id', id).eq('actif', true).order('date_debut')
+      .select('*').eq('formation_id', id).eq('actif', true).order('date_debut'),
+    chargerTarifFormation(f)
   ]);
 
   // Le SQL detail_formations.sql peut ne pas être passé : dans ce cas
@@ -4747,14 +4808,20 @@ function renderCarteTarif(f) {
       </div>`;
   }
 
+  // Les montants arrivent après le premier rendu de la fiche : tant
+  // qu'ils manquent, l'encart s'affiche sans eux au lieu d'annoncer un
+  // « undefined € ».
+  const montants = [
+    f.prix != null ? `<span class="tarif-public">${esc(f.prix)} &euro;</span>` : '',
+    f.tarif_prefere != null
+      ? `<span class="tarif-oc">${esc(f.tarif_prefere)} &euro; <span>/ pers.</span></span>` : ''
+  ].filter(Boolean).join('');
+
   const economie = economieTarif(f);
   const code = codeValidePour(f.id);
   return `<div class="tarif-carte">
       <div class="tarif-titre">Tarif préférentiel OrthoConnect</div>
-      <div class="tarif-prix">
-        ${f.prix != null ? `<span class="tarif-public">${esc(f.prix)} &euro;</span>` : ''}
-        <span class="tarif-oc">${esc(f.tarif_prefere)} &euro; <span>/ pers.</span></span>
-      </div>
+      ${montants ? `<div class="tarif-prix">${montants}</div>` : ''}
       ${economie ? `<div class="tarif-economie-lbl">Soit ${esc(economie)} &euro; d'économie.</div>` : ''}
       ${f.conditions_tarif ? `<div class="tarif-conditions">${esc(f.conditions_tarif)}</div>` : ''}
       <div id="tarifZoneCode">
