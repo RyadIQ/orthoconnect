@@ -1293,6 +1293,9 @@
   .detail-session:last-of-type { border-bottom: none; }
   .detail-session-date { font-size: 14px; font-weight: 700; color: var(--navy); }
   .detail-session-lieu { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .detail-session-horaires {
+    font-size: 12px; color: var(--text-secondary); line-height: 1.55; margin-top: 5px;
+  }
   .detail-session-places { font-size: 12px; color: var(--text-light); margin-top: 3px; }
   .detail-actions { display: flex; flex-direction: column; gap: 10px; }
   .detail-actions .btn { width: 100%; justify-content: center; }
@@ -1314,6 +1317,41 @@
   }
   .formation-title-btn:hover { color: var(--turquoise); }
   .formation-card { cursor: pointer; }
+
+  /* ===== MÉDIAS ===== */
+  .detail-formateur-photo {
+    width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0;
+    object-fit: cover; background: var(--grey-bg);
+  }
+  .detail-orga-ligne { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .detail-orga-logo {
+    height: 38px; max-width: 130px; object-fit: contain;
+    background: var(--white); border-radius: 6px; padding: 5px 8px;
+  }
+  .detail-orga-ligne .detail-orga { margin-bottom: 0; }
+
+  .formation-orga-ligne { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .formation-orga-logo {
+    height: 22px; max-width: 74px; object-fit: contain; flex-shrink: 0;
+  }
+  .formation-orga-ligne .formation-orga { margin-bottom: 0; }
+
+  /* Champ de téléversement de l'admin */
+  .media-champ { display: flex; gap: 12px; align-items: flex-start; margin-top: 8px; }
+  .media-apercu {
+    width: 62px; height: 62px; border-radius: var(--radius-sm); flex-shrink: 0;
+    border: 1px solid var(--grey-border); background: var(--white);
+    object-fit: contain; padding: 4px;
+  }
+  .media-apercu-vide {
+    width: 62px; height: 62px; border-radius: var(--radius-sm); flex-shrink: 0;
+    border: 1px dashed var(--grey-border); background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-light); font-size: 20px;
+  }
+  .media-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .media-etat { font-size: 12px; color: var(--text-secondary); }
+  .media-etat.erreur { color: #B91C1C; font-weight: 600; }
 
   /* ===== ÉDITEUR DE PROGRAMME (ADMIN) ===== */
   .prog-edit-section {
@@ -2333,8 +2371,23 @@
                   <input type="url" id="orgSite" placeholder="https://exemple.fr">
                 </div>
                 <div class="form-group">
-                  <label for="orgLogo">URL du logo</label>
-                  <input type="url" id="orgLogo" placeholder="https://exemple.fr/logo.png">
+                  <label for="orgLogo">Logo</label>
+                  <input type="url" id="orgLogo" placeholder="https://... ou téléversez ci-dessous"
+                         onchange="rafraichirApercu('orgLogo')">
+                  <div class="media-champ">
+                    <div id="orgLogoApercu"></div>
+                    <div>
+                      <div class="media-actions">
+                        <input type="file" id="orgLogoFichier" accept="image/jpeg,image/png,image/webp"
+                               style="display:none" onchange="televerserVers('orgLogo', this)">
+                        <button type="button" class="btn btn-outline btn-sm"
+                                onclick="document.getElementById('orgLogoFichier').click()">Téléverser une image</button>
+                        <button type="button" class="btn btn-outline btn-sm"
+                                onclick="retirerMedia('orgLogo')">Retirer</button>
+                      </div>
+                      <div class="media-etat" id="orgLogoEtat">JPG, PNG ou WebP, 2 Mo maximum.</div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="form-row">
@@ -2498,6 +2551,25 @@
                 <label for="fmFormateurBio">Biographie du formateur</label>
                 <textarea id="fmFormateurBio" placeholder="Parcours et domaines d'expertise"></textarea>
               </div>
+                <div class="form-group">
+                  <label for="fmFormateurPhoto">Photo du formateur</label>
+                  <input type="url" id="fmFormateurPhoto" placeholder="https://... ou téléversez ci-dessous"
+                         onchange="rafraichirApercu('fmFormateurPhoto')">
+                  <div class="media-champ">
+                    <div id="fmFormateurPhotoApercu"></div>
+                    <div>
+                      <div class="media-actions">
+                        <input type="file" id="fmFormateurPhotoFichier" accept="image/jpeg,image/png,image/webp"
+                               style="display:none" onchange="televerserVers('fmFormateurPhoto', this)">
+                        <button type="button" class="btn btn-outline btn-sm"
+                                onclick="document.getElementById('fmFormateurPhotoFichier').click()">Téléverser une image</button>
+                        <button type="button" class="btn btn-outline btn-sm"
+                                onclick="retirerMedia('fmFormateurPhoto')">Retirer</button>
+                      </div>
+                      <div class="media-etat" id="fmFormateurPhotoEtat">JPG, PNG ou WebP, 2 Mo maximum. Sans photo, la fiche affiche les initiales.</div>
+                    </div>
+                  </div>
+                </div>
               <div class="form-row">
                 <div class="form-group">
                   <label for="fmUrlSource">URL source</label>
@@ -2563,6 +2635,12 @@
                   <label for="sePlaces">Places</label>
                   <input type="number" id="sePlaces" min="0" step="1" placeholder="24">
                 </div>
+              </div>
+              <div class="form-group">
+                <label for="seHoraires">Horaires</label>
+                <textarea id="seHoraires" style="min-height:70px"
+                          placeholder="Vendredi 9h-12h30 / 14h-17h30, Samedi 9h-12h30 / 14h-17h30, Dimanche 9h-12h45"></textarea>
+                <div class="form-note">Propres à cette session : deux sessions d'une même formation peuvent différer.</div>
               </div>
               <div class="form-group">
                 <label for="seUrl">URL d'inscription</label>
@@ -2826,7 +2904,7 @@ let savedIds = [];
 // et l'exécution du SQL.
 async function chargerFormationsPubliques() {
   const neuf = await sb.from('formations')
-    .select('*, organismes(nom)').eq('statut', 'publie').order('id');
+    .select('*, organismes(nom, logo_url, partenaire)').eq('statut', 'publie').order('id');
   if (!neuf.error) return neuf;
 
   console.warn('Schéma formations non migré, repli sur actif/organisme :', neuf.error.message);
@@ -2835,6 +2913,22 @@ async function chargerFormationsPubliques() {
 
 function nomOrganisme(f) {
   return (f.organismes && f.organismes.nom) || f.organisme || '';
+}
+
+// Sur les cartes du catalogue, le logo n'apparaît que pour les
+// organismes partenaires. Les autres gardent leur nom en texte.
+function renderOrgaCarte(f) {
+  const o = f.organismes;
+  const nom = nomOrganisme(f);
+  if (!nom) return '';
+
+  if (o && o.partenaire && o.logo_url) {
+    return `<div class="formation-orga-ligne">
+        <img class="formation-orga-logo" src="${esc(o.logo_url)}" alt="${esc(nom)}" loading="lazy">
+        <div class="formation-orga">${esc(nom)}</div>
+      </div>`;
+  }
+  return `<div class="formation-orga">${esc(nom)}</div>`;
 }
 
 // Une grille vide sans explication laisse croire à une panne. On
@@ -3363,7 +3457,7 @@ function renderFormationsDB(data) {
         ${f.dpc ? '<span class="badge badge-new">DPC éligible</span>' : ''}
       </div>
       <div class="formation-card-body">
-        <div class="formation-orga">${nomOrganisme(f)}</div>
+        ${renderOrgaCarte(f)}
         <button type="button" class="formation-title-btn"
                 onclick="event.stopPropagation(); ouvrirFormation(${f.id})">${f.titre}</button>
         <div class="formation-desc">${f.description || ''}</div>
@@ -3601,7 +3695,7 @@ function renderDetailFormation(f, sections, sessions) {
   document.getElementById('detailHero').innerHTML = `
     <div class="detail-badges">${badges}</div>
     <h1>${esc(f.titre)}</h1>
-    ${nomOrganisme(f) ? `<div class="detail-orga">${esc(nomOrganisme(f))}</div>` : ''}
+    ${renderOrgaDetail(f)}
     ${meta ? `<div class="detail-meta">${meta}</div>` : ''}`;
 
   // ── Colonne principale ──
@@ -3626,6 +3720,22 @@ function renderDetailFormation(f, sections, sessions) {
     .classList.toggle('pleine-largeur', !aside.innerHTML.trim());
 }
 
+// Sur la fiche détail, le logo s'affiche pour tout organisme qui en a
+// un, partenaire ou non.
+function renderOrgaDetail(f) {
+  const o = f.organismes;
+  const nom = nomOrganisme(f);
+  if (!nom) return '';
+
+  if (o && o.logo_url) {
+    return `<div class="detail-orga-ligne">
+        <img class="detail-orga-logo" src="${esc(o.logo_url)}" alt="${esc(nom)}">
+        <div class="detail-orga">${esc(nom)}</div>
+      </div>`;
+  }
+  return `<div class="detail-orga">${esc(nom)}</div>`;
+}
+
 function renderProgramme(sections) {
   if (!sections || !sections.length) return '';
 
@@ -3635,7 +3745,7 @@ function renderProgramme(sections) {
       <div class="prog-sequence">
         <div class="prog-sequence-head">
           <div class="prog-sequence-titre">${esc(q.titre)}</div>
-          ${q.duree ? `<div class="prog-sequence-duree">${esc(q.duree)}</div>` : ''}
+          ${q.duree ? `<div class="prog-sequence-duree">${esc(dureeApprox(q.duree))}</div>` : ''}
         </div>
         ${q.contenu ? `<div class="prog-sequence-contenu">${esc(q.contenu)}</div>` : ''}
       </div>`).join('');
@@ -3651,12 +3761,27 @@ function renderProgramme(sections) {
   return rendu || '';
 }
 
+// Les durées annoncées par les organismes sont indicatives : on le dit
+// à l'affichage plutôt que de laisser croire à une minute près. Le
+// préfixe n'est pas stocké, et n'est pas doublé si l'admin l'a déjà mis.
+function dureeApprox(duree) {
+  const d = String(duree || '').trim();
+  if (!d) return '';
+  return /^[≈~]/.test(d) ? d : '≈ ' + d;
+}
+
 function renderFormateur(f) {
   if (!f.formateur_nom) return '';
   const initiales = f.formateur_nom.split(' ').filter(Boolean)
     .map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+  // Sans photo, on garde les initiales : c'est le comportement d'origine.
+  const vignette = f.formateur_photo_url
+    ? `<img class="detail-formateur-photo" src="${esc(f.formateur_photo_url)}" alt="${esc(f.formateur_nom)}">`
+    : `<div class="detail-formateur-avatar">${esc(initiales)}</div>`;
+
   return `<div class="detail-formateur">
-      <div class="detail-formateur-avatar">${esc(initiales)}</div>
+      ${vignette}
       <div>
         <div class="detail-formateur-nom">${esc(f.formateur_nom)}</div>
         ${f.formateur_titre ? `<div class="detail-formateur-titre">${esc(f.formateur_titre)}</div>` : ''}
@@ -3690,6 +3815,7 @@ function renderDetailAside(f, sessions) {
         ${esc(formatDate(s.date_debut))}${s.date_fin && s.date_fin !== s.date_debut ? ' → ' + esc(formatDate(s.date_fin)) : ''}
       </div>
       ${s.ville ? `<div class="detail-session-lieu">${esc(s.ville)}</div>` : ''}
+      ${s.horaires ? `<div class="detail-session-horaires">${esc(s.horaires)}</div>` : ''}
       ${s.places != null ? `<div class="detail-session-places">${esc(s.places)} places</div>` : ''}
       ${s.url_inscription
         ? `<a class="btn btn-outline btn-sm" style="margin-top:8px; width:100%; justify-content:center"
@@ -3815,7 +3941,7 @@ async function chargerAdmin() {
     sb.from('praticiens').select('id, nom, email, ville, statut, rpps, role, created_at')
       .order('created_at', { ascending: false }),
     sb.from('organismes').select('*').order('nom'),
-    sb.from('formations').select('*, organismes(id, nom)').order('id', { ascending: false }),
+    sb.from('formations').select('*, organismes(id, nom, logo_url, partenaire)').order('id', { ascending: false }),
     sb.from('sessions_formation').select('*, formations(id, titre)').order('date_debut')
   ]);
 
@@ -3987,6 +4113,8 @@ function ouvrirFormOrganisme(id) {
   document.getElementById('orgType').value         = o ? (o.type || 'formation') : 'formation';
   document.getElementById('orgSite').value         = o ? (o.site_web || '') : '';
   document.getElementById('orgLogo').value         = o ? (o.logo_url || '') : '';
+  rafraichirApercu('orgLogo');
+  etatMedia('orgLogo', 'JPG, PNG ou WebP, 2 Mo maximum.');
   document.getElementById('orgNiveau').value       = o ? (o.niveau_offre || 'aucun') : 'aucun';
   document.getElementById('orgQualiopi').checked   = o ? !!o.qualiopi : false;
   document.getElementById('orgPartenaire').checked = o ? !!o.partenaire : false;
@@ -4106,6 +4234,9 @@ function ouvrirFormFormation(id) {
   document.getElementById('fmFormateurNom').value    = f ? (f.formateur_nom || '') : '';
   document.getElementById('fmFormateurTitre').value  = f ? (f.formateur_titre || '') : '';
   document.getElementById('fmFormateurBio').value    = f ? (f.formateur_bio || '') : '';
+  document.getElementById('fmFormateurPhoto').value   = f ? (f.formateur_photo_url || '') : '';
+  rafraichirApercu('fmFormateurPhoto');
+  etatMedia('fmFormateurPhoto', "JPG, PNG ou WebP, 2 Mo maximum. Sans photo, la fiche affiche les initiales.");
 
   chargerProgramme(id);
 
@@ -4152,7 +4283,8 @@ async function enregistrerFormation() {
     inclus:           lignesEnTableau('fmInclus'),
     formateur_nom:    document.getElementById('fmFormateurNom').value.trim() || null,
     formateur_titre:  document.getElementById('fmFormateurTitre').value.trim() || null,
-    formateur_bio:    document.getElementById('fmFormateurBio').value.trim() || null
+    formateur_bio:    document.getElementById('fmFormateurBio').value.trim() || null,
+    formateur_photo_url: document.getElementById('fmFormateurPhoto').value.trim() || null
   };
 
   if (await ecrireAdmin('formations', payload, formEnCours)) fermerFormFormation();
@@ -4160,6 +4292,75 @@ async function enregistrerFormation() {
 
 async function changerStatutFormation(id, statut) {
   await ecrireAdmin('formations', { statut }, id);
+}
+
+// ─────────── Médias (Supabase Storage) ───────────
+//
+// Ces contrôles sont du confort d'interface : la garantie réelle est
+// posée sur le bucket lui-même (file_size_limit et allowed_mime_types
+// dans medias_et_horaires.sql), qu'un appel direct à l'API ne
+// contourne pas.
+const MEDIAS_BUCKET = 'medias';
+const MEDIAS_TYPES  = ['image/jpeg', 'image/png', 'image/webp'];
+const MEDIAS_TAILLE = 2 * 1024 * 1024;
+
+function etatMedia(champ, texte, erreur) {
+  const el = document.getElementById(champ + 'Etat');
+  if (!el) return;
+  el.textContent = texte;
+  el.className = 'media-etat' + (erreur ? ' erreur' : '');
+}
+
+function rafraichirApercu(champ) {
+  const zone = document.getElementById(champ + 'Apercu');
+  if (!zone) return;
+  const url = (document.getElementById(champ).value || '').trim();
+  zone.innerHTML = url
+    ? `<img class="media-apercu" src="${esc(url)}" alt="Aperçu">`
+    : '<div class="media-apercu-vide" aria-hidden="true">🖼</div>';
+}
+
+async function televerserVers(champ, input) {
+  const fichier = input.files && input.files[0];
+  input.value = '';                       // permet de reprendre le même fichier
+  if (!fichier) return;
+
+  if (!MEDIAS_TYPES.includes(fichier.type)) {
+    return etatMedia(champ, 'Format refusé : seuls JPG, PNG et WebP sont acceptés.', true);
+  }
+  if (fichier.size > MEDIAS_TAILLE) {
+    const mo = (fichier.size / 1024 / 1024).toFixed(1);
+    return etatMedia(champ, `Fichier trop lourd (${mo} Mo) : 2 Mo maximum.`, true);
+  }
+
+  etatMedia(champ, 'Téléversement en cours...');
+
+  const ext = ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[fichier.type];
+  const base = (fichier.name || 'image').replace(/\.[^.]+$/, '')
+    .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'image';
+  const chemin = `${champ}/${Date.now()}-${base}.${ext}`;
+
+  const { error } = await sb.storage.from(MEDIAS_BUCKET)
+    .upload(chemin, fichier, { cacheControl: '3600', upsert: false, contentType: fichier.type });
+
+  if (error) {
+    return etatMedia(champ, 'Téléversement refusé : ' + error.message, true);
+  }
+
+  const { data } = sb.storage.from(MEDIAS_BUCKET).getPublicUrl(chemin);
+  document.getElementById(champ).value = data.publicUrl;
+  rafraichirApercu(champ);
+  etatMedia(champ, "Image téléversée. Elle sera liée à l'enregistrement du formulaire.");
+}
+
+// Retire seulement la référence, sans supprimer l'objet du bucket : le
+// formulaire peut encore être annulé, et l'enregistrement en base
+// pointerait alors sur un fichier détruit.
+function retirerMedia(champ) {
+  document.getElementById(champ).value = '';
+  rafraichirApercu(champ);
+  etatMedia(champ, "Image retirée. Enregistrez le formulaire pour valider.");
 }
 
 // ─────────── Éditeur de programme ───────────
@@ -4398,6 +4599,7 @@ function ouvrirFormSession(id) {
   document.getElementById('seFin').value       = s ? (s.date_fin || '') : '';
   document.getElementById('seVille').value     = s ? (s.ville || '') : '';
   document.getElementById('sePlaces').value    = s && s.places != null ? s.places : '';
+  document.getElementById('seHoraires').value  = s ? (s.horaires || '') : '';
   document.getElementById('seUrl').value       = s ? (s.url_inscription || '') : '';
   document.getElementById('seActif').checked   = s ? !!s.actif : true;
 
@@ -4429,6 +4631,7 @@ async function enregistrerSession() {
     date_fin,
     ville:           document.getElementById('seVille').value.trim() || null,
     places:          places === '' ? null : Number(places),
+    horaires:        document.getElementById('seHoraires').value.trim() || null,
     url_inscription: document.getElementById('seUrl').value.trim() || null,
     actif:           document.getElementById('seActif').checked
   };
