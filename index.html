@@ -1194,6 +1194,156 @@
   }
   .completion-fill { height: 100%; background: var(--turquoise); transition: width 0.3s ease; }
 
+  /* ===== FICHE FORMATION ===== */
+  .detail-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #1A3F70 100%);
+    padding: 32px 0 44px;
+    color: var(--white);
+  }
+  .detail-retour {
+    background: none; border: none; padding: 0;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+    color: rgba(255,255,255,0.75); cursor: pointer; margin-bottom: 22px;
+  }
+  .detail-retour:hover { color: var(--white); }
+  .detail-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .detail-hero h1 {
+    font-size: 32px; font-weight: 800; line-height: 1.2;
+    letter-spacing: -0.5px; margin-bottom: 10px; max-width: 820px;
+  }
+  .detail-orga {
+    font-size: 13px; font-weight: 600; color: var(--turquoise);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px;
+  }
+  .detail-meta { display: flex; gap: 26px; flex-wrap: wrap; }
+  .detail-meta-item { font-size: 14px; color: rgba(255,255,255,0.8); }
+  .detail-meta-item strong { display: block; font-size: 18px; font-weight: 700; color: var(--white); }
+
+  .detail-body { padding: 44px 0 80px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 320px; gap: 40px; align-items: start; }
+  .detail-grid.pleine-largeur { grid-template-columns: 1fr; }
+
+  .detail-bloc { margin-bottom: 40px; }
+  .detail-bloc:last-child { margin-bottom: 0; }
+  .detail-bloc h2 {
+    font-size: 20px; font-weight: 800; color: var(--navy);
+    margin-bottom: 6px; letter-spacing: -0.3px;
+  }
+  .detail-bloc-trait { width: 34px; height: 3px; background: var(--turquoise); border-radius: 2px; margin-bottom: 20px; }
+  .detail-texte { font-size: 15px; color: var(--text-secondary); line-height: 1.75; }
+
+  .detail-liste { list-style: none; }
+  .detail-liste li {
+    position: relative; padding-left: 26px; margin-bottom: 11px;
+    font-size: 15px; color: var(--text-secondary); line-height: 1.65;
+  }
+  .detail-liste li::before {
+    content: '✓'; position: absolute; left: 0; top: 0;
+    color: var(--turquoise); font-weight: 700;
+  }
+
+  /* Programme. Une section sans titre ne rend aucun en-tête : ses
+     séquences s'enchaînent directement. */
+  .prog-section { margin-bottom: 26px; }
+  .prog-section:last-child { margin-bottom: 0; }
+  .prog-section-titre {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 700; color: var(--navy);
+    background: var(--grey-bg); border: 1px solid var(--grey-border);
+    border-radius: var(--radius-sm); padding: 11px 16px; margin-bottom: 12px;
+  }
+  .prog-sequences { border-left: 2px solid var(--grey-border); margin-left: 8px; padding-left: 18px; }
+  .prog-sequence { padding: 12px 0; border-bottom: 1px solid var(--grey-border); }
+  .prog-sequence:last-child { border-bottom: none; }
+  .prog-sequence-head { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+  .prog-sequence-titre { font-size: 14px; font-weight: 600; color: var(--navy); }
+  .prog-sequence-duree {
+    font-size: 12px; font-weight: 600; color: var(--turquoise);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .prog-sequence-contenu { font-size: 13px; color: var(--text-secondary); line-height: 1.65; margin-top: 5px; }
+
+  .detail-formateur {
+    display: flex; gap: 18px; align-items: flex-start;
+    border: 1px solid var(--grey-border); border-radius: var(--radius); padding: 22px;
+  }
+  .detail-formateur-avatar {
+    width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0;
+    background: var(--navy); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700;
+  }
+  .detail-formateur-nom { font-size: 16px; font-weight: 700; color: var(--navy); }
+  .detail-formateur-titre { font-size: 13px; color: var(--turquoise); font-weight: 600; margin-bottom: 8px; }
+  .detail-formateur-bio { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+
+  .detail-aside { position: sticky; top: 90px; }
+  .detail-carte {
+    border: 1px solid var(--grey-border); border-radius: var(--radius);
+    padding: 22px; background: var(--white); box-shadow: var(--shadow);
+  }
+  .detail-carte h3 {
+    font-size: 14px; font-weight: 700; color: var(--navy);
+    margin-bottom: 16px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--grey-border);
+  }
+  .detail-session {
+    padding: 12px 0; border-bottom: 1px solid var(--grey-border);
+  }
+  .detail-session:last-of-type { border-bottom: none; }
+  .detail-session-date { font-size: 14px; font-weight: 700; color: var(--navy); }
+  .detail-session-lieu { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .detail-session-places { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+  .detail-actions { display: flex; flex-direction: column; gap: 10px; }
+  .detail-actions .btn { width: 100%; justify-content: center; }
+
+  @media (max-width: 900px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .detail-aside { position: static; }
+    .detail-hero h1 { font-size: 25px; }
+  }
+
+  /* Titre de carte cliquable : un vrai bouton, donc atteignable au
+     clavier, mais rendu comme le titre qu'il remplace. */
+  .formation-title-btn {
+    display: block; width: 100%; text-align: left;
+    background: none; border: none; padding: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px; font-weight: 700; color: var(--navy);
+    line-height: 1.3; margin-bottom: 10px; cursor: pointer;
+  }
+  .formation-title-btn:hover { color: var(--turquoise); }
+  .formation-card { cursor: pointer; }
+
+  /* ===== ÉDITEUR DE PROGRAMME (ADMIN) ===== */
+  .prog-edit-section {
+    border: 1px solid var(--grey-border); border-radius: var(--radius);
+    background: var(--white); padding: 16px; margin-bottom: 14px;
+  }
+  .prog-edit-head { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .prog-edit-head input { flex: 1; }
+  .prog-edit-seq {
+    border-left: 2px solid var(--grey-border);
+    padding: 12px 0 12px 14px; margin-left: 6px;
+  }
+  .prog-edit-seq + .prog-edit-seq { border-top: 1px solid var(--grey-border); }
+  .prog-edit-ligne { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .prog-edit-ligne input[type="text"] { flex: 1; }
+  .prog-edit-ligne .duree { max-width: 150px; flex: none; }
+  .btn-icone {
+    background: var(--white); border: 1px solid var(--grey-border);
+    border-radius: var(--radius-sm); width: 30px; height: 30px;
+    flex-shrink: 0; cursor: pointer; color: var(--text-secondary);
+    font-size: 13px; line-height: 1;
+  }
+  .btn-icone:hover { border-color: var(--turquoise); color: var(--navy); }
+  .btn-icone:disabled { opacity: 0.35; cursor: default; }
+  .prog-edit-vide {
+    font-size: 13px; color: var(--text-secondary);
+    padding: 14px; border: 1px dashed var(--grey-border);
+    border-radius: var(--radius-sm); text-align: center;
+  }
+
   /* ===== CATALOGUE VIDE ===== */
   .catalogue-vide {
     grid-column: 1 / -1;
@@ -1815,6 +1965,57 @@
 </div>
 
 
+<!-- ======================= -->
+<!-- PAGE : FICHE FORMATION  -->
+<!-- Contenu injecte par ouvrirFormation()                          -->
+<!-- ======================= -->
+<div class="page" id="page-formation">
+  <section class="detail-hero">
+    <div class="container">
+      <button type="button" class="detail-retour" onclick="showPage('formations')">&larr; Retour au catalogue</button>
+      <div id="detailHero"></div>
+    </div>
+  </section>
+
+  <section class="detail-body">
+    <div class="container">
+      <div class="detail-grid" id="detailGrid">
+        <div id="detailPrincipal"></div>
+        <aside class="detail-aside" id="detailAside"></aside>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, matériel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="#" onclick="showPage('formations')">Catalogue des formations</a>
+        <a href="#" onclick="showPage('produits')">Produits</a>
+        <a href="#" onclick="showPage('landing')">Accueil</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
 <!-- ==================== -->
 <!-- PAGE : DASHBOARD     -->
 <!-- ==================== -->
@@ -2265,6 +2466,40 @@
               </div>
               <div class="form-row">
                 <div class="form-group">
+                  <label for="fmParticipants">Participants maximum</label>
+                  <input type="number" id="fmParticipants" min="1" step="1" placeholder="16">
+                </div>
+                <div class="form-group">
+                  <label for="fmUrlInscription">URL d'inscription</label>
+                  <input type="url" id="fmUrlInscription" placeholder="https://organisme.fr/inscription">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="fmObjectifs">Objectifs pédagogiques</label>
+                <textarea id="fmObjectifs" placeholder="Un objectif par ligne"></textarea>
+                <div class="form-note">Un objectif par ligne. Ils s'affichent en liste sur la fiche publique.</div>
+              </div>
+              <div class="form-group">
+                <label for="fmInclus">Ce qui est inclus</label>
+                <textarea id="fmInclus" placeholder="Un élément par ligne : support de cours, déjeuners, attestation..."></textarea>
+                <div class="form-note">Un élément par ligne.</div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fmFormateurNom">Formateur</label>
+                  <input type="text" id="fmFormateurNom" placeholder="Dr Marie Dupont">
+                </div>
+                <div class="form-group">
+                  <label for="fmFormateurTitre">Titre du formateur</label>
+                  <input type="text" id="fmFormateurTitre" placeholder="SQODF, praticien attaché, Lyon">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="fmFormateurBio">Biographie du formateur</label>
+                <textarea id="fmFormateurBio" placeholder="Parcours et domaines d'expertise"></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
                   <label for="fmUrlSource">URL source</label>
                   <input type="url" id="fmUrlSource" placeholder="https://organisme.fr/formation">
                 </div>
@@ -2277,6 +2512,14 @@
                   </select>
                 </div>
               </div>
+
+              <div class="dash-section-title" style="margin-top:26px">Programme</div>
+              <p class="form-note" style="margin-bottom:14px">
+                Nommez les sections comme il convient à cette formation : « Jour 1 », « Module 2 »,
+                « Année 1 », ou laissez le titre vide pour une simple suite de séquences.
+                Les modifications du programme sont enregistrées immédiatement.
+              </p>
+              <div id="progEditeur"></div>
               <div class="admin-form-actions">
                 <button class="btn btn-turquoise btn-sm" onclick="enregistrerFormation()">Enregistrer</button>
                 <button class="btn btn-outline btn-sm" onclick="fermerFormFormation()">Annuler</button>
@@ -3114,14 +3357,15 @@ function renderFormationsDB(data) {
   }
 
   grid.innerHTML = data.map(f => `
-    <div class="formation-card">
+    <div class="formation-card" onclick="ouvrirFormation(${f.id})">
       <div class="formation-card-top">
         <div><span class="badge badge-${f.format}">${f.format === 'presentiel' ? 'Présentiel' : f.format === 'distanciel' ? 'Distanciel' : 'Hybride'}</span></div>
         ${f.dpc ? '<span class="badge badge-new">DPC éligible</span>' : ''}
       </div>
       <div class="formation-card-body">
         <div class="formation-orga">${nomOrganisme(f)}</div>
-        <div class="formation-title">${f.titre}</div>
+        <button type="button" class="formation-title-btn"
+                onclick="event.stopPropagation(); ouvrirFormation(${f.id})">${f.titre}</button>
         <div class="formation-desc">${f.description || ''}</div>
         <div class="formation-meta">
           <span class="formation-meta-item">⏱ ${f.duree}</span>
@@ -3130,7 +3374,8 @@ function renderFormationsDB(data) {
       </div>
       <div class="formation-footer">
         <div class="formation-price">${f.prix}€ <span>/ pers.</span></div>
-        <button class="btn ${savedIds.includes(f.id) ? 'btn-outline' : 'btn-turquoise'} btn-sm" onclick="saveFormation(${f.id})">
+        <button class="btn ${savedIds.includes(f.id) ? 'btn-outline' : 'btn-turquoise'} btn-sm"
+                onclick="event.stopPropagation(); saveFormation(${f.id})">
           ${savedIds.includes(f.id) ? '✓ Enregistrée' : 'Enregistrer'}
         </button>
       </div>
@@ -3270,6 +3515,202 @@ async function submitForm(e) {
   document.getElementById('formSuccess').style.display = 'block';
   e.target.style.display = 'none';
   document.getElementById('formSuccess').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ═══════════════════════════════════════════════
+// FICHE FORMATION (public)
+// ═══════════════════════════════════════════════
+let formationOuverte = null;
+
+function listeNonVide(v) {
+  return Array.isArray(v) && v.filter(x => x && String(x).trim()).length > 0;
+}
+
+// Chaque bloc de la fiche n'est rendu que s'il a de la matière :
+// une rubrique vide vaut moins que pas de rubrique du tout.
+function blocDetail(titre, contenu) {
+  if (!contenu) return '';
+  return `<div class="detail-bloc">
+      <h2>${esc(titre)}</h2>
+      <div class="detail-bloc-trait"></div>
+      ${contenu}
+    </div>`;
+}
+
+function listeDetail(valeurs) {
+  const items = (valeurs || []).filter(v => v && String(v).trim());
+  if (!items.length) return '';
+  return '<ul class="detail-liste">' +
+    items.map(v => `<li>${esc(v)}</li>`).join('') + '</ul>';
+}
+
+async function ouvrirFormation(id) {
+  const f = formationsDB.find(x => x.id === id);
+  if (!f) return;
+
+  formationOuverte = f;
+  showPage('formation');
+  renderDetailFormation(f, null, []);
+
+  // Programme et sessions arrivent après le premier rendu : la fiche
+  // s'affiche tout de suite avec ce qu'on a déjà en mémoire.
+  const [prog, sess] = await Promise.all([
+    sb.from('programme_sections')
+      .select('*, programme_sequences(*)').eq('formation_id', id).order('ordre'),
+    sb.from('sessions_formation')
+      .select('*').eq('formation_id', id).eq('actif', true).order('date_debut')
+  ]);
+
+  // Le SQL detail_formations.sql peut ne pas être passé : dans ce cas
+  // on affiche la fiche sans programme plutôt que rien.
+  if (prog.error) console.warn('Programme indisponible :', prog.error.message);
+  if (sess.error) console.warn('Sessions indisponibles :', sess.error.message);
+
+  const sections = (prog.data || []).map(s => ({
+    ...s,
+    sequences: (s.programme_sequences || []).slice().sort((a, b) => (a.ordre || 0) - (b.ordre || 0))
+  }));
+
+  const aujourdhui = new Date().toISOString().slice(0, 10);
+  const sessions = (sess.data || []).filter(s => !s.date_debut || s.date_debut >= aujourdhui);
+
+  if (formationOuverte && formationOuverte.id === id) {
+    renderDetailFormation(f, sections, sessions);
+  }
+}
+
+function renderDetailFormation(f, sections, sessions) {
+  const fmt = { presentiel: 'Présentiel', distanciel: 'Distanciel', hybride: 'Hybride' };
+  const niv = { initiation: 'Initiation', perfectionnement: 'Perfectionnement', expert: 'Expert' };
+
+  // ── En-tête ──
+  const badges = [
+    `<span class="badge badge-${esc(f.format)}">${esc(fmt[f.format] || f.format)}</span>`,
+    f.dpc ? '<span class="badge badge-new">DPC éligible</span>' : '',
+    f.niveau ? `<span class="badge badge-pro">${esc(niv[f.niveau] || f.niveau)}</span>` : '',
+    f.thematique ? `<span class="badge badge-hybride">${esc(f.thematique)}</span>` : ''
+  ].filter(Boolean).join('');
+
+  const meta = [
+    f.duree ? `<div class="detail-meta-item"><strong>${esc(f.duree)}</strong>Durée</div>` : '',
+    f.prix != null ? `<div class="detail-meta-item"><strong>${esc(f.prix)} €</strong>Par personne</div>` : '',
+    f.participants_max ? `<div class="detail-meta-item"><strong>${esc(f.participants_max)}</strong>Participants max</div>` : '',
+    f.dpc_numero ? `<div class="detail-meta-item"><strong>${esc(f.dpc_numero)}</strong>Référence DPC</div>` : ''
+  ].filter(Boolean).join('');
+
+  document.getElementById('detailHero').innerHTML = `
+    <div class="detail-badges">${badges}</div>
+    <h1>${esc(f.titre)}</h1>
+    ${nomOrganisme(f) ? `<div class="detail-orga">${esc(nomOrganisme(f))}</div>` : ''}
+    ${meta ? `<div class="detail-meta">${meta}</div>` : ''}`;
+
+  // ── Colonne principale ──
+  const principal = [
+    blocDetail('Présentation', f.description
+      ? `<div class="detail-texte">${esc(f.description)}</div>` : ''),
+    blocDetail('Objectifs pédagogiques', listeDetail(f.objectifs)),
+    blocDetail('Programme', renderProgramme(sections)),
+    blocDetail('Prérequis', f.prerequis
+      ? `<div class="detail-texte">${esc(f.prerequis)}</div>` : ''),
+    blocDetail('Ce qui est inclus', listeDetail(f.inclus)),
+    blocDetail('Le formateur', renderFormateur(f))
+  ].filter(Boolean).join('');
+
+  document.getElementById('detailPrincipal').innerHTML = principal ||
+    '<div class="detail-texte">Le détail de cette formation est en cours de rédaction.</div>';
+
+  // ── Colonne latérale ──
+  const aside = document.getElementById('detailAside');
+  aside.innerHTML = renderDetailAside(f, sessions);
+  document.getElementById('detailGrid')
+    .classList.toggle('pleine-largeur', !aside.innerHTML.trim());
+}
+
+function renderProgramme(sections) {
+  if (!sections || !sections.length) return '';
+
+  const rendu = sections.map(s => {
+    if (!s.sequences.length) return '';
+    const seqs = s.sequences.map(q => `
+      <div class="prog-sequence">
+        <div class="prog-sequence-head">
+          <div class="prog-sequence-titre">${esc(q.titre)}</div>
+          ${q.duree ? `<div class="prog-sequence-duree">${esc(q.duree)}</div>` : ''}
+        </div>
+        ${q.contenu ? `<div class="prog-sequence-contenu">${esc(q.contenu)}</div>` : ''}
+      </div>`).join('');
+
+    // Section sans titre : on n'invente pas d'en-tête, on enchaîne
+    // directement les séquences.
+    return `<div class="prog-section">
+        ${s.titre ? `<div class="prog-section-titre">${esc(s.titre)}</div>` : ''}
+        <div class="prog-sequences">${seqs}</div>
+      </div>`;
+  }).filter(Boolean).join('');
+
+  return rendu || '';
+}
+
+function renderFormateur(f) {
+  if (!f.formateur_nom) return '';
+  const initiales = f.formateur_nom.split(' ').filter(Boolean)
+    .map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  return `<div class="detail-formateur">
+      <div class="detail-formateur-avatar">${esc(initiales)}</div>
+      <div>
+        <div class="detail-formateur-nom">${esc(f.formateur_nom)}</div>
+        ${f.formateur_titre ? `<div class="detail-formateur-titre">${esc(f.formateur_titre)}</div>` : ''}
+        ${f.formateur_bio ? `<div class="detail-formateur-bio">${esc(f.formateur_bio)}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderDetailAside(f, sessions) {
+  const enregistree = savedIds.includes(f.id);
+
+  const actions = `<div class="detail-carte" style="margin-bottom:18px">
+      <div class="detail-actions">
+        ${f.url_source
+          ? `<a class="btn btn-turquoise" href="${esc(f.url_source)}" target="_blank" rel="noopener noreferrer">Voir sur le site de l'organisme</a>`
+          : `<button type="button" class="btn btn-turquoise" disabled
+                     title="Aucun lien source renseigné pour cette formation">Voir sur le site de l'organisme</button>`}
+        <button type="button" class="btn ${enregistree ? 'btn-outline' : 'btn-primary'}"
+                onclick="enregistrerDepuisFiche(${f.id})" id="detailBtnSave">
+          ${enregistree ? '✓ Enregistrée dans mon espace' : 'Enregistrer'}
+        </button>
+      </div>
+      <div style="font-size:12px; color:var(--text-light); margin-top:12px; text-align:center">
+        Retrouvez vos formations enregistrées dans votre espace praticien.
+      </div>
+    </div>`;
+
+  const listeSessions = (sessions || []).map(s => `
+    <div class="detail-session">
+      <div class="detail-session-date">
+        ${esc(formatDate(s.date_debut))}${s.date_fin && s.date_fin !== s.date_debut ? ' → ' + esc(formatDate(s.date_fin)) : ''}
+      </div>
+      ${s.ville ? `<div class="detail-session-lieu">${esc(s.ville)}</div>` : ''}
+      ${s.places != null ? `<div class="detail-session-places">${esc(s.places)} places</div>` : ''}
+      ${s.url_inscription
+        ? `<a class="btn btn-outline btn-sm" style="margin-top:8px; width:100%; justify-content:center"
+              href="${esc(s.url_inscription)}" target="_blank" rel="noopener noreferrer">S'inscrire</a>`
+        : ''}
+    </div>`).join('');
+
+  const carteSessions = listeSessions
+    ? `<div class="detail-carte"><h3>Prochaines sessions</h3>${listeSessions}</div>`
+    : '';
+
+  return actions + carteSessions;
+}
+
+async function enregistrerDepuisFiche(id) {
+  await saveFormation(id);
+  const btn = document.getElementById('detailBtnSave');
+  if (btn && savedIds.includes(id)) {
+    btn.textContent = '✓ Enregistrée dans mon espace';
+    btn.className = 'btn btn-outline';
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -3658,6 +4099,15 @@ function ouvrirFormFormation(id) {
   document.getElementById('fmDescription').value = f ? (f.description || '') : '';
   document.getElementById('fmUrlSource').value   = f ? (f.url_source || '') : '';
   document.getElementById('fmStatut').value      = f ? (f.statut || 'brouillon') : 'brouillon';
+  document.getElementById('fmParticipants').value    = f && f.participants_max != null ? f.participants_max : '';
+  document.getElementById('fmUrlInscription').value  = f ? (f.url_inscription || '') : '';
+  document.getElementById('fmObjectifs').value       = f ? (f.objectifs || []).join('\n') : '';
+  document.getElementById('fmInclus').value          = f ? (f.inclus || []).join('\n') : '';
+  document.getElementById('fmFormateurNom').value    = f ? (f.formateur_nom || '') : '';
+  document.getElementById('fmFormateurTitre').value  = f ? (f.formateur_titre || '') : '';
+  document.getElementById('fmFormateurBio').value    = f ? (f.formateur_bio || '') : '';
+
+  chargerProgramme(id);
 
   showAdminPanel('formations');
   document.querySelectorAll('#page-admin .dash-nav button').forEach(b => {
@@ -3680,6 +4130,7 @@ async function enregistrerFormation() {
   if (!titre) return adminMessage('Le titre est obligatoire.', true);
 
   const prix = document.getElementById('fmPrix').value;
+  const participants = document.getElementById('fmParticipants').value;
   const payload = {
     titre,
     organisme_id: document.getElementById('fmOrganisme').value || null,
@@ -3694,7 +4145,14 @@ async function enregistrerFormation() {
     prerequis:    document.getElementById('fmPrerequis').value.trim() || null,
     description:  document.getElementById('fmDescription').value.trim() || null,
     url_source:   document.getElementById('fmUrlSource').value.trim() || null,
-    statut:       document.getElementById('fmStatut').value
+    statut:       document.getElementById('fmStatut').value,
+    participants_max: participants === '' ? null : Number(participants),
+    url_inscription:  document.getElementById('fmUrlInscription').value.trim() || null,
+    objectifs:        lignesEnTableau('fmObjectifs'),
+    inclus:           lignesEnTableau('fmInclus'),
+    formateur_nom:    document.getElementById('fmFormateurNom').value.trim() || null,
+    formateur_titre:  document.getElementById('fmFormateurTitre').value.trim() || null,
+    formateur_bio:    document.getElementById('fmFormateurBio').value.trim() || null
   };
 
   if (await ecrireAdmin('formations', payload, formEnCours)) fermerFormFormation();
@@ -3702,6 +4160,194 @@ async function enregistrerFormation() {
 
 async function changerStatutFormation(id, statut) {
   await ecrireAdmin('formations', { statut }, id);
+}
+
+// ─────────── Éditeur de programme ───────────
+//
+// Le programme s'enregistre au fil de l'eau, pas au « Enregistrer » de
+// la formation : chaque ajout, renommage, déplacement ou suppression
+// part immédiatement en base. C'est ce qui évite d'avoir à réconcilier
+// un état imbriqué au moment de la sauvegarde.
+let programmeEdition = [];
+let formationProgramme = null;
+
+// Une ligne de textarea = une entrée du tableau text[].
+function lignesEnTableau(id) {
+  const lignes = document.getElementById(id).value
+    .split('\n').map(l => l.trim()).filter(Boolean);
+  return lignes.length ? lignes : null;
+}
+
+async function chargerProgramme(formationId) {
+  formationProgramme = formationId || null;
+  programmeEdition = [];
+
+  const zone = document.getElementById('progEditeur');
+  if (!zone) return;
+
+  if (!formationProgramme) {
+    zone.innerHTML = '<div class="prog-edit-vide">Enregistrez d\'abord la formation : le programme se compose ensuite, une fois qu\'elle a un identifiant.</div>';
+    return;
+  }
+
+  const { data, error } = await sb.from('programme_sections')
+    .select('*, programme_sequences(*)').eq('formation_id', formationProgramme).order('ordre');
+
+  if (error) {
+    zone.innerHTML = '<div class="prog-edit-vide">Programme indisponible : ' + esc(error.message)
+      + ' — vérifie que detail_formations.sql a bien été passé.</div>';
+    return;
+  }
+
+  programmeEdition = (data || []).map(s => ({
+    ...s,
+    sequences: (s.programme_sequences || []).slice().sort((a, b) => (a.ordre || 0) - (b.ordre || 0))
+  }));
+  renderProgrammeEdition();
+}
+
+function renderProgrammeEdition() {
+  const zone = document.getElementById('progEditeur');
+  if (!zone) return;
+
+  const sections = programmeEdition.map((s, i) => {
+    const sequences = s.sequences.length
+      ? s.sequences.map((q, j) => `
+        <div class="prog-edit-seq">
+          <div class="prog-edit-ligne">
+            <input type="text" value="${esc(q.titre || '')}" placeholder="Intitulé de la séquence"
+                   onchange="majSequence(${q.id}, 'titre', this.value)">
+            <input type="text" class="duree" value="${esc(q.duree || '')}" placeholder="2h30"
+                   onchange="majSequence(${q.id}, 'duree', this.value)">
+            <button type="button" class="btn-icone" title="Monter la séquence"
+                    onclick="deplacerSequence(${s.id}, ${q.id}, -1)" ${j === 0 ? 'disabled' : ''}>&uarr;</button>
+            <button type="button" class="btn-icone" title="Descendre la séquence"
+                    onclick="deplacerSequence(${s.id}, ${q.id}, 1)" ${j === s.sequences.length - 1 ? 'disabled' : ''}>&darr;</button>
+            <button type="button" class="btn-icone" title="Supprimer la séquence"
+                    onclick="supprimerSequence(${q.id})">&times;</button>
+          </div>
+          <textarea placeholder="Contenu détaillé (facultatif)" style="min-height:60px"
+                    onchange="majSequence(${q.id}, 'contenu', this.value)">${esc(q.contenu || '')}</textarea>
+        </div>`).join('')
+      : '<div class="prog-edit-vide">Aucune séquence dans cette section.</div>';
+
+    return `
+      <div class="prog-edit-section">
+        <div class="prog-edit-head">
+          <input type="text" value="${esc(s.titre || '')}"
+                 placeholder="Titre de la section — Jour 1, Module 2, Année 1... (facultatif)"
+                 onchange="renommerSection(${s.id}, this.value)">
+          <button type="button" class="btn-icone" title="Monter la section"
+                  onclick="deplacerSection(${s.id}, -1)" ${i === 0 ? 'disabled' : ''}>&uarr;</button>
+          <button type="button" class="btn-icone" title="Descendre la section"
+                  onclick="deplacerSection(${s.id}, 1)" ${i === programmeEdition.length - 1 ? 'disabled' : ''}>&darr;</button>
+          <button type="button" class="btn-icone" title="Supprimer la section et ses séquences"
+                  onclick="supprimerSection(${s.id})">&times;</button>
+        </div>
+        ${sequences}
+        <button type="button" class="btn btn-outline btn-sm" style="margin-top:12px"
+                onclick="ajouterSequence(${s.id})">+ Ajouter une séquence</button>
+      </div>`;
+  }).join('');
+
+  zone.innerHTML = (sections || '<div class="prog-edit-vide">Aucune section pour l\'instant. Ajoutez-en une pour composer le programme.</div>')
+    + '<button type="button" class="btn btn-turquoise btn-sm" style="margin-top:6px"'
+    + ' onclick="ajouterSection()">+ Ajouter une section</button>';
+}
+
+async function ecrireProgramme(table, action, payload, id) {
+  let req;
+  if (action === 'insert')      req = sb.from(table).insert(payload);
+  else if (action === 'update') req = sb.from(table).update(payload).eq('id', id);
+  else                          req = sb.from(table).delete().eq('id', id);
+
+  const { error } = await req;
+  if (error) { adminMessage('Programme : ' + error.message, true); return false; }
+  await chargerProgramme(formationProgramme);
+  return true;
+}
+
+async function ajouterSection() {
+  if (!formationProgramme) return;
+  await ecrireProgramme('programme_sections', 'insert', {
+    formation_id: formationProgramme,
+    titre: null,
+    ordre: programmeEdition.length
+  });
+}
+
+async function renommerSection(id, titre) {
+  await ecrireProgramme('programme_sections', 'update', { titre: titre.trim() || null }, id);
+}
+
+async function supprimerSection(id) {
+  const s = programmeEdition.find(x => x.id === id);
+  const nb = s ? s.sequences.length : 0;
+  const quoi = s && s.titre ? '« ' + s.titre + ' »' : 'cette section sans titre';
+  if (!window.confirm('Supprimer ' + quoi
+      + (nb ? ' et ses ' + nb + ' séquence' + (nb > 1 ? 's' : '') : '') + ' ?')) return;
+  await ecrireProgramme('programme_sections', 'delete', null, id);
+}
+
+async function ajouterSequence(sectionId) {
+  const s = programmeEdition.find(x => x.id === sectionId);
+  await ecrireProgramme('programme_sequences', 'insert', {
+    section_id: sectionId,
+    titre: 'Nouvelle séquence',
+    ordre: s ? s.sequences.length : 0
+  });
+}
+
+async function majSequence(id, champ, valeur) {
+  const v = valeur.trim();
+  // titre est not null en base : on refuse de le vider côté interface
+  // plutôt que de laisser partir une écriture vouée à échouer.
+  if (champ === 'titre' && !v) {
+    adminMessage("L'intitulé d'une séquence ne peut pas être vide.", true);
+    renderProgrammeEdition();
+    return;
+  }
+  await ecrireProgramme('programme_sequences', 'update', { [champ]: v || null }, id);
+}
+
+async function supprimerSequence(id) {
+  if (!window.confirm('Supprimer cette séquence ?')) return;
+  await ecrireProgramme('programme_sequences', 'delete', null, id);
+}
+
+// Réordonnancement par échange des rangs entre voisins. On réécrit les
+// deux positions à partir de l'index affiché : les valeurs d'ordre en
+// base peuvent être égales entre elles (créations successives), auquel
+// cas un simple échange des valeurs existantes n'aurait aucun effet.
+async function echangerOrdre(table, a, b) {
+  const r1 = await sb.from(table).update({ ordre: b.ordre }).eq('id', a.id);
+  const r2 = await sb.from(table).update({ ordre: a.ordre }).eq('id', b.id);
+  if (r1.error || r2.error) {
+    adminMessage('Réordonnancement : ' + (r1.error || r2.error).message, true);
+    return false;
+  }
+  await chargerProgramme(formationProgramme);
+  return true;
+}
+
+async function deplacerSection(id, sens) {
+  const i = programmeEdition.findIndex(s => s.id === id);
+  const j = i + sens;
+  if (i < 0 || j < 0 || j >= programmeEdition.length) return;
+  await echangerOrdre('programme_sections',
+    { id: programmeEdition[i].id, ordre: i },
+    { id: programmeEdition[j].id, ordre: j });
+}
+
+async function deplacerSequence(sectionId, id, sens) {
+  const s = programmeEdition.find(x => x.id === sectionId);
+  if (!s) return;
+  const i = s.sequences.findIndex(q => q.id === id);
+  const j = i + sens;
+  if (i < 0 || j < 0 || j >= s.sequences.length) return;
+  await echangerOrdre('programme_sequences',
+    { id: s.sequences[i].id, ordre: i },
+    { id: s.sequences[j].id, ordre: j });
 }
 
 // ─────────── Sessions ───────────
