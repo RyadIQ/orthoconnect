@@ -963,19 +963,30 @@
     margin-top: 20px;
   }
 
-  /* ===== RESPONSIVE ===== */
-  @media (max-width: 1024px) {
+  /* ===== RESPONSIVE =====
+     Quand deux bornes se recouvrent, c'est l'ordre du fichier qui
+     tranche, et déplacer un bloc suffit alors à casser une mise en
+     page sans que rien ne le signale. Les grilles réglées à plusieurs
+     paliers portent donc des intervalles disjoints : une largeur
+     donnée n'est décrite qu'une fois, et l'ordre n'a plus de sens à
+     porter. Les bornes qui n'entrent en conflit avec personne restent
+     cumulatives — c'est leur cascade qui fait le travail. */
+  @media (min-width: 601px) and (max-width: 1024px) {
     .features-4grid { grid-template-columns: repeat(2,1fr) !important; }
   }
   @media (max-width: 600px) {
     .features-4grid { grid-template-columns: 1fr !important; }
   }
   @media (max-width: 1024px) {
-    .footer-inner { grid-template-columns: 1fr 1fr; }
     .hero-inner { grid-template-columns: 1fr; }
     .hero-visual { display: none; }
-    .formations-grid { grid-template-columns: repeat(2, 1fr); }
     .produits-grid { grid-template-columns: 1fr; }
+  }
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    .formations-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 481px) and (max-width: 1024px) {
     .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
   }
   @media (max-width: 768px) {
@@ -996,7 +1007,6 @@
     .form-row { grid-template-columns: 1fr; }
     .section-header h2 { font-size: 26px; }
     .marques-hero h1 { font-size: 30px; }
-    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
     .page-hero-meta { gap: 12px; }
   }
 
