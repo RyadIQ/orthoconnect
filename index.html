@@ -3960,24 +3960,24 @@ function codeValidePour(formationId) {
 function renderCarteTarif(f) {
   if (!aTarifPrefere(f)) return '';
 
-  const economie = economieTarif(f);
   const organisme = nomOrganisme(f) || "l'organisme";
 
-  // Hors session : on annonce le montant réel de la remise, sans le
-  // prix négocié. La promesse est chiffrée, donc vérifiable.
+  // Hors session, aucun chiffre : ni le tarif négocié, ni le montant
+  // de la remise n'entrent dans le HTML produit. Ce n'est pas un
+  // masquage visuel, les deux valeurs sont absentes du rendu.
   if (!currentUser) {
     return `<div class="tarif-carte">
         <div class="tarif-titre">Tarif préférentiel OrthoConnect</div>
-        ${economie
-          ? `<div class="tarif-economie">&minus;${esc(economie)} &euro;</div>
-             <div class="tarif-economie-lbl">négociés pour les praticiens inscrits sur cette formation.</div>`
-          : `<div class="tarif-economie-lbl">Un tarif négocié s'applique à cette formation pour les praticiens inscrits.</div>`}
+        <div class="tarif-economie-lbl">
+          Un tarif négocié est disponible sur cette formation pour les praticiens inscrits.
+        </div>
         <button type="button" class="btn btn-turquoise" onclick="openAuth('signup')">
           Créer mon compte gratuitement
         </button>
       </div>`;
   }
 
+  const economie = economieTarif(f);
   const code = codeValidePour(f.id);
   return `<div class="tarif-carte">
       <div class="tarif-titre">Tarif préférentiel OrthoConnect</div>
