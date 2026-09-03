@@ -113,37 +113,57 @@ returns trigger
 language plpgsql
 as $$
 declare
+  -- La ligne est lue en jsonb, jamais par new.<colonne> : PL/pgSQL
+  -- résout ces références à l'exécution, y compris dans la branche
+  -- non empruntée d'un case. Une fonction qui sert trois tables aux
+  -- colonnes différentes échouerait donc sur new.nom dès qu'elle
+  -- tourne sur formations. L'opérateur ->> accepte un champ absent et
+  -- rend null.
+  ligne    jsonb := to_jsonb(new);
+  precedent jsonb;
+  cle      text;
   intitule text;
   ancien   text;
+  slug_neuf text;
   base     text;
   essai    text;
   n        int := 1;
   pris     boolean;
 begin
-  intitule := case tg_table_name when 'produits' then new.nom else new.titre end;
+  -- produits porte son intitulé dans « nom », les deux autres dans
+  -- « titre » : c'est la seule différence entre les trois tables.
+  cle := case tg_table_name when 'produits' then 'nom' else 'titre' end;
+
+  intitule  := ligne ->> cle;
+  slug_neuf := ligne ->> 'slug';
 
   if tg_op = 'UPDATE' then
-    ancien := case tg_table_name when 'produits' then old.nom else old.titre end;
+    precedent := to_jsonb(old);
+    ancien    := precedent ->> cle;
 
-    -- Slug déjà là, titre inchangé, ou slug modifié à la main : on sort.
-    if new.slug is distinct from old.slug then
+    -- Slug modifié à la main par la requête : on n'y touche pas.
+    if slug_neuf is distinct from (precedent ->> 'slug') then
       return new;
     end if;
-    if new.slug is not null and new.slug <> '' and intitule is not distinct from ancien then
+    -- Slug déjà là et titre inchangé : rien à refaire.
+    if slug_neuf is not null and slug_neuf <> '' and intitule is not distinct from ancien then
       return new;
     end if;
   end if;
 
   -- Slug fourni explicitement à l'insertion : on le respecte, quitte à
   -- le passer par la même normalisation.
-  if tg_op = 'INSERT' and new.slug is not null and new.slug <> '' then
-    base := public.slugifier(new.slug);
+  if tg_op = 'INSERT' and slug_neuf is not null and slug_neuf <> '' then
+    base := public.slugifier(slug_neuf);
   else
     base := public.slugifier(intitule);
   end if;
 
   essai := base;
 
+  -- id et slug, eux, existent sur les trois tables — la section 2 pose
+  -- la seconde — et l'id est comparé tel quel, sans passer par jsonb :
+  -- il faudrait sinon le recaster vers le type de la colonne.
   loop
     execute format(
       'select exists (select 1 from public.%I where slug = $1 and id is distinct from $2)',
@@ -181,35 +201,29 @@ create trigger produits_slug
 -- ───────────────────────────────────────────────────────────────────
 -- 4. Rattrapage des contenus déjà en base
 --
--- Écrit directement plutôt que par un UPDATE qui déclencherait le
--- trigger : ça évite de toucher updated_at sur toutes les lignes,
--- donc de fausser les dates du sitemap.
+-- L'UPDATE ne change rien par lui-même : il remet null là où le slug
+-- manque déjà. C'est le trigger de la section 3 qu'il réveille, ligne
+-- par ligne, et c'est lui qui pose le slug — donc la même règle et le
+-- même suffixe anti-collision qu'à toute insertion future.
 --
--- Deux temps : le slug nu, puis un suffixe pour les doublons — la
--- ligne la plus ancienne garde l'adresse courte.
+-- Écrire les slugs en masse puis dédoublonner ensuite ne marche pas :
+-- deux titres qui donnent le même slug font échouer le premier UPDATE
+-- sur l'index unique, avant que le dédoublonnage ait eu lieu.
+--
+-- Seule conséquence : sur offres_emploi, updated_at est touché pour
+-- les lignes rattrapées. Le sitemap ne s'en sert pas — il lit
+-- publie_le et verifie_le.
 -- ───────────────────────────────────────────────────────────────────
 
-update public.formations    set slug = public.slugifier(titre) where slug is null or slug = '';
-update public.offres_emploi set slug = public.slugifier(titre) where slug is null or slug = '';
-update public.produits      set slug = public.slugifier(nom)   where slug is null or slug = '';
-
-with doublons as (
-  select id, slug, row_number() over (partition by slug order by id) as rang
-  from public.formations where slug is not null)
-update public.formations f set slug = f.slug || '-' || d.rang
-from doublons d where d.id = f.id and d.rang > 1;
-
-with doublons as (
-  select id, slug, row_number() over (partition by slug order by id) as rang
-  from public.offres_emploi where slug is not null)
-update public.offres_emploi j set slug = j.slug || '-' || d.rang
-from doublons d where d.id = j.id and d.rang > 1;
-
-with doublons as (
-  select id, slug, row_number() over (partition by slug order by id) as rang
-  from public.produits where slug is not null)
-update public.produits p set slug = p.slug || '-' || d.rang
-from doublons d where d.id = p.id and d.rang > 1;
+do $$
+declare
+  cible text;
+begin
+  foreach cible in array array['formations', 'offres_emploi', 'produits'] loop
+    execute format('update public.%I set slug = null where slug is null or slug = %L', cible, '');
+  end loop;
+end;
+$$;
 
 
 -- ───────────────────────────────────────────────────────────────────
