@@ -541,14 +541,28 @@
     gap: 32px;
     text-align: center;
   }
+  /* Le bloc ne doit pas dépendre de ce qu'on y écrit. La valeur suit
+     la largeur disponible entre 32 px — la taille du cas mobile
+     d'aujourd'hui — et les 40 px du desktop, sans qu'une media query
+     ait à trancher ; les bornes sont en rem pour rester fidèles à la
+     taille de police choisie par le lecteur. La coupure des mots
+     encaisse le reste : un libellé plus long, ou l'agrandissement de
+     police à 130 %, qui reproduit la situation des 430 px sans
+     qu'aucune media query ne se déclenche. */
   .metric-value {
-    font-size: 40px;
+    font-size: clamp(2rem, 5vw, 2.5rem);
     font-weight: 800;
     color: var(--turquoise);
     line-height: 1;
     margin-bottom: 8px;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
-  .metric-label { font-size: 14px; color: rgba(255,255,255,0.6); }
+  .metric-label {
+    font-size: 14px; color: rgba(255,255,255,0.6);
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
 
   /* CTA BAND */
   .cta-band {
@@ -987,11 +1001,11 @@
   }
 
   /* Petits mobiles. « Indépendant » en 40 px mesure 190 px : deux
-     colonnes de ce gabarit ne tiennent pas dans 320 px, et un mot ne
-     se coupe pas — la grille poussait la page hors de l'écran. */
+     colonnes de ce gabarit ne tiennent pas dans 320 px — la grille
+     poussait la page hors de l'écran. La taille de la valeur, elle,
+     est désormais tenue par le clamp de .metric-value. */
   @media (max-width: 480px) {
     .metrics-grid { grid-template-columns: 1fr; gap: 22px; }
-    .metric-value { font-size: 32px; }
   }
 
   /* ===== ANIMATIONS ===== */
