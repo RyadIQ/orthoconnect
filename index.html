@@ -1220,6 +1220,12 @@
   .job-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 8px; }
   .job-title { font-size: 16px; font-weight: 700; color: var(--navy); }
   .job-cab { font-size: 13px; color: var(--turquoise); font-weight: 600; margin-top: 2px; }
+  /* À la place du nom du cabinet, hors session : une mention qui dit
+     pourquoi il manque, assez sobre pour ne pas se lire comme le nom
+     d'un annonceur. */
+  .cabinet-masque { font-weight: 500; letter-spacing: 0; text-transform: none; }
+  .job-cab.cabinet-masque { color: var(--text-light); }
+  .detail-orga.cabinet-masque { color: rgba(255,255,255,0.6); }
   .job-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 10px 0; }
   .job-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-light); }
 
@@ -2633,11 +2639,16 @@
               <div class="form-group">
                 <label for="anTitre">Intitulé du poste</label>
                 <input type="text" id="anTitre" placeholder="Collaboration libérale 3 jours par semaine">
+                <div class="form-note">
+                  Évitez d'y mettre le nom de votre cabinet : il est masqué aux visiteurs
+                  non inscrits partout ailleurs, mais l'intitulé, lui, s'affiche tel quel.
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
                   <label for="anCabinet">Cabinet</label>
                   <input type="text" id="anCabinet" placeholder="Cabinet Dupont Orthodontie">
+                  <div class="form-note">Visible par les praticiens connectés seulement.</div>
                 </div>
                 <div class="form-group">
                   <label for="anType">Type de contrat</label>
@@ -4210,7 +4221,7 @@ function renderAnnonces() {
         <div>
           <button type="button" class="job-title-btn"
                   onclick="event.stopPropagation(); ouvrirAnnonce(${j.id})">${esc(j.titre)}</button>
-          <div class="job-cab">${esc(j.cabinet || '')}</div>
+          ${renderCabinetAnnonce(j, 'job-cab')}
         </div>
         <span class="badge badge-contrat">${esc(libelleContrat(j.type_contrat))}</span>
       </div>
@@ -4221,6 +4232,23 @@ function renderAnnonces() {
       </div>
     </div>
   `).join('');
+}
+
+// Le nom du cabinet suit la règle des coordonnées : hors session il ne
+// s'affiche pas et, une fois emploi_cabinet_masque.sql passé, la vue
+// publique ne l'envoie même plus — elle n'en garde qu'un booléen, comme
+// a_contact. Le masquage à l'écran vaut en attendant, et couvre le
+// repli sur la table quand la vue manque.
+function aCabinet(j) {
+  return j.a_cabinet != null ? !!j.a_cabinet : !!j.cabinet;
+}
+
+function renderCabinetAnnonce(j, classe) {
+  if (currentUser && j.cabinet) return `<div class="${classe}">${esc(j.cabinet)}</div>`;
+  if (!currentUser && aCabinet(j)) {
+    return `<div class="${classe} cabinet-masque">Cabinet réservé aux praticiens inscrits</div>`;
+  }
+  return '';
 }
 
 function extraitTexte(t, max) {
@@ -4241,7 +4269,7 @@ function ouvrirAnnonce(id) {
       <span class="badge badge-contrat">${esc(libelleContrat(j.type_contrat))}</span>
     </div>
     <h1>${esc(j.titre)}</h1>
-    ${j.cabinet ? `<div class="detail-orga">${esc(j.cabinet)}</div>` : ''}
+    ${renderCabinetAnnonce(j, 'detail-orga')}
     <div class="detail-meta">
       ${j.ville ? `<div class="detail-meta-item"><strong>${esc(j.ville)}</strong>${j.departement ? 'Département ' + esc(j.departement) : 'Lieu'}</div>` : ''}
       <div class="detail-meta-item"><strong>${esc(formatDate(j.publie_le || j.created_at))}</strong>Publiée le</div>
