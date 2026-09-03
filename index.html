@@ -1287,8 +1287,18 @@
     background: rgba(255,255,255,0.18);
     animation: squelettePouls 1.4s ease-in-out infinite;
   }
-  .detail-meta-item .detail-squelette { width: 64px; height: 18px; }
-  .detail-tarif-bande .detail-squelette { width: 52px; height: 13px; }
+  /* Le montant n'est pas le dernier élément de sa ligne : le libellé
+     « Participants max » le suit dans l'en-tête, la pastille du code
+     dans la bande. Sa place est donc réservée à la largeur du plus
+     gros montant plausible du catalogue, séparateur de milliers et
+     symbole compris — « 12 500 € » mesure 6,21 ch en gras —, faute de
+     quoi la valeur, en s'installant, décalerait ce qui vient après.
+     En ch, la réserve suit la taille de police sans être recalculée. */
+  .detail-meta-prix strong,
+  .detail-tarif-montant { min-width: 6.5ch; }
+  .detail-tarif-montant { display: inline-block; font-weight: 700; }
+  .detail-meta-prix .detail-squelette { display: block; width: 100%; height: 18px; }
+  .detail-tarif-bande .detail-squelette { height: 13px; }
   @keyframes squelettePouls {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.45; }
@@ -4967,11 +4977,11 @@ function renderMetaPrix(f) {
 
   if (f.prix == null) {
     return tarifEnAttente(f)
-      ? `<div class="detail-meta-item"><strong><span class="detail-squelette"></span></strong>${libelle}</div>`
+      ? `<div class="detail-meta-item detail-meta-prix"><strong><span class="detail-squelette"></span></strong>${libelle}</div>`
       : '';
   }
 
-  return `<div class="detail-meta-item"><strong>${esc(f.prix)} €</strong>${libelle}</div>`;
+  return `<div class="detail-meta-item detail-meta-prix"><strong>${esc(f.prix)} €</strong>${libelle}</div>`;
 }
 
 // L'en-tête annonce le prix plein. Sans ce rappel juste en dessous, un
@@ -4999,8 +5009,8 @@ function renderBandeauTarif(f) {
   const code = codeValidePour(f.id);
   if (code) {
     const montant = f.tarif_prefere != null
-      ? `<strong>${esc(f.tarif_prefere)} €</strong>`
-      : (tarifEnAttente(f) ? '<span class="detail-squelette"></span>' : '');
+      ? `<strong class="detail-tarif-montant">${esc(f.tarif_prefere)} €</strong>`
+      : (tarifEnAttente(f) ? '<span class="detail-squelette detail-tarif-montant"></span>' : '');
     return bande(`<span class="detail-tarif-texte">Votre tarif préférentiel${
         montant ? ' : ' + montant : ''}</span>
         <span class="detail-tarif-code">${esc(code.code)}</span>`);
