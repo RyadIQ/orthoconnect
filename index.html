@@ -1323,16 +1323,24 @@
     width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0;
     object-fit: cover; background: var(--grey-bg);
   }
-  .detail-orga-ligne { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-  .detail-orga-logo {
-    height: 38px; max-width: 130px; object-fit: contain;
-    background: var(--white); border-radius: 6px; padding: 5px 8px;
+  /* Encart organisme, colonne de droite de la fiche. Le logo y est
+     l'élément principal, pas un ornement collé au nom. */
+  .detail-carte-orga { text-align: center; margin-bottom: 18px; }
+  .detail-carte-orga-logo {
+    max-height: 78px; max-width: 100%; object-fit: contain;
+    margin: 0 auto 14px; display: block;
   }
-  .detail-orga-ligne .detail-orga { margin-bottom: 0; }
+  .detail-carte-orga-nom {
+    font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 4px;
+  }
+  .detail-carte-orga-lien {
+    font-size: 13px; font-weight: 600; color: var(--turquoise); text-decoration: none;
+  }
+  .detail-carte-orga-lien:hover { text-decoration: underline; }
 
-  .formation-orga-ligne { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .formation-orga-ligne { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
   .formation-orga-logo {
-    height: 22px; max-width: 74px; object-fit: contain; flex-shrink: 0;
+    height: 40px; max-width: 116px; object-fit: contain; flex-shrink: 0;
   }
   .formation-orga-ligne .formation-orga { margin-bottom: 0; }
 
@@ -1582,6 +1590,48 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ==================== -->
+<!-- MODALE MISE EN RELATION -->
+<!-- ==================== -->
+<div class="auth-overlay" id="relationOverlay" onclick="if(event.target===this) fermerMiseEnRelation()">
+  <div class="auth-box">
+    <button class="auth-close" onclick="fermerMiseEnRelation()" aria-label="Fermer">&times;</button>
+
+    <h3>Être recontacté</h3>
+    <p class="auth-sub" id="relationSousTitre">Votre demande est transmise à l'organisme.</p>
+
+    <div class="auth-badge">
+      <span aria-hidden="true">🔒</span>
+      <span>Seules ces coordonnées sont transmises, et uniquement à cet organisme.</span>
+    </div>
+
+    <div class="auth-error" id="relationMessage"></div>
+
+    <div class="auth-field">
+      <label for="relNom">Nom</label>
+      <input type="text" id="relNom" autocomplete="name">
+    </div>
+    <div class="auth-field">
+      <label for="relEmail">Email</label>
+      <input type="email" id="relEmail" readonly style="background:var(--grey-bg)">
+      <div class="auth-hint">Votre adresse de connexion, non modifiable ici.</div>
+    </div>
+    <div class="auth-field">
+      <label for="relTelephone">Téléphone</label>
+      <input type="tel" id="relTelephone" placeholder="+33 6 00 00 00 00" autocomplete="tel">
+      <div class="auth-hint">Enregistré dans votre profil pour vos prochaines demandes.</div>
+    </div>
+    <div class="auth-field">
+      <label for="relMessage">Message (optionnel)</label>
+      <textarea id="relMessage" style="min-height:90px"
+                placeholder="Précisez votre question : dates, financement DPC, prérequis..."></textarea>
+    </div>
+
+    <button class="btn btn-turquoise" id="relationBtn" style="width:100%; justify-content:center; margin-top:8px"
+            onclick="envoyerMiseEnRelation()">Envoyer ma demande</button>
   </div>
 </div>
 
@@ -2140,6 +2190,12 @@
                 </div>
               </div>
 
+              <div class="form-group">
+                <label for="cabTelephone">Téléphone</label>
+                <input type="tel" id="cabTelephone" placeholder="+33 6 00 00 00 00" autocomplete="tel">
+                <div class="form-note">Transmis uniquement si vous demandez à être recontacté par un organisme.</div>
+              </div>
+
               <div class="form-row">
                 <div class="form-group">
                   <label for="cabType">Type d'exercice</label>
@@ -2272,6 +2328,7 @@
           <button onclick="showAdminPanel('organismes', this)">🏢 Organismes</button>
           <button onclick="showAdminPanel('formations', this)">📚 Formations</button>
           <button onclick="showAdminPanel('sessions', this)">🗓 Sessions</button>
+          <button onclick="showAdminPanel('demandes', this)">📨 Demandes</button>
           <button onclick="showPage('dashboard')" style="margin-top:12px; color:var(--text-light)">↩ Mon espace</button>
         </div>
 
@@ -2319,6 +2376,10 @@
               <div class="stat-card">
                 <div class="stat-val" id="admStatSessions">0</div>
                 <div class="stat-lbl">Sessions à venir</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="admStatDemandes">0</div>
+                <div class="stat-lbl">Demandes nouvelles</div>
               </div>
             </div>
 
@@ -2658,6 +2719,22 @@
             <div id="admSessionsListe"></div>
           </div>
 
+          <!-- DEMANDES -->
+          <div class="dash-panel" id="adminPanel-demandes">
+            <h2>Demandes de mise en relation</h2>
+            <p class="panel-sub">Praticiens souhaitant être recontactés par un organisme partenaire.</p>
+
+            <div class="admin-toolbar">
+              <span class="filter-label">Statut :</span>
+              <button class="filter-btn active" onclick="filtrerDemandes('tous', this)">Toutes</button>
+              <button class="filter-btn" onclick="filtrerDemandes('nouvelle', this)">Nouvelles</button>
+              <button class="filter-btn" onclick="filtrerDemandes('transmise', this)">Transmises</button>
+              <button class="filter-btn" onclick="filtrerDemandes('traitee', this)">Traitées</button>
+            </div>
+
+            <div id="admDemandesListe"></div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -2904,7 +2981,7 @@ let savedIds = [];
 // et l'exécution du SQL.
 async function chargerFormationsPubliques() {
   const neuf = await sb.from('formations')
-    .select('*, organismes(nom, logo_url, partenaire)').eq('statut', 'publie').order('id');
+    .select('*, organismes(id, nom, logo_url, partenaire, site_web)').eq('statut', 'publie').order('id');
   if (!neuf.error) return neuf;
 
   console.warn('Schéma formations non migré, repli sur actif/organisme :', neuf.error.message);
@@ -3284,6 +3361,7 @@ function renderDashboard() {
 
   // Pré-remplissage du formulaire cabinet
   document.getElementById('cabNom').value = p.cabinet_nom || '';
+  document.getElementById('cabTelephone').value = p.telephone || '';
   document.getElementById('cabVille').value = p.cabinet_ville || p.ville || '';
   document.getElementById('cabType').value = p.cabinet_type || '';
   document.getElementById('cabAnnees').value = p.annees_exercice || '';
@@ -3324,6 +3402,7 @@ async function saveProfile() {
 
   const updates = {
     cabinet_nom: document.getElementById('cabNom').value.trim() || null,
+    telephone: document.getElementById('cabTelephone').value.trim() || null,
     cabinet_ville: document.getElementById('cabVille').value.trim() || null,
     cabinet_type: document.getElementById('cabType').value || null,
     annees_exercice: document.getElementById('cabAnnees').value || null,
@@ -3695,7 +3774,7 @@ function renderDetailFormation(f, sections, sessions) {
   document.getElementById('detailHero').innerHTML = `
     <div class="detail-badges">${badges}</div>
     <h1>${esc(f.titre)}</h1>
-    ${renderOrgaDetail(f)}
+    ${nomOrganisme(f) ? `<div class="detail-orga">${esc(nomOrganisme(f))}</div>` : ''}
     ${meta ? `<div class="detail-meta">${meta}</div>` : ''}`;
 
   // ── Colonne principale ──
@@ -3718,22 +3797,6 @@ function renderDetailFormation(f, sections, sessions) {
   aside.innerHTML = renderDetailAside(f, sessions);
   document.getElementById('detailGrid')
     .classList.toggle('pleine-largeur', !aside.innerHTML.trim());
-}
-
-// Sur la fiche détail, le logo s'affiche pour tout organisme qui en a
-// un, partenaire ou non.
-function renderOrgaDetail(f) {
-  const o = f.organismes;
-  const nom = nomOrganisme(f);
-  if (!nom) return '';
-
-  if (o && o.logo_url) {
-    return `<div class="detail-orga-ligne">
-        <img class="detail-orga-logo" src="${esc(o.logo_url)}" alt="${esc(nom)}">
-        <div class="detail-orga">${esc(nom)}</div>
-      </div>`;
-  }
-  return `<div class="detail-orga">${esc(nom)}</div>`;
 }
 
 function renderProgramme(sections) {
@@ -3790,8 +3853,28 @@ function renderFormateur(f) {
     </div>`;
 }
 
+// Encart organisme, en tête de la colonne de droite. Le logo s'affiche
+// pour tout organisme qui en a un, partenaire ou non.
+function renderCarteOrganisme(f) {
+  const o = f.organismes;
+  const nom = nomOrganisme(f);
+  if (!o || !nom || (!o.logo_url && !o.site_web)) return '';
+
+  return `<div class="detail-carte detail-carte-orga">
+      ${o.logo_url
+        ? `<img class="detail-carte-orga-logo" src="${esc(o.logo_url)}" alt="${esc(nom)}">`
+        : ''}
+      <div class="detail-carte-orga-nom">${esc(nom)}</div>
+      ${o.site_web
+        ? `<a class="detail-carte-orga-lien" href="${esc(o.site_web)}"
+              target="_blank" rel="noopener noreferrer">Voir le site &rarr;</a>`
+        : ''}
+    </div>`;
+}
+
 function renderDetailAside(f, sessions) {
   const enregistree = savedIds.includes(f.id);
+  const partenaire = !!(f.organismes && f.organismes.partenaire);
 
   const actions = `<div class="detail-carte" style="margin-bottom:18px">
       <div class="detail-actions">
@@ -3799,6 +3882,11 @@ function renderDetailAside(f, sessions) {
           ? `<a class="btn btn-turquoise" href="${esc(f.url_source)}" target="_blank" rel="noopener noreferrer">Voir sur le site de l'organisme</a>`
           : `<button type="button" class="btn btn-turquoise" disabled
                      title="Aucun lien source renseigné pour cette formation">Voir sur le site de l'organisme</button>`}
+        ${partenaire
+          ? `<button type="button" class="btn btn-primary" onclick="ouvrirMiseEnRelation(${f.id})">
+               Être recontacté par l'organisme
+             </button>`
+          : ''}
         <button type="button" class="btn ${enregistree ? 'btn-outline' : 'btn-primary'}"
                 onclick="enregistrerDepuisFiche(${f.id})" id="detailBtnSave">
           ${enregistree ? '✓ Enregistrée dans mon espace' : 'Enregistrer'}
@@ -3827,7 +3915,100 @@ function renderDetailAside(f, sessions) {
     ? `<div class="detail-carte"><h3>Prochaines sessions</h3>${listeSessions}</div>`
     : '';
 
-  return actions + carteSessions;
+  return renderCarteOrganisme(f) + actions + carteSessions;
+}
+
+// ─────── Mise en relation avec un organisme partenaire ───────
+let relationFormation = null;
+
+async function ouvrirMiseEnRelation(formationId) {
+  const f = formationsDB.find(x => x.id === formationId);
+  if (!f) return;
+
+  // La demande porte l'identité du praticien : sans compte, il n'y a
+  // rien à transmettre à l'organisme.
+  if (!currentUser) { openAuth('signup'); return; }
+
+  relationFormation = f;
+  document.getElementById('relationSousTitre').textContent =
+    'Votre demande sera transmise à ' + (nomOrganisme(f) || "l'organisme") + ' au sujet de « ' + f.titre + ' ».';
+
+  const p = currentProfile || {};
+  document.getElementById('relNom').value       = p.nom || '';
+  document.getElementById('relEmail').value     = p.email || currentUser.email || '';
+  document.getElementById('relTelephone').value = p.telephone || '';
+  document.getElementById('relMessage').value   = '';
+  clearMessage('relationMessage');
+
+  const btn = document.getElementById('relationBtn');
+  btn.disabled = false;
+  btn.textContent = 'Envoyer ma demande';
+
+  document.getElementById('relationOverlay').classList.add('open');
+
+  // Une demande antérieure ne bloque pas : on la signale, une relance
+  // avec un message différent reste légitime.
+  const { data } = await sb.from('demandes_contact')
+    .select('created_at').eq('formation_id', formationId)
+    .eq('praticien_id', currentUser.id)
+    .order('created_at', { ascending: false }).limit(1);
+
+  if (data && data.length && relationFormation && relationFormation.id === formationId) {
+    showNotice('relationMessage',
+      'Vous avez déjà demandé à être recontacté pour cette formation le '
+      + formatDate(data[0].created_at) + '. Vous pouvez relancer avec un nouveau message.');
+    btn.textContent = 'Envoyer une nouvelle demande';
+  }
+}
+
+function fermerMiseEnRelation() {
+  relationFormation = null;
+  document.getElementById('relationOverlay').classList.remove('open');
+  clearMessage('relationMessage');
+}
+
+async function envoyerMiseEnRelation() {
+  if (!relationFormation || !currentUser) return;
+  const f = relationFormation;
+
+  const nom = document.getElementById('relNom').value.trim();
+  const tel = document.getElementById('relTelephone').value.trim();
+  const msg = document.getElementById('relMessage').value.trim();
+
+  if (!nom) return showError('relationMessage', 'Indiquez votre nom.');
+  if (!tel) return showError('relationMessage', 'Indiquez un téléphone : c\'est par là que l\'organisme vous rappellera.');
+
+  const btn = document.getElementById('relationBtn');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours...';
+
+  const { error } = await sb.from('demandes_contact').insert({
+    formation_id: f.id,
+    organisme_id: f.organisme_id || (f.organismes && f.organismes.id) || null,
+    praticien_id: currentUser.id,
+    message: msg || null
+  });
+
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Envoyer ma demande';
+    return showError('relationMessage', "Envoi impossible : " + error.message);
+  }
+
+  // Les corrections saisies ici sont reportées au profil, sinon elles
+  // seraient perdues et le champ redeviendrait vide à la demande
+  // suivante.
+  if (nom !== (currentProfile && currentProfile.nom) || tel !== (currentProfile && currentProfile.telephone)) {
+    const { error: pErr } = await sb.from('praticiens')
+      .update({ nom, telephone: tel }).eq('id', currentUser.id);
+    if (pErr) console.warn('Profil non mis à jour :', pErr.message);
+    else if (currentProfile) { currentProfile.nom = nom; currentProfile.telephone = tel; }
+  }
+
+  showNotice('relationMessage',
+    'Demande envoyée. ' + (nomOrganisme(f) || "L'organisme") + ' vous recontactera directement.');
+  btn.textContent = 'Demande envoyée';
+  setTimeout(fermerMiseEnRelation, 2600);
 }
 
 async function enregistrerDepuisFiche(id) {
@@ -3852,6 +4033,8 @@ let adminPraticiens = [];
 let adminOrganismes = [];
 let adminFormations = [];
 let adminSessions   = [];
+let adminDemandes   = [];
+let filtreStatutDemande = 'tous';
 let filtreStatutFormation = 'tous';
 let rechercheInscrits = '';
 let orgEnCours  = null;
@@ -3937,15 +4120,18 @@ function adminMessage(texte, estErreur) {
 }
 
 async function chargerAdmin() {
-  const [pr, org, fo, se] = await Promise.all([
+  const [pr, org, fo, se, de] = await Promise.all([
     sb.from('praticiens').select('id, nom, email, ville, statut, rpps, role, created_at')
       .order('created_at', { ascending: false }),
     sb.from('organismes').select('*').order('nom'),
     sb.from('formations').select('*, organismes(id, nom, logo_url, partenaire)').order('id', { ascending: false }),
-    sb.from('sessions_formation').select('*, formations(id, titre)').order('date_debut')
+    sb.from('sessions_formation').select('*, formations(id, titre)').order('date_debut'),
+    sb.from('demandes_contact')
+      .select('*, praticiens(nom, email, ville, telephone), formations(id, titre), organismes(id, nom)')
+      .order('created_at', { ascending: false })
   ]);
 
-  const enErreur = [pr, org, fo, se].find(r => r.error);
+  const enErreur = [pr, org, fo, se, de].find(r => r.error);
   const boite = document.getElementById('adminErreur');
   if (enErreur) {
     boite.textContent = "Chargement impossible : " + enErreur.error.message
@@ -3959,12 +4145,14 @@ async function chargerAdmin() {
   adminOrganismes = org.data || [];
   adminFormations = fo.data  || [];
   adminSessions   = se.data  || [];
+  adminDemandes   = de.data  || [];
 
   renderAdminDash();
   renderAdminInscrits();
   renderAdminOrganismes();
   renderAdminFormations();
   renderAdminSessions();
+  renderAdminDemandes();
   remplirSelectsAdmin();
 }
 
@@ -3986,6 +4174,7 @@ function renderAdminDash() {
   setStat('admStatBrouillons', brouillons.length);
   setStat('admStatOrganismes', adminOrganismes.length);
   setStat('admStatSessions',   adminSessions.filter(s => s.date_debut >= aujourdhui).length);
+  setStat('admStatDemandes',   adminDemandes.filter(d => d.statut === 'nouvelle').length);
 
   const zone = document.getElementById('admBrouillons');
   if (!brouillons.length) {
@@ -4648,6 +4837,71 @@ async function supprimerSession(id) {
   if (error) return adminMessage("Suppression refusée : " + error.message, true);
 
   adminMessage('Session supprimée.');
+  await chargerAdmin();
+}
+
+// ─────────── Demandes de mise en relation ───────────
+function filtrerDemandes(statut, btn) {
+  filtreStatutDemande = statut;
+  document.querySelectorAll('#adminPanel-demandes .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAdminDemandes();
+}
+
+function renderAdminDemandes() {
+  const lignes = filtreStatutDemande === 'tous'
+    ? adminDemandes
+    : adminDemandes.filter(d => d.statut === filtreStatutDemande);
+
+  const zone = document.getElementById('admDemandesListe');
+  if (!zone) return;
+
+  if (!lignes.length) {
+    zone.innerHTML = '<div class="admin-empty">'
+      + (adminDemandes.length ? 'Aucune demande dans cette catégorie.' : 'Aucune demande pour le moment.')
+      + '</div>';
+    return;
+  }
+
+  const statuts = { nouvelle: 'Nouvelle', transmise: 'Transmise', traitee: 'Traitée' };
+  zone.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Praticien</th><th>Formation</th><th>Organisme</th><th>Reçue le</th><th>Statut</th></tr>
+        </thead>
+        <tbody>
+          ${lignes.map(d => {
+            const p = d.praticiens || {};
+            return `
+            <tr>
+              <td>
+                <div class="admin-nom">${esc(p.nom || 'Praticien supprimé')}</div>
+                <div style="font-size:12px; color:var(--text-light)">
+                  ${esc(p.email || '')}${p.telephone ? ' · ' + esc(p.telephone) : ''}${p.ville ? ' · ' + esc(p.ville) : ''}
+                </div>
+                ${d.message ? `<div style="font-size:12px; color:var(--text-secondary); margin-top:6px; line-height:1.55">&laquo; ${esc(d.message)} &raquo;</div>` : ''}
+              </td>
+              <td>${esc(d.formations ? d.formations.titre : '—')}</td>
+              <td>${esc(d.organismes ? d.organismes.nom : '—')}</td>
+              <td style="white-space:nowrap">${esc(formatDate(d.created_at))}</td>
+              <td>
+                <select onchange="changerStatutDemande(${d.id}, this.value)" style="font-size:13px; padding:7px 10px">
+                  ${Object.keys(statuts).map(s =>
+                    `<option value="${s}"${d.statut === s ? ' selected' : ''}>${statuts[s]}</option>`).join('')}
+                </select>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function changerStatutDemande(id, statut) {
+  const { error } = await sb.from('demandes_contact').update({ statut }).eq('id', id);
+  if (error) { adminMessage('Statut non modifié : ' + error.message, true); return; }
+  adminMessage('Statut mis à jour.');
   await chargerAdmin();
 }
 
