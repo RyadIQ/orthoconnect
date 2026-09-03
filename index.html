@@ -2996,13 +2996,58 @@ let codesPraticien = [];
 // passé, ces colonnes n'existent pas : on retombe alors sur l'ancien
 // schéma pour ne pas vider le catalogue entre le déploiement du front
 // et l'exécution du SQL.
-async function chargerFormationsPubliques() {
-  const neuf = await sb.from('formations')
-    .select('*, organismes(id, nom, logo_url, partenaire, site_web)').eq('statut', 'publie').order('id');
-  if (!neuf.error) return neuf;
+// Deux sources selon la session, et c'est le fond de l'affaire : la
+// vue formations_publiques n'expose pas tarif_prefere, la table oui.
+// Un visiteur non connecté n'a donc aucun chemin vers le montant, pas
+// même par un appel direct à l'API — anon n'a plus le droit de lire
+// la table (voir vue_formations_publiques.sql).
+let sourceCatalogue = null;
 
-  console.warn('Schéma formations non migré, repli sur actif/organisme :', neuf.error.message);
+function sourceAttendue() {
+  return currentUser ? 'formations' : 'formations_publiques';
+}
+
+const COLONNES_ORGANISME = 'organismes(id, nom, logo_url, partenaire, site_web)';
+
+async function chargerFormationsPubliques() {
+  const source = sourceAttendue();
+  sourceCatalogue = source;
+
+  const requete = source === 'formations'
+    ? sb.from('formations').select('*, ' + COLONNES_ORGANISME)
+    : sb.from('formations_publiques').select('*');
+
+  const r = await requete.eq('statut', 'publie').order('id');
+  if (!r.error) return r;
+
+  // Vue absente parce que le SQL n'est pas passé : on retombe sur la
+  // table, quitte à perdre l'étanchéité, plutôt que de vider le
+  // catalogue. Le repli suivant couvre le schéma d'avant les statuts.
+  console.warn('Source « ' + source + ' » indisponible, repli sur la table :', r.error.message);
+
+  const t = await sb.from('formations')
+    .select('*, ' + COLONNES_ORGANISME).eq('statut', 'publie').order('id');
+  if (!t.error) { sourceCatalogue = 'formations'; return t; }
+
+  console.warn('Schéma formations non migré, repli sur actif/organisme :', t.error.message);
+  sourceCatalogue = 'formations';
   return sb.from('formations').select('*').eq('actif', true).order('id');
+}
+
+// La vue aplatit l'organisme, la table le renvoie imbriqué. On
+// recompose la même forme pour que le reste du code n'ait pas à
+// connaître la provenance des lignes.
+function normaliserFormation(f) {
+  if (f.organismes || f.organisme_nom == null) return f;
+  return Object.assign({}, f, {
+    organismes: {
+      id: f.organisme_id,
+      nom: f.organisme_nom,
+      logo_url: f.organisme_logo_url,
+      partenaire: f.organisme_partenaire,
+      site_web: f.organisme_site_web
+    }
+  });
 }
 
 function nomOrganisme(f) {
@@ -3050,7 +3095,7 @@ async function loadCatalogues() {
       sb.from('avis').select('id', { count: 'exact', head: true })
     ]);
 
-    formationsDB = f.data || [];
+    formationsDB = (f.data || []).map(normaliserFormation);
     produitsDB = p.data || [];
     jobsDB = j.data || [];
     actusDB = a.data || [];
@@ -3068,7 +3113,11 @@ async function loadCatalogues() {
     setStat('heroStatProduits', produitsDB.length);
 
     setStat('statPageFormations', formationsDB.length);
-    setStat('statPageOrganismes', distinct(formationsDB, 'organisme'));
+    // nomOrganisme et pas la colonne texte « organisme » : celle-ci
+    // n'existe pas dans la vue publique, le compteur tomberait à 0
+    // pour les visiteurs non connectés.
+    setStat('statPageOrganismes',
+      new Set(formationsDB.map(nomOrganisme).filter(Boolean)).size);
     setStat('statPageDpc', formationsDB.filter(x => x.dpc).length);
 
     setStat('statPageProduits', produitsDB.length);
@@ -3286,6 +3335,13 @@ async function ensureProfile(user) {
 async function refreshAuthUI() {
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
+
+  // Connexion ou déconnexion change la source du catalogue : sans ce
+  // rechargement, un praticien qui vient de se connecter garderait les
+  // lignes de la vue, donc sans tarif négocié.
+  if (sourceCatalogue && sourceCatalogue !== sourceAttendue()) {
+    await loadCatalogues();
+  }
 
   const navUser = document.getElementById('navUser');
   const loginBtn = document.querySelector('.nav-login-btn');
@@ -3941,8 +3997,11 @@ function renderCarteOrganisme(f) {
 
 // Les DEUX conditions, pas une seule : un tarif saisi sur une
 // formation dont l'organisme n'est pas partenaire reste invisible.
+// Hors session, la vue ne renvoie qu'un booléen ; connecté, la table
+// renvoie le montant. Les deux formes valent « il y a un tarif ».
 function aTarifPrefere(f) {
-  return f.tarif_prefere != null && !!(f.organismes && f.organismes.partenaire);
+  const existe = f.tarif_prefere != null || f.a_tarif_prefere === true;
+  return existe && !!(f.organismes && f.organismes.partenaire);
 }
 
 function economieTarif(f) {
