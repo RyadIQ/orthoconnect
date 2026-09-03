@@ -4700,6 +4700,27 @@ function listeDetail(valeurs) {
     items.map(v => `<li>${esc(v)}</li>`).join('') + '</ul>';
 }
 
+// Une requête qui ne retombe jamais — réseau qui pend, aucune erreur
+// levée — laisserait les places réservées en attente indéfiniment. Au
+// bout de ce délai la fiche reprend la main et s'affiche sans montant.
+const DELAI_GARDE_TARIF = 6000;
+
+// Un seul tarif est attendu à la fois, celui de la fiche ouverte.
+let gardeTarif = null;
+const TARIF_DELAI   = { issue: 'delai' };    // le délai a coiffé la requête
+const TARIF_ABANDON = { issue: 'abandon' };  // la fiche a été quittée
+
+// Quitter la fiche annule l'attente : le rendu qu'elle déclencherait
+// ne concerne plus rien à l'écran, et le drapeau ne doit pas bouger
+// pour que la lecture soit retentée à la prochaine ouverture.
+function annulerGardeTarif(issue) {
+  if (!gardeTarif) return;
+  const { minuteur, resoudre } = gardeTarif;
+  gardeTarif = null;
+  clearTimeout(minuteur);
+  resoudre(issue || TARIF_ABANDON);
+}
+
 // Le catalogue ne transporte plus aucun montant : c'est l'ouverture
 // d'une fiche qui va chercher le tarif, pour cette formation-là. Un
 // visiteur non connecté n'obtient que le prix public ; le tarif négocié
@@ -4709,13 +4730,40 @@ async function chargerTarifFormation(f) {
   if (f.tarifCharge) return;
 
   const colonnes = currentUser ? 'prix, tarif_prefere, conditions_tarif' : 'prix';
-  const r = await sb.from(sourceTarif()).select(colonnes).eq('id', f.id).maybeSingle();
+  // Un rejet du client (réseau coupé en cours d'appel) redevient un
+  // résultat en erreur : la fiche doit retomber sur ses pieds, pas
+  // laisser la place réservée en attente derrière une exception.
+  const requete = Promise.resolve(
+    sb.from(sourceTarif()).select(colonnes).eq('id', f.id).maybeSingle()
+  ).catch(e => ({ error: { message: (e && e.message) || String(e) } }));
 
-  // Tarif introuvable : la fiche s'affiche sans montant plutôt que
-  // pas du tout, comme pour le programme et les sessions.
+  annulerGardeTarif();
+  const garde = new Promise(resoudre => {
+    const minuteur = setTimeout(() => annulerGardeTarif(TARIF_DELAI), DELAI_GARDE_TARIF);
+    gardeTarif = { minuteur, resoudre };
+  });
+
+  // La course laisse la fiche s'afficher même si la base ne répond
+  // pas : sans elle, l'attente du tarif retiendrait aussi le programme
+  // et les sessions, déjà arrivés.
+  const r = await Promise.race([requete, garde]);
+  annulerGardeTarif();
+
+  // Fiche quittée entre-temps : aucun drapeau ne bouge, la formation
+  // repart de zéro à la prochaine ouverture.
+  if (r === TARIF_ABANDON) return;
+
+  // Tarif introuvable ou trop lent : la fiche s'affiche sans montant
+  // plutôt que pas du tout, comme pour le programme et les sessions.
   // tarifRepondu dit que la requête est retombée, tarifCharge qu'elle a
   // rapporté quelque chose : un échec doit pouvoir être retenté à la
   // prochaine ouverture, sans pour autant laisser l'attente à l'écran.
+  if (r === TARIF_DELAI) {
+    console.warn('Tarif : pas de réponse en', DELAI_GARDE_TARIF, 'ms');
+    f.tarifRepondu = true;
+    return;
+  }
+
   if (r.error) {
     console.warn('Tarif indisponible :', r.error.message);
     f.tarifRepondu = true;
@@ -4731,6 +4779,7 @@ async function ouvrirFormation(id) {
   const f = formationsDB.find(x => x.id === id);
   if (!f) return;
 
+  annulerGardeTarif();
   formationOuverte = f;
   showPage('formation');
   renderDetailFormation(f, null, []);
@@ -6161,6 +6210,9 @@ function showPage(page) {
   if (page === 'admin' && !estAdmin()) page = currentUser ? 'dashboard' : 'landing';
 
   setNoindex(page === 'admin');
+
+  // Sortir de la fiche démonte l'attente du tarif restée en cours.
+  if (page !== 'formation') annulerGardeTarif();
 
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = document.getElementById('page-' + page);
