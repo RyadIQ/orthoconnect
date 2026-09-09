@@ -1571,6 +1571,12 @@
   .carte-filtres select { width: auto; min-width: 178px; padding: 9px 14px; font-size: 14px; }
   .carte-bascule { display: flex; gap: 6px; flex-wrap: wrap; }
 
+  .carte-note-rayon {
+    font-size: 12.5px; color: var(--text-secondary); line-height: 1.55;
+    margin: -2px 0 12px;
+  }
+  .carte-note-rayon a { color: var(--turquoise); font-weight: 600; }
+
   .carte-legende {
     display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
     font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;
@@ -2525,6 +2531,8 @@
         </select>
       </div>
 
+      <div class="carte-note-rayon" id="carteRayonNote" style="display:none"></div>
+
       <div class="carte-legende">
         <div class="carte-legende-item">
           <span class="carte-puce carte-puce-offre" aria-hidden="true"></span>
@@ -2811,9 +2819,15 @@
                   <label for="cabNom">Nom du cabinet</label>
                   <input type="text" id="cabNom" placeholder="Cabinet Dupont Orthodontie">
                 </div>
-                <div class="form-group">
+                <div class="form-group champ-commune">
                   <label for="cabVille">Ville</label>
-                  <input type="text" id="cabVille" placeholder="Lyon">
+                  <input type="text" id="cabVille" placeholder="Lyon" autocomplete="off">
+                  <div class="commune-liste" id="cabVilleListe"></div>
+                  <div class="form-note">
+                    Choisissez la commune dans la liste : elle sert à mesurer les distances
+                    depuis votre cabinet sur la carte de l'emploi. Elle reste privée, aucune
+                    page publique ne l'affiche.
+                  </div>
                 </div>
               </div>
 
@@ -4287,6 +4301,9 @@ async function refreshAuthUI() {
       .split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
     document.getElementById('navAvatar').textContent = initiales || '--';
     renderDashboard();
+    // Le profil est là : le cabinet peut devenir la référence des
+    // distances, ce que le chargement des catalogues ignorait encore.
+    majReferenceRayon();
   } else {
     currentProfile = null;
     savedIds = [];
@@ -4297,6 +4314,7 @@ async function refreshAuthUI() {
     if (mobLogin) mobLogin.style.display = 'block';
     if (mobDash) mobDash.style.display = 'none';
     majVisibiliteAdmin();
+    majReferenceRayon();
   }
 }
 
@@ -4368,7 +4386,18 @@ function renderDashboard() {
   // Pré-remplissage du formulaire cabinet
   document.getElementById('cabNom').value = p.cabinet_nom || '';
   document.getElementById('cabTelephone').value = p.telephone || '';
-  document.getElementById('cabVille').value = p.cabinet_ville || p.ville || '';
+  // Le champ garde la commune déjà géocodée : enregistrer sa fiche
+  // sans avoir touché à la ville ne repasse pas par l'API Adresse.
+  const champCabVille = document.getElementById('cabVille');
+  champCabVille.value = p.cabinet_ville || p.ville || '';
+  delete champCabVille.dataset.ville;
+  delete champCabVille.dataset.lat;
+  delete champCabVille.dataset.lng;
+  if (champCabVille.value && p.cabinet_lat != null && p.cabinet_ville) {
+    champCabVille.dataset.ville = p.cabinet_ville;
+    champCabVille.dataset.lat = p.cabinet_lat;
+    champCabVille.dataset.lng = p.cabinet_lng;
+  }
   document.getElementById('cabType').value = p.cabinet_type || '';
   document.getElementById('cabAnnees').value = p.annees_exercice || '';
   document.getElementById('cabPatients').value = p.volume_patients || '';
@@ -4444,6 +4473,28 @@ function renderMesCodes() {
   }).join('');
 }
 
+// cabinet_lat / cabinet_lng n'existent qu'une fois
+// carte_rayon_cabinet.sql passé. Au premier refus, on cesse de les
+// envoyer pour la session : une fiche cabinet doit rester
+// enregistrable, la carte n'est pas la raison d'être de ce formulaire.
+let colonnesGeoCabinet = true;
+
+async function ecrireProfil(updates) {
+  const envoyer = (u) => sb.from('praticiens').update(u).eq('id', currentUser.id);
+
+  let r = await envoyer(updates);
+  if (r.error && colonnesGeoCabinet && 'cabinet_lat' in updates
+      && /cabinet_lat|cabinet_lng|schema cache/i.test(r.error.message)) {
+    console.warn("Colonnes cabinet_lat / cabinet_lng absentes : carte_rayon_cabinet.sql n'a pas été passé.");
+    colonnesGeoCabinet = false;
+    const sansGeo = { ...updates };
+    delete sansGeo.cabinet_lat;
+    delete sansGeo.cabinet_lng;
+    r = await envoyer(sansGeo);
+  }
+  return r;
+}
+
 async function saveProfile() {
   if (!currentUser) return;
   const techniques = Array.from(document.querySelectorAll('#cabTechniques input:checked')).map(cb => cb.value);
@@ -4460,15 +4511,37 @@ async function saveProfile() {
     techniques
   };
 
-  const { error } = await sb.from('praticiens').update(updates).eq('id', currentUser.id);
+  // La ville du cabinet est géocodée pour servir de référence au filtre
+  // de rayon de la carte. Ces coordonnées restent sur la ligne du
+  // praticien : aucune vue publique ne les expose. Une ville effacée ou
+  // introuvable les remet à null, et le filtre retombe alors sur le
+  // centre de la carte, ce que la mention explique à l'écran.
+  if (colonnesGeoCabinet) {
+    const lieu = await coordsDuChamp('cabVille');
+    updates.cabinet_lat = lieu ? lieu.lat : null;
+    updates.cabinet_lng = lieu ? lieu.lng : null;
+  }
+
+  const { error } = await ecrireProfil(updates);
 
   if (error) { alert("Erreur d'enregistrement. Réessayez."); return; }
+
+  // Ce qui n'a pas été écrit ne doit pas être tenu pour vrai en
+  // mémoire : sans les colonnes, la carte croirait le cabinet situé.
+  if (!colonnesGeoCabinet) {
+    delete updates.cabinet_lat;
+    delete updates.cabinet_lng;
+  }
 
   currentProfile = { ...currentProfile, ...updates };
   const saved = document.getElementById('profileSaved');
   saved.classList.add('show');
   setTimeout(() => saved.classList.remove('show'), 3000);
   renderDashboard();
+
+  // Le cabinet vient peut-être de devenir la référence des distances,
+  // ou de cesser de l'être.
+  majReferenceRayon();
 }
 
 async function saveFormation(id) {
@@ -5182,6 +5255,14 @@ async function chargerMesAnnonces() {
   mesAnnonces = data || [];
 }
 
+// La mention du filtre de rayon y renvoie : c'est là que se
+// renseigne la ville qui sert de référence.
+function ouvrirFicheCabinet() {
+  if (!currentUser) { openAuth('login'); return; }
+  showPage('dashboard');
+  showDashPanel('cabinet');
+}
+
 async function ouvrirMesAnnonces() {
   if (!currentUser) { openAuth('signup'); return; }
   showPage('dashboard');
@@ -5454,6 +5535,9 @@ const CARTE_ZOOM   = 5;
 // France doit tenir dans le cadre aussi bien sur un écran large que
 // dans les 320 px d'un téléphone, ce qu'un zoom fixe ne sait pas faire.
 const BORNES_FRANCE = [[41.3, -5.2], [51.1, 9.6]];
+// Un cabinet et sa région : de quoi voir les postes joignables sans
+// avoir à dézoomer, soit une centaine de kilomètres de large.
+const ZOOM_CABINET = 9;
 const COULEUR_OFFRE     = '#00B8C8';
 const COULEUR_PRATICIEN = '#F97316';
 
@@ -5577,14 +5661,20 @@ async function initCarte() {
     fermerFicheCarte();
   });
 
-  // Le filtre de rayon se lit par rapport au centre de la carte :
-  // déplacer la carte, c'est déplacer le filtre.
+  // Quand le filtre se lit depuis le centre de la carte, déplacer la
+  // carte, c'est déplacer le filtre. Quand il se lit depuis le cabinet,
+  // au contraire, il ne bouge pas : la carte se promène, la référence
+  // reste chez le praticien.
   carte.on('moveend', () => {
+    const ref = refRayon();
+    if (ref && ref.cabinet) return;
     majCercleFiltre();
     if (carteRayonFiltre !== 'tout') renderCarte();
   });
 
   etatCarte('');
+  majOptionsRayon();
+  majNoteRayon();
   renderCarte();
 
   // Leaflet mesure son conteneur au moment de la construction, et le
@@ -5593,8 +5683,21 @@ async function initCarte() {
   // de boucle suivant, puis on réapplique le cadrage.
   setTimeout(() => {
     carte.invalidateSize();
-    carte.fitBounds(carteBornes || BORNES_FRANCE, { padding: [36, 36], maxZoom: 10 });
+    appliquerCadrage();
+    majCercleFiltre();
   }, 0);
+}
+
+// Le cadrage d'ouverture. Le cabinet du praticien connecté d'abord —
+// il ouvre la carte là où il exerce, ce qui est la seule chose qui
+// l'intéresse — puis les points affichés, puis la France entière.
+function appliquerCadrage() {
+  if (!carte) return;
+
+  const cab = cabinetGeocode();
+  if (cab) { carte.setView([cab.lat, cab.lng], ZOOM_CABINET); return; }
+
+  carte.fitBounds(carteBornes || BORNES_FRANCE, { padding: [36, 36], maxZoom: 10 });
 }
 
 // ─────── Filtres ───────
@@ -5603,7 +5706,16 @@ function filtrerCarte() {
   const r = document.getElementById('carteRayon');
   carteTypeFiltre = t ? t.value : 'tous';
   carteRayonFiltre = r ? r.value : 'tout';
+  majNoteRayon();
   majCercleFiltre();
+
+  // Choisir un rayon cadre dessus : sans ça, « 200 km autour de mon
+  // cabinet » laisserait hors champ la moitié de ce qu'il vient de
+  // sélectionner. Le centre ne bouge pas, la référence non plus.
+  if (carteCercleFiltre) {
+    carte.fitBounds(carteCercleFiltre.getBounds(), { padding: [20, 20] });
+  }
+
   renderCarte();
 }
 
@@ -5633,6 +5745,9 @@ function remplirFiltresCarte() {
     liste.map(t => `<option value="${esc(t)}">${esc(libelleContrat(t))}</option>`).join('');
   sel.value = liste.includes(carteTypeFiltre) ? carteTypeFiltre : 'tous';
   carteTypeFiltre = sel.value;
+
+  majOptionsRayon();
+  majNoteRayon();
 }
 
 // Les annonces situées. Celles d'avant la carte n'ont pas de
@@ -5651,10 +5766,85 @@ function distanceKm(lat1, lng1, lat2, lng2) {
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
-function dansLeRayon(lat, lng) {
-  if (carteRayonFiltre === 'tout' || !carte) return true;
+// D'où partent les distances. Le cabinet du praticien connecté dès
+// qu'il est géocodé — c'est ce qu'on veut dire par « autour de lui » —
+// et à défaut le centre de la carte, qui a l'avantage de fonctionner
+// sans compte et de se déplacer avec elle.
+//
+// cabinet_lat / cabinet_lng ne sortent d'aucune vue : elles ne sont
+// lues que sur la ligne du praticien lui-même, dans son propre
+// navigateur (voir carte_rayon_cabinet.sql).
+function cabinetGeocode() {
+  const p = currentProfile;
+  if (!currentUser || !p || p.cabinet_lat == null || p.cabinet_lng == null) return null;
+  return { lat: p.cabinet_lat, lng: p.cabinet_lng, ville: p.cabinet_ville || p.ville || '' };
+}
+
+function refRayon() {
+  const cab = cabinetGeocode();
+  if (cab) return { lat: cab.lat, lng: cab.lng, ville: cab.ville, cabinet: true };
+  if (!carte) return null;
   const c = carte.getCenter();
-  return distanceKm(c.lat, c.lng, lat, lng) <= Number(carteRayonFiltre);
+  return { lat: c.lat, lng: c.lng, cabinet: false };
+}
+
+function dansLeRayon(lat, lng) {
+  if (carteRayonFiltre === 'tout') return true;
+  const ref = refRayon();
+  if (!ref) return true;
+  return distanceKm(ref.lat, ref.lng, lat, lng) <= Number(carteRayonFiltre);
+}
+
+// Les libellés du filtre nomment leur point de départ : « 50 km autour
+// de mon cabinet » et « 50 km autour du centre de la carte » ne
+// sélectionnent pas les mêmes annonces, l'un ne doit pas pouvoir se
+// lire pour l'autre.
+const RAYONS_CARTE = [25, 50, 100, 200];
+
+function majOptionsRayon() {
+  const sel = document.getElementById('carteRayon');
+  if (!sel) return;
+  const autour = cabinetGeocode() ? 'autour de mon cabinet' : 'autour du centre de la carte';
+  const valeur = sel.value || carteRayonFiltre;
+  sel.innerHTML = '<option value="tout">Toute la France</option>' +
+    RAYONS_CARTE.map(km => `<option value="${km}">${km} km ${autour}</option>`).join('');
+  sel.value = valeur;
+  carteRayonFiltre = sel.value;
+}
+
+// La mention n'apparaît qu'une fois un rayon choisi : tant qu'on
+// affiche toute la France, aucune distance n'est mesurée et il n'y a
+// rien à expliquer.
+function majNoteRayon() {
+  const el = document.getElementById('carteRayonNote');
+  if (!el) return;
+
+  if (carteRayonFiltre === 'tout') { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+
+  const cab = cabinetGeocode();
+  if (cab) {
+    el.textContent = 'Distances mesurées depuis votre cabinet'
+      + (cab.ville ? ' (' + cab.ville + ')' : '') + ', pas depuis le centre de la carte.';
+  } else if (currentUser) {
+    el.innerHTML = 'Distances mesurées depuis le centre de la carte, qui se déplace avec elle. '
+      + 'Renseignez la ville de votre cabinet dans '
+      + '<a href="/mon-espace" onclick="event.preventDefault(); ouvrirFicheCabinet()">votre fiche cabinet</a>'
+      + ' pour les mesurer depuis chez vous.';
+  } else {
+    el.textContent = 'Distances mesurées depuis le centre de la carte, qui se déplace avec elle. '
+      + 'Connectez-vous pour les mesurer depuis votre cabinet.';
+  }
+}
+
+// Appelée quand la référence a pu changer : connexion, déconnexion,
+// enregistrement de la fiche cabinet.
+function majReferenceRayon() {
+  majOptionsRayon();
+  majNoteRayon();
+  if (carte && cabinetGeocode()) { carteCadree = true; appliquerCadrage(); }
+  majCercleFiltre();
+  renderCarte();
 }
 
 function majCercleFiltre() {
@@ -5662,7 +5852,10 @@ function majCercleFiltre() {
   if (carteCercleFiltre) { carte.removeLayer(carteCercleFiltre); carteCercleFiltre = null; }
   if (carteRayonFiltre === 'tout') return;
 
-  carteCercleFiltre = L.circle(carte.getCenter(), {
+  const ref = refRayon();
+  if (!ref) return;
+
+  carteCercleFiltre = L.circle([ref.lat, ref.lng], {
     radius: Number(carteRayonFiltre) * 1000,
     color: '#0F2B4D', weight: 1.5, dashArray: '6 6',
     fill: false, interactive: false
@@ -5728,7 +5921,7 @@ function renderCarte() {
   if (!carteCadree && points.length) {
     carteCadree = true;
     carteBornes = L.latLngBounds(points);
-    carte.fitBounds(carteBornes, { padding: [36, 36], maxZoom: 10 });
+    appliquerCadrage();
   }
 }
 
@@ -7985,6 +8178,7 @@ document.addEventListener('keydown', (e) => {
     if (dept && c.departement) dept.value = c.departement;
   });
   brancherCommune('rcVille', 'rcVilleListe');
+  brancherCommune('cabVille', 'cabVilleListe');
 
   await loadCatalogues();
   await refreshAuthUI();
