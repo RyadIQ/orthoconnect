@@ -1559,6 +1559,187 @@
   .badge-pourvue    { background: var(--turquoise-light); color: #007A86; }
   .badge-expiree    { background: var(--grey-bg); color: var(--text-secondary); }
 
+  /* ===== CARTE DE L'EMPLOI ===== */
+  .carte-section { padding: 44px 0 4px; }
+  .carte-entete h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+  .carte-entete p { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+
+  .carte-filtres {
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    margin: 18px 0 12px;
+  }
+  .carte-filtres select { width: auto; min-width: 178px; padding: 9px 14px; font-size: 14px; }
+  .carte-bascule { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .carte-legende {
+    display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
+    font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;
+  }
+  .carte-legende-item { display: flex; align-items: center; gap: 8px; }
+  .carte-puce {
+    width: 14px; height: 14px; border-radius: 50%; flex: none;
+    border: 2px solid var(--white); box-shadow: 0 0 0 1px rgba(15,43,77,0.25);
+  }
+  .carte-puce-offre     { background: var(--turquoise); }
+  .carte-puce-praticien { background: #F97316; }
+  .carte-legende-note { color: var(--text-light); font-size: 12px; }
+
+  .carte-zone {
+    position: relative;
+    border: 1px solid var(--grey-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  #carteEmploi { height: 520px; width: 100%; background: var(--grey-bg); }
+
+  /* Le message d'attente et celui d'échec occupent la même place que la
+     carte : sans lui, un CDN bloqué laisserait un rectangle gris muet. */
+  .carte-etat {
+    position: absolute; inset: 0; z-index: 700;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 28px;
+    background: var(--grey-bg); color: var(--text-secondary); font-size: 14px;
+  }
+  .carte-etat.cachee { display: none; }
+
+  /* Les pastilles. Leaflet pose son divIcon sans style : tout est ici. */
+  .carte-pin {
+    /* display:block, sinon le span reste en ligne et ses dimensions
+       sont ignorées : la pastille ne se voit pas sur la carte. */
+    display: block;
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2.5px solid var(--white);
+    box-shadow: 0 1px 5px rgba(15,43,77,0.45);
+    transition: transform var(--transition);
+  }
+  .carte-pin-offre     { background: var(--turquoise); }
+  .carte-pin-praticien { background: #F97316; }
+  .carte-pin.actif { transform: scale(1.45); }
+
+  /* La fiche courte. Sur grand écran elle se pose dans un coin de la
+     carte ; sous 700 px elle devient une feuille ancrée en bas d'écran,
+     hors du cadre de la carte : en surimpression, elle masquerait
+     justement le point qu'on vient de toucher. */
+  .carte-fiche {
+    display: none;
+    position: absolute; top: 14px; right: 14px;
+    width: 330px; max-width: calc(100% - 28px);
+    max-height: calc(100% - 28px); overflow-y: auto;
+    background: var(--white);
+    border: 1px solid var(--grey-border); border-radius: var(--radius);
+    box-shadow: var(--shadow-hover);
+    padding: 18px 18px 16px; z-index: 800;
+  }
+  .carte-fiche.open { display: block; }
+  .carte-fiche-fermer {
+    position: absolute; top: 8px; right: 8px;
+    width: 30px; height: 30px; border-radius: 50%;
+    border: none; background: var(--grey-bg); color: var(--text-secondary);
+    font-size: 17px; line-height: 1; cursor: pointer;
+  }
+  .carte-fiche-fermer:hover { background: var(--grey-border); }
+  .carte-fiche-titre { font-size: 16px; font-weight: 700; color: var(--navy); line-height: 1.3; margin: 8px 0 6px; padding-right: 26px; }
+  .carte-fiche-lieu { font-size: 13px; color: var(--text-secondary); }
+  .carte-fiche-texte { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top: 10px; }
+  .carte-fiche-ligne { font-size: 13px; color: var(--text-main); margin-top: 8px; }
+  .carte-fiche-ligne strong { font-weight: 600; }
+  .carte-fiche .btn { width: 100%; justify-content: center; margin-top: 14px; white-space: normal; text-align: center; }
+  .carte-fiche-note { font-size: 11.5px; color: var(--text-light); line-height: 1.5; margin-top: 10px; }
+  .carte-etiquettes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .carte-etiquette {
+    font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 20px;
+    background: var(--grey-bg); color: var(--text-secondary);
+  }
+
+  @media (max-width: 700px) {
+    /* Pleine largeur : la carte sort de la gouttière du conteneur. */
+    .carte-zone {
+      margin-left: -24px; margin-right: -24px;
+      border-radius: 0; border-left: none; border-right: none;
+    }
+    #carteEmploi { height: 60vh; min-height: 320px; }
+    .carte-filtres select { width: 100%; min-width: 0; }
+    .carte-bascule { width: 100%; }
+    .carte-bascule .filter-btn { flex: 1; }
+
+    .carte-fiche {
+      position: fixed; inset: auto 0 0 0;
+      width: 100%; max-width: none;
+      max-height: 68vh; z-index: 1100;
+      border-radius: 16px 16px 0 0; border-bottom: none;
+      box-shadow: 0 -6px 26px rgba(15,43,77,0.24);
+      padding-bottom: 24px;
+      animation: carteFicheMonte 0.18s ease-out;
+    }
+    .carte-fiche::before {
+      content: ''; display: block; width: 40px; height: 4px; border-radius: 2px;
+      background: var(--grey-border); margin: 0 auto 12px;
+    }
+  }
+  @keyframes carteFicheMonte {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  /* ===== MA RECHERCHE D'EMPLOI ===== */
+  .recherche-bascule {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    border: 1px solid var(--grey-border); border-radius: var(--radius);
+    padding: 18px 20px; margin-bottom: 18px;
+  }
+  .recherche-bascule.active { border-color: var(--success); background: #F2FBF7; }
+  .recherche-bascule-texte { flex: 1; min-width: 220px; }
+  .recherche-bascule-titre { font-size: 15px; font-weight: 700; color: var(--navy); }
+  .recherche-bascule-etat { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  .switch { position: relative; display: inline-block; width: 52px; height: 30px; flex: none; }
+  .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 2; }
+  .switch-piste {
+    position: absolute; inset: 0; border-radius: 30px;
+    background: var(--grey-border); transition: background var(--transition);
+  }
+  .switch-piste::before {
+    content: ''; position: absolute; left: 3px; top: 3px;
+    width: 24px; height: 24px; border-radius: 50%; background: var(--white);
+    box-shadow: 0 1px 3px rgba(15,43,77,0.3);
+    transition: transform var(--transition);
+  }
+  .switch input:checked ~ .switch-piste { background: var(--success); }
+  .switch input:checked ~ .switch-piste::before { transform: translateX(22px); }
+  .switch input:focus-visible ~ .switch-piste { outline: 2px solid var(--turquoise); outline-offset: 2px; }
+
+  .recherche-consent {
+    display: none;
+    border: 1px solid var(--turquoise); background: var(--turquoise-light);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 18px;
+  }
+  .recherche-consent.open { display: block; }
+  .recherche-consent h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+  .recherche-consent ul { margin: 0 0 14px 18px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.75; }
+  .recherche-consent .admin-check { align-items: flex-start; font-size: 13.5px; line-height: 1.5; margin-bottom: 16px; }
+  .recherche-consent .admin-check input { margin-top: 3px; }
+
+  /* ===== AUTOCOMPLÉTION DES COMMUNES ===== */
+  .champ-commune { position: relative; }
+  .commune-liste {
+    display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    z-index: 60; max-height: 260px; overflow-y: auto;
+    background: var(--white); border: 1px solid var(--grey-border);
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-hover);
+  }
+  .commune-liste.open { display: block; }
+  .commune-item {
+    padding: 9px 14px; font-size: 14px; cursor: pointer;
+    border-bottom: 1px solid var(--grey-bg);
+  }
+  .commune-item:last-child { border-bottom: none; }
+  .commune-item:hover, .commune-item.survol { background: var(--turquoise-light); }
+  .commune-item span { color: var(--text-light); font-size: 12.5px; margin-left: 6px; }
+  .commune-etat { padding: 9px 14px; font-size: 13px; color: var(--text-light); }
+  .champ-commune .form-note.ok { color: var(--success); font-weight: 600; }
+
+  .badge-recherche { background: #FFF1E6; color: #C2410C; }
+
   /* ===== TARIF PRÉFÉRENTIEL ===== */
   .tarif-carte {
     border: 1px solid var(--turquoise);
@@ -2312,6 +2493,62 @@
     </div>
   </section>
 
+  <!-- ===== LA CARTE ===== -->
+  <!-- Les filtres de la carte sont les siens : ils ne touchent pas à  -->
+  <!-- la liste plus bas, qui garde les siens. Les deux vues ne        -->
+  <!-- montrent pas la même chose — la carte porte aussi les           -->
+  <!-- praticiens en recherche.                                        -->
+  <section class="carte-section">
+    <div class="container">
+      <div class="carte-entete">
+        <h2>La carte de l'emploi</h2>
+        <p>Les postes à pourvoir et les praticiens en recherche, sur la même carte.</p>
+      </div>
+
+      <div class="carte-filtres">
+        <div class="carte-bascule" id="carteBascule">
+          <button type="button" class="filter-btn active" onclick="filtrerCarteAffichage('tout', this)">Les deux</button>
+          <button type="button" class="filter-btn" onclick="filtrerCarteAffichage('offres', this)">Offres</button>
+          <button type="button" class="filter-btn" onclick="filtrerCarteAffichage('praticiens', this)">Praticiens</button>
+        </div>
+        <label for="carteType" class="filter-label">Contrat :</label>
+        <select id="carteType" onchange="filtrerCarte()">
+          <option value="tous">Tous les contrats</option>
+        </select>
+        <label for="carteRayon" class="filter-label">Rayon :</label>
+        <select id="carteRayon" onchange="filtrerCarte()">
+          <option value="tout">Toute la France</option>
+          <option value="25">25 km autour du centre de la carte</option>
+          <option value="50">50 km autour du centre de la carte</option>
+          <option value="100">100 km autour du centre de la carte</option>
+          <option value="200">200 km autour du centre de la carte</option>
+        </select>
+      </div>
+
+      <div class="carte-legende">
+        <div class="carte-legende-item">
+          <span class="carte-puce carte-puce-offre" aria-hidden="true"></span>
+          Offres d'emploi <strong id="carteNbOffres">0</strong>
+        </div>
+        <div class="carte-legende-item">
+          <span class="carte-puce carte-puce-praticien" aria-hidden="true"></span>
+          Praticiens en recherche <strong id="carteNbPraticiens">0</strong>
+        </div>
+        <span class="carte-legende-note">
+          Les points désignent une zone, jamais une adresse.
+        </span>
+      </div>
+
+      <div class="form-note" id="carteVide" style="display:none; margin-bottom:10px"></div>
+
+      <div class="carte-zone">
+        <div id="carteEmploi"></div>
+        <div class="carte-etat" id="carteEtat">Chargement de la carte…</div>
+        <div class="carte-fiche" id="carteFiche" role="dialog" aria-label="Détail du point sélectionné"></div>
+      </div>
+    </div>
+  </section>
+
   <div class="filters-bar">
     <div class="filters-inner filtres-selects">
       <label for="filtreContrat" class="filter-label">Contrat :</label>
@@ -2519,6 +2756,7 @@
           <button onclick="showDashPanel('formations', this)">📚 Mes formations</button>
           <button onclick="showDashPanel('codes', this)">🎟 Mes codes</button>
           <button onclick="showDashPanel('annonces', this)">💼 Mes annonces</button>
+          <button onclick="showDashPanel('recherche', this)">🔎 Ma recherche d'emploi</button>
           <button onclick="showDashPanel('actus', this)">📰 Actualités</button>
           <button onclick="doLogout()" style="margin-top:12px; color:var(--text-light)">↩ Se déconnecter</button>
         </div>
@@ -2714,9 +2952,14 @@
                 </div>
               </div>
               <div class="form-row">
-                <div class="form-group">
+                <div class="form-group champ-commune">
                   <label for="anVille">Ville</label>
-                  <input type="text" id="anVille" placeholder="Lyon 2e">
+                  <input type="text" id="anVille" placeholder="Lyon, Bordeaux…" autocomplete="off">
+                  <div class="commune-liste" id="anVilleListe"></div>
+                  <div class="form-note">
+                    Choisissez la commune dans la liste : elle renseigne le département et pose
+                    l'annonce sur la carte de l'emploi.
+                  </div>
                 </div>
                 <div class="form-group">
                   <label for="anDept">Département</label>
@@ -2772,6 +3015,109 @@
             </div>
 
             <div id="mesAnnoncesListe"></div>
+          </div>
+
+          <!-- MA RECHERCHE D'EMPLOI -->
+          <div class="dash-panel" id="panel-recherche">
+            <h2>Ma recherche d'emploi</h2>
+            <p class="panel-sub">Apparaissez sur la carte de l'emploi auprès des cabinets qui recrutent. Vous pouvez vous en retirer à tout moment.</p>
+
+            <div class="admin-message" id="rechercheMessage"></div>
+
+            <div class="recherche-bascule" id="rechercheBascule">
+              <label class="switch">
+                <input type="checkbox" id="rcActif" onchange="basculerRecherche(this.checked)"
+                       aria-describedby="rcEtat">
+                <span class="switch-piste" aria-hidden="true"></span>
+              </label>
+              <div class="recherche-bascule-texte">
+                <div class="recherche-bascule-titre">Je suis en recherche</div>
+                <div class="recherche-bascule-etat" id="rcEtat">Personne ne voit que vous cherchez. Vous n'êtes pas sur la carte.</div>
+              </div>
+            </div>
+
+            <!-- Rien n'est publié tant que cette case n'est pas cochée. -->
+            <div class="recherche-consent" id="rcConsentBloc">
+              <h4>Ce qui devient public</h4>
+              <p style="font-size:13.5px; color:var(--text-secondary); margin-bottom:12px">
+                Votre ville, votre rayon et vos critères seront visibles de tous.
+                Votre nom et vos coordonnées ne seront visibles que des praticiens connectés.
+              </p>
+              <ul>
+                <li><strong>Visible sans compte</strong> : votre ville, votre rayon, votre statut, les contrats que vous cherchez, votre disponibilité, votre message et vos techniques.</li>
+                <li><strong>Visible des praticiens connectés seulement</strong> : votre nom et votre email.</li>
+                <li><strong>Jamais publié</strong> : votre adresse. Le point posé sur la carte est décalé de quelques centaines de mètres et désigne une zone.</li>
+              </ul>
+              <label class="admin-check">
+                <input type="checkbox" id="rcConsent" onchange="majBoutonActivation()">
+                <span>J'ai lu ce qui devient public et j'accepte de figurer sur la carte de l'emploi.</span>
+              </label>
+              <div class="admin-form-actions">
+                <button class="btn btn-turquoise btn-sm" id="rcBoutonActiver" disabled
+                        onclick="enregistrerRecherche(true)">Activer et publier sur la carte</button>
+                <button class="btn btn-outline btn-sm" onclick="annulerActivation()">Annuler</button>
+              </div>
+            </div>
+
+            <div class="profile-form">
+              <div class="form-row">
+                <div class="form-group champ-commune">
+                  <label for="rcVille">Ville de recherche</label>
+                  <input type="text" id="rcVille" placeholder="Commencez à taper : Lyon, Bordeaux…" autocomplete="off">
+                  <div class="commune-liste" id="rcVilleListe"></div>
+                  <div class="form-note">Choisissez la commune dans la liste : c'est elle qui pose votre point sur la carte.</div>
+                </div>
+                <div class="form-group">
+                  <label for="rcRayon">Rayon accepté autour de cette ville</label>
+                  <select id="rcRayon">
+                    <option value="10">10 km</option>
+                    <option value="20">20 km</option>
+                    <option value="30">30 km</option>
+                    <option value="50">50 km</option>
+                    <option value="80">80 km</option>
+                    <option value="150">150 km</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="rcDepts">Départements supplémentaires (optionnel)</label>
+                <input type="text" id="rcDepts" placeholder="69, 38, 01">
+                <div class="form-note">Séparés par des virgules. À renseigner si vous acceptez aussi des postes hors de ce rayon.</div>
+              </div>
+
+              <div class="form-group">
+                <label>Ce que vous cherchez</label>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px" id="rcTypes">
+                  <label style="display:flex; align-items:center; gap:6px; font-weight:400; font-size:14px; cursor:pointer">
+                    <input type="checkbox" value="collaboration_liberale" style="width:auto"> Collaboration libérale
+                  </label>
+                  <label style="display:flex; align-items:center; gap:6px; font-weight:400; font-size:14px; cursor:pointer">
+                    <input type="checkbox" value="collaboration_salariee" style="width:auto"> Collaboration salariée
+                  </label>
+                  <label style="display:flex; align-items:center; gap:6px; font-weight:400; font-size:14px; cursor:pointer">
+                    <input type="checkbox" value="remplacement" style="width:auto"> Remplacement
+                  </label>
+                  <label style="display:flex; align-items:center; gap:6px; font-weight:400; font-size:14px; cursor:pointer">
+                    <input type="checkbox" value="association" style="width:auto"> Association
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="rcDispo">Disponibilité</label>
+                <input type="text" id="rcDispo" maxlength="60" placeholder="Immédiate, septembre 2026, à partir de janvier…">
+              </div>
+
+              <div class="form-group">
+                <label for="rcMessage">Ce que vous cherchez, en une phrase</label>
+                <textarea id="rcMessage" maxlength="240" style="min-height:80px"
+                          placeholder="Ex : collaboration 3 jours par semaine, orientation aligneurs, cabinet de groupe."></textarea>
+                <div class="form-note">240 caractères. Visible de tous, y compris sans compte : n'y mettez ni votre nom ni vos coordonnées.</div>
+              </div>
+
+              <button class="btn btn-turquoise" onclick="enregistrerRecherche(false)">Enregistrer mes critères</button>
+            </div>
           </div>
 
           <!-- ACTUS -->
@@ -2844,6 +3190,10 @@
               <div class="stat-card">
                 <div class="stat-val" id="admStatInterne">0</div>
                 <div class="stat-lbl">Internes</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="admStatRecherche">0</div>
+                <div class="stat-lbl">En recherche d'emploi</div>
               </div>
             </div>
 
@@ -3498,6 +3848,9 @@ let annonceEnCours = null;
 let actusDB = [];
 let savedIds = [];
 let codesPraticien = [];
+// Le formulaire de recherche n'est pré-rempli qu'une fois par session :
+// un rendu du tableau de bord ne doit pas écraser une saisie en cours.
+let rechercheRemplie = false;
 
 // ═══════════════════════════════════════════════
 // CHARGEMENT DES CATALOGUES (public, sans auth)
@@ -3638,24 +3991,28 @@ function setStat(id, valeur) {
 
 async function loadCatalogues() {
   try {
-    const [f, p, j, a, av] = await Promise.all([
+    const [f, p, j, a, av, pc] = await Promise.all([
       chargerFormationsPubliques(),
       sb.from('produits').select('*').eq('actif', true).order('id'),
       chargerAnnonces(),
       sb.from('actualites').select('*').eq('actif', true).order('publie_le', { ascending: false }),
-      sb.from('avis').select('id', { count: 'exact', head: true })
+      sb.from('avis').select('id', { count: 'exact', head: true }),
+      chargerPraticiensCarte()
     ]);
 
     formationsDB = (f.data || []).map(normaliserFormation);
     produitsDB = p.data || [];
     jobsDB = j.data || [];
     actusDB = a.data || [];
+    praticiensCarte = pc || [];
 
     renderFormationsDB(formationsDB);
     renderProduitsDB(produitsDB);
     remplirFiltresAnnonces();
     renderAnnonces();
     renderActus();
+    remplirFiltresCarte();
+    renderCarte();
 
     const distinct = (rows, champ) => new Set(rows.map(r => r[champ]).filter(Boolean)).size;
 
@@ -3888,6 +4245,7 @@ async function ensureProfile(user) {
 async function refreshAuthUI() {
   const { data: { session } } = await sb.auth.getSession();
   currentUser = session ? session.user : null;
+  rechercheRemplie = false;
 
   // La liste est la même dans les deux cas — elle ne transporte aucun
   // montant. Ce qui change, c'est le tarif lisible sur une fiche : on
@@ -4044,6 +4402,7 @@ function renderDashboard() {
   renderSavedFormations();
   renderMesCodes();
   renderMesAnnonces();
+  renderRecherche();
 }
 
 // Un code dont la date est dépassée est traité comme expiré, sans
@@ -4167,6 +4526,380 @@ function formatDate(d) {
   const mois = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
   const dt = new Date(d);
   return dt.getDate() + ' ' + mois[dt.getMonth()] + ' ' + dt.getFullYear();
+}
+
+// ═══════════════════════════════════════════════
+// GÉOCODAGE DES COMMUNES
+//
+// API Adresse du gouvernement : gratuite, sans clé, sans quota
+// contractuel. On ne lui demande que des communes (type=municipality),
+// jamais des adresses : le point posé sur la carte doit désigner une
+// ville, et une requête d'adresse ferait remonter des numéros de rue
+// dont on n'a que faire ici.
+//
+// Deux usages, un seul appel réseau à la fois :
+//   — l'autocomplétion, pendant la frappe, requête annulée à chaque
+//     nouvelle lettre ;
+//   — le rattrapage à l'enregistrement, quand la ville a été tapée
+//     sans passer par la liste.
+//
+// Rien de tout cela n'est bloquant : sans coordonnées, une annonce se
+// publie quand même, elle n'a simplement pas de point sur la carte.
+// ═══════════════════════════════════════════════
+const API_ADRESSE = 'https://api-adresse.data.gouv.fr/search/';
+
+// Le département vient de « context » (« 69, Rhône, Auvergne-Rhône-
+// Alpes »), qui donne 2A pour la Corse et 974 pour La Réunion là où
+// les deux premiers caractères du code INSEE se tromperaient.
+function communeDepuisFeature(f) {
+  const pr = (f && f.properties) || {};
+  const coords = (f && f.geometry && f.geometry.coordinates) || [];
+  const ville = pr.city || pr.name || '';
+  return {
+    ville,
+    codePostal: pr.postcode || '',
+    departement: String(pr.context || '').split(',')[0].trim()
+      || String(pr.citycode || '').slice(0, 2),
+    lat: coords[1],
+    lng: coords[0]
+  };
+}
+
+async function chercherCommunes(q, signal) {
+  const url = API_ADRESSE + '?q=' + encodeURIComponent(q)
+    + '&type=municipality&autocomplete=1&limit=7';
+  const r = await fetch(url, { signal });
+  if (!r.ok) throw new Error('API Adresse : ' + r.status);
+  const j = await r.json();
+  return (j.features || []).map(communeDepuisFeature)
+    .filter(c => c.ville && c.lat != null && c.lng != null);
+}
+
+// Le premier résultat, pour une ville saisie sans être choisie dans la
+// liste. Une panne de l'API rend null : on n'empêche personne de
+// publier parce qu'un service tiers est indisponible.
+async function geocoderCommune(texte) {
+  const q = String(texte || '').trim();
+  if (q.length < 2) return null;
+  try {
+    const l = await chercherCommunes(q);
+    return l.length ? l[0] : null;
+  } catch (e) {
+    console.warn('Géocodage impossible :', e.message);
+    return null;
+  }
+}
+
+// Ce qu'un champ de commune a retenu : la commune choisie dans la
+// liste si le texte n'a pas bougé depuis, sinon un géocodage à la
+// volée. C'est ce qui permet de taper « Lyon » et d'être quand même
+// placé, sans avoir touché à la liste.
+async function coordsDuChamp(idInput) {
+  const input = document.getElementById(idInput);
+  if (!input) return null;
+  const v = input.value.trim();
+  if (!v) return null;
+
+  const d = input.dataset;
+  if (d.lat && d.ville && d.ville.toLowerCase() === v.toLowerCase()) {
+    return { ville: d.ville, departement: d.dept || '', lat: +d.lat, lng: +d.lng };
+  }
+  return geocoderCommune(v);
+}
+
+// L'autocomplétion. Un même code sert au formulaire d'annonce et à
+// celui de la recherche d'emploi : c'est la même saisie, elle doit se
+// comporter pareil aux deux endroits.
+function brancherCommune(idInput, idListe, surChoix) {
+  const input = document.getElementById(idInput);
+  const liste = document.getElementById(idListe);
+  if (!input || !liste) return;
+
+  let minuteur = null;
+  let requete = null;
+  let resultats = [];
+  let survol = -1;
+
+  const fermer = () => {
+    liste.classList.remove('open');
+    liste.innerHTML = '';
+    resultats = [];
+    survol = -1;
+  };
+
+  const rendre = () => {
+    liste.innerHTML = resultats.map((c, i) => `
+      <div class="commune-item${i === survol ? ' survol' : ''}" data-i="${i}">
+        ${esc(c.ville)}<span>${esc(c.codePostal || c.departement || '')}</span>
+      </div>`).join('');
+    liste.classList.add('open');
+  };
+
+  const etat = (texte) => {
+    liste.innerHTML = `<div class="commune-etat">${esc(texte)}</div>`;
+    liste.classList.add('open');
+  };
+
+  const choisir = (i) => {
+    const c = resultats[i];
+    if (!c) return;
+    input.value = c.ville;
+    input.dataset.ville = c.ville;
+    input.dataset.lat = c.lat;
+    input.dataset.lng = c.lng;
+    input.dataset.dept = c.departement || '';
+    fermer();
+    if (surChoix) surChoix(c);
+  };
+
+  input.addEventListener('input', () => {
+    // Toute frappe périme la commune retenue : sans cet oubli, corriger
+    // « Lyon » en « Lyons-la-Forêt » sans repasser par la liste
+    // garderait les coordonnées de Lyon.
+    delete input.dataset.ville;
+    delete input.dataset.lat;
+    delete input.dataset.lng;
+    delete input.dataset.dept;
+
+    const q = input.value.trim();
+    if (minuteur) clearTimeout(minuteur);
+    if (requete) { requete.abort(); requete = null; }
+    if (q.length < 2) { fermer(); return; }
+
+    minuteur = setTimeout(async () => {
+      requete = new AbortController();
+      try {
+        resultats = await chercherCommunes(q, requete.signal);
+        survol = -1;
+        if (resultats.length) rendre();
+        else etat('Aucune commune ne correspond.');
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        etat('Recherche de communes indisponible. Tapez la ville, elle sera retrouvée à l\'enregistrement.');
+      } finally {
+        requete = null;
+      }
+    }, 250);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (!resultats.length) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      survol = (survol + (e.key === 'ArrowDown' ? 1 : -1) + resultats.length) % resultats.length;
+      rendre();
+    } else if (e.key === 'Enter') {
+      if (survol >= 0) { e.preventDefault(); choisir(survol); }
+    } else if (e.key === 'Escape') {
+      fermer();
+    }
+  });
+
+  // mousedown et non click : le clic arriverait après le blur, qui a
+  // déjà refermé la liste, et ne toucherait plus rien.
+  liste.addEventListener('mousedown', (e) => {
+    const item = e.target.closest('.commune-item');
+    if (!item) return;
+    e.preventDefault();
+    choisir(+item.dataset.i);
+  });
+
+  input.addEventListener('blur', () => setTimeout(fermer, 120));
+}
+
+// ═══════════════════════════════════════════════
+// MA RECHERCHE D'EMPLOI (espace praticien)
+//
+// Se déclarer en recherche est un acte public : le praticien apparaît
+// sur une carte que tout le monde peut ouvrir, sans compte. Deux
+// garde-fous, l'un devant l'autre :
+//
+//   — l'activation passe par une case à cocher qui récapitule
+//     exactement ce qui devient visible, et de qui ;
+//   — ce qui sort de la base est décidé par les vues de
+//     carte_emploi.sql, pas par ce fichier. Même si l'affichage se
+//     trompait, le nom d'un praticien ne partirait pas dans la réponse
+//     JSON servie à un visiteur.
+//
+// La désactivation est immédiate et sans confirmation : on ne retient
+// pas quelqu'un qui veut disparaître de la carte. Les critères restent
+// enregistrés, il les retrouve en se réactivant.
+// ═══════════════════════════════════════════════
+function messageRecherche(texte, erreur) {
+  const el = document.getElementById('rechercheMessage');
+  if (!el) return;
+  el.textContent = texte;
+  el.className = 'admin-message show ' + (erreur ? 'ko' : 'ok');
+  if (!erreur) setTimeout(() => { el.className = 'admin-message'; }, 4000);
+}
+
+// Les colonnes n'existent qu'une fois carte_emploi.sql passé. Le
+// message le dit franchement plutôt que de laisser l'erreur brute de
+// Postgres à l'écran.
+function messageRefusRecherche(error) {
+  const m = String(error && error.message || '');
+  if (/column|colonne|schema cache/i.test(m) && /recherche|en_recherche/i.test(m)) {
+    messageRecherche("La carte n'est pas encore installée sur la base : carte_emploi.sql n'a pas été exécuté.", true);
+  } else {
+    messageRecherche('Enregistrement refusé : ' + m, true);
+  }
+}
+
+function renderRecherche() {
+  const bascule = document.getElementById('rcActif');
+  if (!bascule) return;
+
+  const p = currentProfile || {};
+  const actif = !!p.en_recherche;
+
+  bascule.checked = actif;
+  document.getElementById('rechercheBascule').classList.toggle('active', actif);
+  document.getElementById('rcEtat').innerHTML = actif
+    ? 'Vous apparaissez sur la carte' + (p.recherche_ville ? ' autour de <strong>' + esc(p.recherche_ville) + '</strong>' : '') + '.'
+      + (p.recherche_maj_le ? ' Depuis le ' + esc(formatDate(p.recherche_maj_le)) + '.' : '')
+    : "Personne ne voit que vous cherchez. Vous n'êtes pas sur la carte.";
+
+  // Le formulaire n'est rempli qu'à l'ouverture du panneau, pas à
+  // chaque rendu du tableau de bord : sinon une saisie en cours serait
+  // écrasée par la valeur enregistrée.
+  if (rechercheRemplie) return;
+  rechercheRemplie = true;
+
+  const ville = document.getElementById('rcVille');
+  ville.value = p.recherche_ville || p.cabinet_ville || p.ville || '';
+  if (p.recherche_ville && p.recherche_lat != null) {
+    ville.dataset.ville = p.recherche_ville;
+    ville.dataset.lat = p.recherche_lat;
+    ville.dataset.lng = p.recherche_lng;
+  }
+
+  document.getElementById('rcRayon').value = String(p.recherche_rayon_km || 30);
+  document.getElementById('rcDepts').value = (p.recherche_departements || []).join(', ');
+  document.getElementById('rcDispo').value = p.recherche_disponibilite || '';
+  document.getElementById('rcMessage').value = p.recherche_message || '';
+  document.querySelectorAll('#rcTypes input').forEach(cb => {
+    cb.checked = (p.recherche_types || []).includes(cb.value);
+  });
+}
+
+// « 69, 38 ; 2a » devient ['69', '38', '2A']. On ne garde que ce qui
+// ressemble à un numéro de département, et on plafonne : une liste de
+// quarante départements ne veut plus rien dire pour qui lit la fiche.
+function departementsSaisis(texte) {
+  const vus = [];
+  String(texte || '').toUpperCase().split(/[^0-9A-Z]+/).forEach(d => {
+    if (/^(2A|2B|9[7-8][0-9]|[0-9]{2})$/.test(d) && !vus.includes(d)) vus.push(d);
+  });
+  return vus.slice(0, 12);
+}
+
+function basculerRecherche(actif) {
+  if (!currentUser) {
+    document.getElementById('rcActif').checked = false;
+    openAuth('login');
+    return;
+  }
+  if (actif) {
+    // Rien n'est écrit tant que la case n'est pas cochée : le
+    // basculement seul ne publie personne.
+    const bloc = document.getElementById('rcConsentBloc');
+    document.getElementById('rcConsent').checked = false;
+    majBoutonActivation();
+    bloc.classList.add('open');
+    bloc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } else {
+    desactiverRecherche();
+  }
+}
+
+function majBoutonActivation() {
+  const bouton = document.getElementById('rcBoutonActiver');
+  if (bouton) bouton.disabled = !document.getElementById('rcConsent').checked;
+}
+
+function annulerActivation() {
+  document.getElementById('rcConsentBloc').classList.remove('open');
+  document.getElementById('rcActif').checked = !!(currentProfile && currentProfile.en_recherche);
+}
+
+async function desactiverRecherche() {
+  const { error } = await sb.from('praticiens')
+    .update({ en_recherche: false }).eq('id', currentUser.id);
+  if (error) {
+    document.getElementById('rcActif').checked = true;
+    return messageRefusRecherche(error);
+  }
+  currentProfile = { ...currentProfile, en_recherche: false };
+  document.getElementById('rcConsentBloc').classList.remove('open');
+  renderRecherche();
+  messageRecherche('Vous ne figurez plus sur la carte. Vos critères restent enregistrés.');
+  await rafraichirCarte();
+}
+
+// activation vaut true quand l'enregistrement met aussi le praticien en
+// ligne. Sinon en_recherche n'est pas touché : le bouton « Enregistrer
+// mes critères » ne doit ni publier quelqu'un qui ne l'a pas demandé,
+// ni retirer de la carte quelqu'un qui y est.
+async function enregistrerRecherche(activation) {
+  if (!currentUser) { openAuth('login'); return; }
+
+  if (activation && !document.getElementById('rcConsent').checked) {
+    return messageRecherche('Cochez la case de confirmation pour apparaître sur la carte.', true);
+  }
+
+  const nomVille = document.getElementById('rcVille').value.trim();
+  if (!nomVille) {
+    return messageRecherche('Indiquez la ville autour de laquelle vous cherchez.', true);
+  }
+
+  const lieu = await coordsDuChamp('rcVille');
+  const doitEtreLocalise = activation || (currentProfile && currentProfile.en_recherche);
+  if (!lieu && doitEtreLocalise) {
+    return messageRecherche(
+      "Cette commune n'a pas été retrouvée. Choisissez-la dans la liste proposée pendant la frappe : sans coordonnées, votre point ne peut pas être posé.", true);
+  }
+
+  const types = Array.from(document.querySelectorAll('#rcTypes input:checked')).map(cb => cb.value);
+
+  const payload = {
+    recherche_ville:         lieu ? lieu.ville : nomVille,
+    recherche_lat:           lieu ? lieu.lat : null,
+    recherche_lng:           lieu ? lieu.lng : null,
+    recherche_rayon_km:      Number(document.getElementById('rcRayon').value) || 30,
+    recherche_departements:  departementsSaisis(document.getElementById('rcDepts').value),
+    recherche_types:         types,
+    recherche_disponibilite: document.getElementById('rcDispo').value.trim() || null,
+    recherche_message:       document.getElementById('rcMessage').value.trim() || null
+  };
+
+  if (activation) {
+    payload.en_recherche = true;
+    payload.recherche_maj_le = new Date().toISOString();
+  }
+
+  const { error } = await sb.from('praticiens').update(payload).eq('id', currentUser.id);
+  if (error) return messageRefusRecherche(error);
+
+  currentProfile = { ...currentProfile, ...payload };
+
+  // Le champ garde la commune retenue : un second enregistrement ne
+  // repasse pas par l'API pour la même ville.
+  if (lieu) {
+    const champ = document.getElementById('rcVille');
+    champ.value = lieu.ville;
+    champ.dataset.ville = lieu.ville;
+    champ.dataset.lat = lieu.lat;
+    champ.dataset.lng = lieu.lng;
+    champ.dataset.dept = lieu.departement || '';
+  }
+
+  document.getElementById('rcConsentBloc').classList.remove('open');
+  renderRecherche();
+  messageRecherche(activation
+    ? 'Vous êtes sur la carte. Les cabinets qui recrutent autour de ' + payload.recherche_ville + ' peuvent vous voir.'
+    : 'Vos critères sont enregistrés.');
+
+  await rafraichirCarte();
 }
 
 // ═══════════════════════════════════════════════
@@ -4560,6 +5293,29 @@ function messageAnnonce(texte, erreur) {
   if (!erreur) setTimeout(() => { el.className = 'admin-message'; }, 4000);
 }
 
+// lat / lng n'existent qu'une fois carte_emploi.sql passé. Au premier
+// refus, on cesse de les envoyer pour toute la session plutôt que
+// d'empêcher la publication : même règle que pour la colonne slug.
+let colonnesGeoAnnonce = true;
+
+async function ecrireAnnonceEmploi(payload, id) {
+  const envoyer = (p) => id
+    ? sb.from('offres_emploi').update(p).eq('id', id)
+    : sb.from('offres_emploi').insert(p);
+
+  let r = await envoyer(payload);
+  if (r.error && colonnesGeoAnnonce && 'lat' in payload
+      && /lat|lng|schema cache/i.test(r.error.message)) {
+    console.warn("Colonnes lat / lng absentes : carte_emploi.sql n'a pas été passé.");
+    colonnesGeoAnnonce = false;
+    const sansGeo = { ...payload };
+    delete sansGeo.lat;
+    delete sansGeo.lng;
+    r = await envoyer(sansGeo);
+  }
+  return r;
+}
+
 async function enregistrerAnnonce() {
   if (!currentUser) { openAuth('signup'); return; }
 
@@ -4590,6 +5346,19 @@ async function enregistrerAnnonce() {
     statut:           document.getElementById('anStatut').value
   };
 
+  // La ville est géocodée pour poser l'annonce sur la carte. Une
+  // commune introuvable n'empêche pas de publier : l'annonce paraît
+  // dans la liste, sans point, et le message le dit.
+  let situee = null;
+  if (colonnesGeoAnnonce) {
+    situee = await coordsDuChamp('anVille');
+    if (situee) {
+      payload.lat = situee.lat;
+      payload.lng = situee.lng;
+      if (!payload.departement && situee.departement) payload.departement = situee.departement;
+    }
+  }
+
   // Une annonce republiée après expiration repart pour 90 jours,
   // sinon elle resterait invisible malgré son statut « publiée ».
   const j = annonceEnCours ? mesAnnonces.find(x => x.id === annonceEnCours) : null;
@@ -4599,13 +5368,14 @@ async function enregistrerAnnonce() {
     payload.expire_le = dansNJours(90);
   }
 
-  const { error } = annonceEnCours
-    ? await sb.from('offres_emploi').update(payload).eq('id', annonceEnCours)
-    : await sb.from('offres_emploi').insert(payload);
+  const { error } = await ecrireAnnonceEmploi(payload, annonceEnCours);
 
   if (error) return messageAnnonce('Enregistrement refusé : ' + error.message, true);
 
-  messageAnnonce(annonceEnCours ? 'Annonce mise à jour.' : 'Annonce publiée.');
+  messageAnnonce((annonceEnCours ? 'Annonce mise à jour.' : 'Annonce publiée.')
+    + (colonnesGeoAnnonce && !situee
+        ? " Sa ville n'a pas été retrouvée : elle ne figure pas sur la carte."
+        : ''));
   fermerFormAnnonce();
   await rafraichirAnnonces();
 }
@@ -4656,6 +5426,443 @@ function renderActus() {
       <div class="news-excerpt">${a.extrait || ''}</div>
     </div>
   `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// LA CARTE DE L'EMPLOI
+//
+// Une seule carte pour les deux populations : les postes à pourvoir et
+// les praticiens qui cherchent. Leaflet et les fonds OpenStreetMap,
+// chargés depuis un CDN au premier affichage de la page emploi — la
+// bibliothèque pèse plus lourd que tout le reste du site, elle n'a
+// rien à faire dans le chargement de l'accueil.
+//
+// CE QUI ARRIVE ICI EST DÉJÀ FILTRÉ
+// Les praticiens viennent de praticiens_recherche_publique pour un
+// visiteur, de praticiens_recherche_contact pour un praticien
+// connecté. La première ne porte ni nom ni email : il n'y a rien à
+// masquer à l'écran, il n'y a rien reçu. Et dans les deux cas la
+// position est décalée en base — le point désigne une zone, pas une
+// adresse, y compris pour un praticien connecté.
+// ═══════════════════════════════════════════════
+const LEAFLET_CSS = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css';
+const LEAFLET_JS  = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js';
+
+const CARTE_CENTRE = [46.7, 2.4];   // la France entière
+const CARTE_ZOOM   = 5;
+// Le cadrage de départ. Des bornes plutôt qu'un niveau de zoom : la
+// France doit tenir dans le cadre aussi bien sur un écran large que
+// dans les 320 px d'un téléphone, ce qu'un zoom fixe ne sait pas faire.
+const BORNES_FRANCE = [[41.3, -5.2], [51.1, 9.6]];
+const COULEUR_OFFRE     = '#00B8C8';
+const COULEUR_PRATICIEN = '#F97316';
+
+let carte = null;
+let carteCouches = null;
+let carteCercleZone = null;    // le rayon du praticien sélectionné
+let carteCercleFiltre = null;  // le rayon du filtre, autour du centre
+let carteChargement = null;
+let carteCadree = false;
+let carteBornes = null;        // le cadrage voulu, réappliqué après mesure
+let carteSelection = null;
+
+let praticiensCarte = [];
+let sourcePraticiensCarte = null;
+
+let carteAffichage = 'tout';   // tout | offres | praticiens
+let carteTypeFiltre = 'tous';
+let carteRayonFiltre = 'tout';
+
+function sourcePraticiens() {
+  return currentUser ? 'praticiens_recherche_contact' : 'praticiens_recherche_publique';
+}
+
+// La vue de contact est réservée à authenticated : si elle manque ou
+// si elle refuse, on retombe sur la vue publique. La carte perd les
+// noms, elle ne perd pas ses points.
+async function chargerPraticiensCarte() {
+  const source = sourcePraticiens();
+  const r = await sb.from(source).select('*');
+  if (!r.error) { sourcePraticiensCarte = source; return r.data || []; }
+
+  console.warn('Source « ' + source + ' » indisponible pour la carte :', r.error.message);
+
+  if (source !== 'praticiens_recherche_publique') {
+    const pub = await sb.from('praticiens_recherche_publique').select('*');
+    if (!pub.error) { sourcePraticiensCarte = 'praticiens_recherche_publique'; return pub.data || []; }
+    console.warn('Vue publique des praticiens indisponible :', pub.error.message);
+  }
+
+  // carte_emploi.sql n'est pas passé : la carte se limite aux offres.
+  sourcePraticiensCarte = null;
+  return [];
+}
+
+async function rafraichirCarte() {
+  praticiensCarte = await chargerPraticiensCarte();
+  remplirFiltresCarte();
+  renderCarte();
+}
+
+// ─────── Chargement de Leaflet ───────
+function chargerLeaflet() {
+  if (window.L) return Promise.resolve();
+  if (carteChargement) return carteChargement;
+
+  carteChargement = new Promise((resolve, reject) => {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = LEAFLET_CSS;
+    document.head.appendChild(css);
+
+    const js = document.createElement('script');
+    js.src = LEAFLET_JS;
+    js.onload = () => resolve();
+    js.onerror = () => { carteChargement = null; reject(new Error('CDN injoignable')); };
+    document.head.appendChild(js);
+  });
+  return carteChargement;
+}
+
+function etatCarte(texte) {
+  const el = document.getElementById('carteEtat');
+  if (!el) return;
+  el.textContent = texte;
+  el.classList.toggle('cachee', !texte);
+}
+
+// Appelée à chaque affichage de la page emploi. La carte ne se
+// construit qu'une fois ; les fois suivantes, invalidateSize la remet
+// d'aplomb — Leaflet a mesuré un conteneur caché si l'onglet a été
+// ouvert depuis une autre page.
+async function initCarte() {
+  const zone = document.getElementById('carteEmploi');
+  if (!zone) return;
+
+  if (carte) {
+    setTimeout(() => { carte.invalidateSize(); }, 60);
+    renderCarte();
+    return;
+  }
+  if (carteChargement) return;
+
+  etatCarte('Chargement de la carte…');
+  try {
+    await chargerLeaflet();
+  } catch (e) {
+    etatCarte("La carte n'a pas pu être chargée. Les offres restent consultables dans la liste ci-dessous.");
+    return;
+  }
+
+  carte = L.map('carteEmploi', {
+    center: CARTE_CENTRE,
+    zoom: CARTE_ZOOM,
+    // La molette n'est prise en main qu'après un premier clic sur la
+    // carte : sinon elle avale le défilement de la page dès qu'on la
+    // survole. Le pincement et le glissement au doigt, eux, restent
+    // actifs d'emblée — c'est la seule façon d'utiliser la carte sur
+    // un téléphone.
+    scrollWheelZoom: false
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(carte);
+
+  carteCouches = L.layerGroup().addTo(carte);
+
+  carte.on('click', () => {
+    carte.scrollWheelZoom.enable();
+    fermerFicheCarte();
+  });
+
+  // Le filtre de rayon se lit par rapport au centre de la carte :
+  // déplacer la carte, c'est déplacer le filtre.
+  carte.on('moveend', () => {
+    majCercleFiltre();
+    if (carteRayonFiltre !== 'tout') renderCarte();
+  });
+
+  etatCarte('');
+  renderCarte();
+
+  // Leaflet mesure son conteneur au moment de la construction, et le
+  // mesure trop étroit quand la page vient tout juste d'être affichée :
+  // la France se retrouve décalée vers la gauche. On remesure au tour
+  // de boucle suivant, puis on réapplique le cadrage.
+  setTimeout(() => {
+    carte.invalidateSize();
+    carte.fitBounds(carteBornes || BORNES_FRANCE, { padding: [36, 36], maxZoom: 10 });
+  }, 0);
+}
+
+// ─────── Filtres ───────
+function filtrerCarte() {
+  const t = document.getElementById('carteType');
+  const r = document.getElementById('carteRayon');
+  carteTypeFiltre = t ? t.value : 'tous';
+  carteRayonFiltre = r ? r.value : 'tout';
+  majCercleFiltre();
+  renderCarte();
+}
+
+function filtrerCarteAffichage(quoi, btn) {
+  carteAffichage = quoi;
+  document.querySelectorAll('#carteBascule .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  fermerFicheCarte();
+  renderCarte();
+}
+
+// Les types proposés sont ceux réellement portés par des points. Un
+// contrat sans aucune offre ni aucun praticien ne mène qu'à une carte
+// vide, autant ne pas l'offrir.
+function remplirFiltresCarte() {
+  const sel = document.getElementById('carteType');
+  if (!sel) return;
+
+  const presents = new Set();
+  offresCarte().forEach(j => { if (j.type_contrat) presents.add(j.type_contrat); });
+  praticiensCarte.forEach(p => (p.types || []).forEach(t => presents.add(t)));
+
+  const liste = [...presents]
+    .sort((a, b) => libelleContrat(a).localeCompare(libelleContrat(b), 'fr'));
+
+  sel.innerHTML = '<option value="tous">Tous les contrats</option>' +
+    liste.map(t => `<option value="${esc(t)}">${esc(libelleContrat(t))}</option>`).join('');
+  sel.value = liste.includes(carteTypeFiltre) ? carteTypeFiltre : 'tous';
+  carteTypeFiltre = sel.value;
+}
+
+// Les annonces situées. Celles d'avant la carte n'ont pas de
+// coordonnées : elles restent dans la liste, sans point.
+function offresCarte() {
+  return jobsDB.filter(j => annonceActive(j) && j.lat != null && j.lng != null);
+}
+
+function distanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad;
+  const dLng = (lng2 - lng1) * rad;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+function dansLeRayon(lat, lng) {
+  if (carteRayonFiltre === 'tout' || !carte) return true;
+  const c = carte.getCenter();
+  return distanceKm(c.lat, c.lng, lat, lng) <= Number(carteRayonFiltre);
+}
+
+function majCercleFiltre() {
+  if (!carte) return;
+  if (carteCercleFiltre) { carte.removeLayer(carteCercleFiltre); carteCercleFiltre = null; }
+  if (carteRayonFiltre === 'tout') return;
+
+  carteCercleFiltre = L.circle(carte.getCenter(), {
+    radius: Number(carteRayonFiltre) * 1000,
+    color: '#0F2B4D', weight: 1.5, dashArray: '6 6',
+    fill: false, interactive: false
+  }).addTo(carte);
+}
+
+// ─────── Rendu ───────
+function renderCarte() {
+  // Avant que Leaflet soit là, il n'y a rien à compter et surtout rien
+  // à annoncer : afficher « aucun point » pendant le chargement du CDN
+  // ferait croire à une carte vide.
+  if (!carte || !carteCouches) {
+    const vide = document.getElementById('carteVide');
+    if (vide) vide.style.display = 'none';
+    return;
+  }
+
+  const compteurs = (o, p) => {
+    setStat('carteNbOffres', o);
+    setStat('carteNbPraticiens', p);
+    const vide = document.getElementById('carteVide');
+    if (!vide) return;
+    if (o + p) { vide.style.display = 'none'; return; }
+    vide.style.display = 'block';
+    vide.textContent = (offresCarte().length + praticiensCarte.length)
+      ? "Aucun point ne correspond à ces filtres. Élargissez le rayon ou le type de contrat."
+      : "Aucun point sur la carte pour l'instant : les annonces publiées avant la carte ne sont pas encore situées, et aucun praticien ne s'est déclaré en recherche.";
+  };
+
+  carteCouches.clearLayers();
+  if (carteCercleZone) { carte.removeLayer(carteCercleZone); carteCercleZone = null; }
+
+  const offres = carteAffichage === 'praticiens' ? [] : offresCarte().filter(j =>
+    (carteTypeFiltre === 'tous' || j.type_contrat === carteTypeFiltre) &&
+    dansLeRayon(j.lat, j.lng));
+
+  const praticiens = carteAffichage === 'offres' ? [] : praticiensCarte.filter(p =>
+    p.lat != null && p.lng != null &&
+    (carteTypeFiltre === 'tous' || (p.types || []).includes(carteTypeFiltre)) &&
+    dansLeRayon(p.lat, p.lng));
+
+  const points = [];
+
+  offres.forEach(j => {
+    points.push([j.lat, j.lng]);
+    ajouterPoint('offre', j.lat, j.lng, j.titre, () => ouvrirFicheCarte(ficheOffre(j), 'offre-' + j.id));
+  });
+
+  praticiens.forEach(p => {
+    points.push([p.lat, p.lng]);
+    const nom = 'Praticien en recherche' + (p.ville ? ' — ' + p.ville : '');
+    ajouterPoint('praticien', p.lat, p.lng, nom, () => {
+      ouvrirFicheCarte(fichePraticien(p), 'praticien-' + p.id);
+      montrerZone(p);
+    });
+  });
+
+  compteurs(offres.length, praticiens.length);
+
+  // Le cadrage n'est fait qu'une fois, au premier rendu utile :
+  // recadrer à chaque changement de filtre ferait sauter la carte sous
+  // les doigts de qui vient de la déplacer.
+  if (!carteCadree && points.length) {
+    carteCadree = true;
+    carteBornes = L.latLngBounds(points);
+    carte.fitBounds(carteBornes, { padding: [36, 36], maxZoom: 10 });
+  }
+}
+
+function ajouterPoint(genre, lat, lng, titre, auClic) {
+  const marqueur = L.marker([lat, lng], {
+    title: titre,
+    alt: titre,
+    riseOnHover: true,
+    icon: L.divIcon({
+      className: '',
+      html: '<span class="carte-pin carte-pin-' + genre + '"></span>',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    })
+  });
+  const selectionner = (e) => {
+    document.querySelectorAll('#carteEmploi .carte-pin.actif')
+      .forEach(el => el.classList.remove('actif'));
+    const pastille = marqueur.getElement && marqueur.getElement();
+    if (pastille) {
+      const pin = pastille.querySelector('.carte-pin');
+      if (pin) pin.classList.add('actif');
+    }
+    auClic(e);
+  };
+  marqueur.on('click', selectionner);
+  marqueur.on('keypress', selectionner);
+  marqueur.addTo(carteCouches);
+  return marqueur;
+}
+
+// Le rayon accepté par le praticien sélectionné, dessiné autour de son
+// point : c'est ce qui donne son sens au chiffre affiché dans la fiche.
+function montrerZone(p) {
+  if (!carte || !p.rayon_km) return;
+  carteCercleZone = L.circle([p.lat, p.lng], {
+    radius: p.rayon_km * 1000,
+    color: COULEUR_PRATICIEN, weight: 1.5,
+    fillColor: COULEUR_PRATICIEN, fillOpacity: 0.08,
+    interactive: false
+  }).addTo(carte);
+}
+
+// ─────── La fiche courte ───────
+function ouvrirFicheCarte(html, cle) {
+  const f = document.getElementById('carteFiche');
+  if (!f) return;
+  if (carteCercleZone) { carte.removeLayer(carteCercleZone); carteCercleZone = null; }
+  carteSelection = cle;
+  f.innerHTML = html;
+  f.classList.add('open');
+  f.scrollTop = 0;
+}
+
+function fermerFicheCarte() {
+  document.querySelectorAll('#carteEmploi .carte-pin.actif')
+    .forEach(el => el.classList.remove('actif'));
+  const f = document.getElementById('carteFiche');
+  if (f) { f.classList.remove('open'); f.innerHTML = ''; }
+  carteSelection = null;
+  if (carte && carteCercleZone) { carte.removeLayer(carteCercleZone); carteCercleZone = null; }
+}
+
+function boutonFermerFiche() {
+  return '<button class="carte-fiche-fermer" onclick="fermerFicheCarte()" aria-label="Fermer la fiche">&times;</button>';
+}
+
+function etiquettesCarte(valeurs) {
+  const l = (valeurs || []).filter(Boolean);
+  if (!l.length) return '';
+  return '<div class="carte-etiquettes">' +
+    l.map(v => `<span class="carte-etiquette">${esc(v)}</span>`).join('') + '</div>';
+}
+
+function ficheOffre(j) {
+  return `
+    ${boutonFermerFiche()}
+    <span class="badge badge-contrat">${esc(libelleContrat(j.type_contrat))}</span>
+    <div class="carte-fiche-titre">${esc(j.titre)}</div>
+    ${renderCabinetAnnonce(j, 'carte-fiche-lieu')}
+    <div class="carte-fiche-lieu">📍 ${esc(j.ville || '')}${j.departement ? ' (' + esc(j.departement) + ')' : ''}</div>
+    ${j.description ? `<div class="carte-fiche-texte">${esc(extraitTexte(j.description, 170))}</div>` : ''}
+    <a class="btn btn-turquoise btn-sm" href="${cheminAnnonce(j)}"
+       onclick="event.preventDefault(); fermerFicheCarte(); ouvrirAnnonce(${j.id})">Voir l'annonce</a>`;
+}
+
+// Le titre de la fiche est le seul endroit où un nom peut apparaître,
+// et seulement s'il a été reçu — c'est-à-dire seulement pour un
+// praticien connecté, servi par la vue de contact.
+function fichePraticien(p) {
+  const nom = currentUser && p.nom ? p.nom : null;
+  const types = (p.types || []).map(libelleContrat);
+  const soiMeme = currentProfile && p.id === currentProfile.id;
+
+  return `
+    ${boutonFermerFiche()}
+    <span class="badge badge-recherche">En recherche</span>
+    <div class="carte-fiche-titre">${nom ? esc(nom) : esc(libelleStatut(p.statut)) + ' en recherche'}</div>
+    ${nom ? `<div class="carte-fiche-lieu">${esc(libelleStatut(p.statut))}</div>` : ''}
+    <div class="carte-fiche-lieu">📍 ${esc(p.ville || '')}${p.rayon_km ? ' · rayon ' + esc(p.rayon_km) + ' km' : ''}</div>
+    ${(p.departements || []).length
+      ? `<div class="carte-fiche-ligne"><strong>Aussi :</strong> ${esc((p.departements || []).join(', '))}</div>` : ''}
+    ${p.disponibilite
+      ? `<div class="carte-fiche-ligne"><strong>Disponible :</strong> ${esc(p.disponibilite)}</div>` : ''}
+    ${p.message ? `<div class="carte-fiche-texte">${esc(extraitTexte(p.message, 200))}</div>` : ''}
+    ${etiquettesCarte(types)}
+    ${etiquettesCarte(p.techniques)}
+    ${soiMeme
+      ? `<div class="carte-fiche-note">C'est votre propre recherche, telle que les autres la voient.</div>`
+      : contactPraticien(p)}
+    <div class="carte-fiche-note">
+      Position indicative : le point est décalé de quelques centaines de mètres et désigne une zone, pas une adresse.
+    </div>`;
+}
+
+// L'objet est pré-rempli comme pour une candidature à une annonce :
+// le praticien contacté doit comprendre d'où vient le message.
+function objetContactPraticien(p) {
+  return 'Proposition de poste' + (p.ville ? ' à ' + p.ville : '') + ' — OrthoConnect';
+}
+
+function contactPraticien(p) {
+  if (!currentUser) {
+    return `<button class="btn btn-turquoise btn-sm" onclick="openAuth('login')">Se connecter pour contacter</button>
+      <div class="carte-fiche-note">
+        Le nom et l'email d'un praticien en recherche sont réservés aux praticiens inscrits.
+        L'inscription est gratuite et réservée aux orthodontistes et internes en ODF.
+      </div>`;
+  }
+  if (!p.email) {
+    return `<div class="carte-fiche-note">Aucun email n'est joignable sur ce compte.</div>`;
+  }
+  return `<a class="btn btn-turquoise btn-sm"
+     href="mailto:${esc(p.email)}?subject=${encodeURIComponent(objetContactPraticien(p))}">✉️ Contacter ce praticien</a>`;
 }
 
 // ═══════════════════════════════════════════════
@@ -5435,10 +6642,28 @@ function adminMessage(texte, estErreur) {
   if (!estErreur) setTimeout(() => { el.className = 'admin-message'; }, 4000);
 }
 
+// en_recherche n'existe qu'une fois carte_emploi.sql passé. On la
+// demande une fois ; au premier refus, on s'en passe pour la session
+// plutôt que de rendre toute l'administration inaccessible.
+let colonneRecherche = true;
+
+async function chargerPraticiensAdmin() {
+  const colonnes = 'id, nom, email, ville, statut, rpps, role, created_at';
+  const lire = (c) => sb.from('praticiens').select(c)
+    .order('created_at', { ascending: false });
+
+  if (colonneRecherche) {
+    const r = await lire(colonnes + ', en_recherche');
+    if (!r.error) return r;
+    console.warn("Colonne en_recherche absente : carte_emploi.sql n'a pas été passé.");
+    colonneRecherche = false;
+  }
+  return lire(colonnes);
+}
+
 async function chargerAdmin() {
   const [pr, org, fo, se, co, an] = await Promise.all([
-    sb.from('praticiens').select('id, nom, email, ville, statut, rpps, role, created_at')
-      .order('created_at', { ascending: false }),
+    chargerPraticiensAdmin(),
     sb.from('organismes').select('*').order('nom'),
     sb.from('formations').select('*, organismes(id, nom, logo_url, partenaire)').order('id', { ascending: false }),
     sb.from('sessions_formation').select('*, formations(id, titre)').order('date_debut'),
@@ -5491,6 +6716,7 @@ function renderAdminDash() {
   setStat('admStatLiberal',    parStatut.liberal);
   setStat('admStatCollab',     parStatut.collaborateur);
   setStat('admStatInterne',    parStatut.interne);
+  setStat('admStatRecherche',  adminPraticiens.filter(p => p.en_recherche).length);
   setStat('admStatPubliees',   adminFormations.filter(f => f.statut === 'publie').length);
   setStat('admStatBrouillons', brouillons.length);
   setStat('admStatOrganismes', adminOrganismes.length);
@@ -5550,7 +6776,7 @@ function renderAdminInscrits() {
       <table class="admin-table">
         <thead>
           <tr>
-            <th>Nom</th><th>Statut</th><th>Ville</th><th>RPPS</th><th>Inscrit le</th>
+            <th>Nom</th><th>Statut</th><th>Ville</th><th>Recherche</th><th>RPPS</th><th>Inscrit le</th>
           </tr>
         </thead>
         <tbody>
@@ -5562,6 +6788,9 @@ function renderAdminInscrits() {
               </td>
               <td>${esc(libelleStatut(p.statut))}</td>
               <td>${esc(p.ville || '—')}</td>
+              <td>${p.en_recherche
+                ? '<span class="badge badge-recherche">En recherche</span>'
+                : '<span style="color:var(--text-light)">—</span>'}</td>
               <td>${renderRpps(p)}</td>
               <td style="white-space:nowrap">${esc(formatDate(p.created_at))}</td>
             </tr>
@@ -6723,6 +7952,11 @@ function showPage(page, chemin) {
   const meta = META_PAGES[page];
   if (meta) majMeta(meta.titre, meta.description, adresse || cheminCourant());
 
+  // Leaflet mesure son conteneur : la carte ne peut être construite
+  // qu'une fois la page affichée, pas avant.
+  if (page === 'emploi') initCarte();
+  else fermerFicheCarte();
+
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -6743,6 +7977,15 @@ document.addEventListener('keydown', (e) => {
 // DÉMARRAGE
 // ═══════════════════════════════════════════════
 (async function init() {
+  // L'annonce et la recherche d'emploi partagent la même saisie de
+  // commune ; le choix d'une ville renseigne aussi le département de
+  // l'annonce, qui sert au filtre de la liste.
+  brancherCommune('anVille', 'anVilleListe', (c) => {
+    const dept = document.getElementById('anDept');
+    if (dept && c.departement) dept.value = c.departement;
+  });
+  brancherCommune('rcVille', 'rcVilleListe');
+
   await loadCatalogues();
   await refreshAuthUI();
 
