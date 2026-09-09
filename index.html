@@ -2809,6 +2809,7 @@
             <p class="panel-sub">Ces informations restent privées. Elles servent à personnaliser vos recommandations.</p>
 
             <div class="profile-saved" id="profileSaved">✓ Votre fiche a bien été enregistrée.</div>
+            <div class="admin-message" id="profileMessage"></div>
 
             <div style="font-size:13px; color:var(--text-secondary)">Complétion : <strong id="completionPct">0%</strong></div>
             <div class="completion-bar"><div class="completion-fill" id="completionFill" style="width:0%"></div></div>
@@ -3800,6 +3801,7 @@
             <div class="form-note" style="margin-top:12px">Sans engagement. Réponse sous 24h ouvrées.</div>
           </div>
         </form>
+        <div class="admin-message" id="formErreur" style="margin-top:18px"></div>
         <div class="form-success" id="formSuccess">
           ✅ Merci ! Votre demande a bien été reçue. Un consultant vous contactera sous 24h.
         </div>
@@ -3865,6 +3867,64 @@ let codesPraticien = [];
 // Le formulaire de recherche n'est pré-rempli qu'une fois par session :
 // un rendu du tableau de bord ne doit pas écraser une saisie en cours.
 let rechercheRemplie = false;
+
+// ═══════════════════════════════════════════════
+// ERREURS
+//
+// Une erreur qu'on ne sait pas traiter doit rester lisible.
+// « Erreur d'enregistrement. Réessayez. » ne disait rien, et réessayer
+// ne changeait rien : le message de la base part à l'écran, l'objet
+// entier dans la console.
+// ═══════════════════════════════════════════════
+
+// message, details et hint ne disent pas la même chose : PostgREST met
+// le nom de la colonne dans l'un, la contrainte violée dans l'autre.
+// On les rend tous les trois plutôt que d'en choisir un, et le code
+// avec — c'est lui qu'on cherche dans la documentation.
+function detailErreur(error) {
+  if (!error) return 'erreur inconnue';
+  const texte = [error.message, error.details, error.hint].filter(Boolean).join(' — ');
+  return (texte || String(error)) + (error.code ? ' [' + error.code + ']' : '');
+}
+
+// Journalise tout, rend de quoi afficher. Le contexte est le nom de
+// l'opération : c'est par lui qu'on retrouve la ligne dans la console.
+function signalerErreur(contexte, error) {
+  console.error('[OrthoConnect] ' + contexte, {
+    message: error && error.message,
+    details: error && error.details,
+    hint:    error && error.hint,
+    code:    error && error.code,
+    erreur:  error
+  });
+  return detailErreur(error);
+}
+
+// Vrai seulement si l'erreur dit que L'UNE DE CES COLONNES-LÀ manque.
+//
+// Les tests précédents cherchaient « schema cache » dans le message,
+// ou pire « lat » — qui est un morceau de « violates » et de
+// « relation ». N'importe quelle colonne absente, n'importe quelle
+// contrainte violée, passait donc pour une absence de cabinet_lat : le
+// front annonçait un SQL non exécuté qui l'était, puis réessayait sans
+// les coordonnées et échouait pour la vraie raison, restée invisible.
+//
+// PostgREST rend PGRST204 quand une colonne du payload manque à son
+// cache de schéma, Postgres rend 42703 (undefined_column) quand c'est
+// lui qui la refuse. Dans les deux cas le nom de la colonne est écrit
+// dans le message : on exige de l'y trouver, entier, pas en sous-chaîne.
+function colonneAbsente(error, colonnes) {
+  if (!error) return false;
+
+  const texte = [error.message, error.details, error.hint].filter(Boolean).join(' ');
+  const nommee = colonnes.some(c =>
+    new RegExp('(^|[^a-z0-9_])' + c + '($|[^a-z0-9_])', 'i').test(texte));
+  if (!nommee) return false;
+
+  const code = String(error.code || '');
+  return code === 'PGRST204' || code === '42703'
+    || /could not find|does not exist|schema cache/i.test(texte);
+}
 
 // ═══════════════════════════════════════════════
 // CHARGEMENT DES CATALOGUES (public, sans auth)
@@ -4483,8 +4543,7 @@ async function ecrireProfil(updates) {
   const envoyer = (u) => sb.from('praticiens').update(u).eq('id', currentUser.id);
 
   let r = await envoyer(updates);
-  if (r.error && colonnesGeoCabinet && 'cabinet_lat' in updates
-      && /cabinet_lat|cabinet_lng|schema cache/i.test(r.error.message)) {
+  if ('cabinet_lat' in updates && colonneAbsente(r.error, ['cabinet_lat', 'cabinet_lng'])) {
     console.warn("Colonnes cabinet_lat / cabinet_lng absentes : carte_rayon_cabinet.sql n'a pas été passé.");
     colonnesGeoCabinet = false;
     const sansGeo = { ...updates };
@@ -4493,6 +4552,16 @@ async function ecrireProfil(updates) {
     r = await envoyer(sansGeo);
   }
   return r;
+}
+
+// L'erreur reste affichée tant qu'elle n'est pas corrigée : elle est
+// là pour être lue, recopiée et diagnostiquée, pas pour passer.
+function messageProfil(texte, erreur) {
+  const el = document.getElementById('profileMessage');
+  if (!el) return;
+  if (!texte) { el.className = 'admin-message'; el.textContent = ''; return; }
+  el.textContent = texte;
+  el.className = 'admin-message show ' + (erreur ? 'ko' : 'ok');
 }
 
 async function saveProfile() {
@@ -4524,7 +4593,11 @@ async function saveProfile() {
 
   const { error } = await ecrireProfil(updates);
 
-  if (error) { alert("Erreur d'enregistrement. Réessayez."); return; }
+  if (error) {
+    return messageProfil('Enregistrement refusé par la base : '
+      + signalerErreur('saveProfile', error), true);
+  }
+  messageProfil('');
 
   // Ce qui n'a pas été écrit ne doit pas être tenu pour vrai en
   // mémoire : sans les colonnes, la carte croirait le cabinet situé.
@@ -4810,11 +4883,17 @@ function messageRecherche(texte, erreur) {
 // message le dit franchement plutôt que de laisser l'erreur brute de
 // Postgres à l'écran.
 function messageRefusRecherche(error) {
-  const m = String(error && error.message || '');
-  if (/column|colonne|schema cache/i.test(m) && /recherche|en_recherche/i.test(m)) {
-    messageRecherche("La carte n'est pas encore installée sur la base : carte_emploi.sql n'a pas été exécuté.", true);
+  const detail = signalerErreur('enregistrerRecherche', error);
+
+  const colonnes = ['en_recherche', 'recherche_ville', 'recherche_lat', 'recherche_lng',
+    'recherche_rayon_km', 'recherche_departements', 'recherche_types',
+    'recherche_disponibilite', 'recherche_message', 'recherche_maj_le'];
+
+  if (colonneAbsente(error, colonnes)) {
+    messageRecherche("La carte n'est pas encore installée sur la base : carte_emploi.sql n'a pas été exécuté. "
+      + '(' + detail + ')', true);
   } else {
-    messageRecherche('Enregistrement refusé : ' + m, true);
+    messageRecherche('Enregistrement refusé par la base : ' + detail, true);
   }
 }
 
@@ -5385,8 +5464,7 @@ async function ecrireAnnonceEmploi(payload, id) {
     : sb.from('offres_emploi').insert(p);
 
   let r = await envoyer(payload);
-  if (r.error && colonnesGeoAnnonce && 'lat' in payload
-      && /lat|lng|schema cache/i.test(r.error.message)) {
+  if ('lat' in payload && colonneAbsente(r.error, ['lat', 'lng'])) {
     console.warn("Colonnes lat / lng absentes : carte_emploi.sql n'a pas été passé.");
     colonnesGeoAnnonce = false;
     const sansGeo = { ...payload };
@@ -5451,7 +5529,10 @@ async function enregistrerAnnonce() {
 
   const { error } = await ecrireAnnonceEmploi(payload, annonceEnCours);
 
-  if (error) return messageAnnonce('Enregistrement refusé : ' + error.message, true);
+  if (error) {
+    return messageAnnonce('Enregistrement refusé par la base : '
+      + signalerErreur('enregistrerAnnonce', error), true);
+  }
 
   messageAnnonce((annonceEnCours ? 'Annonce mise à jour.' : 'Annonce publiée.')
     + (colonnesGeoAnnonce && !situee
@@ -5467,7 +5548,7 @@ function dansNJours(n) {
 
 async function marquerPourvue(id) {
   const { error } = await sb.from('offres_emploi').update({ statut: 'pourvue' }).eq('id', id);
-  if (error) return messageAnnonce('Modification refusée : ' + error.message, true);
+  if (error) return messageAnnonce('Modification refusée : ' + signalerErreur('marquerPourvue', error), true);
   messageAnnonce('Annonce marquée pourvue, elle ne figure plus dans les offres.');
   await rafraichirAnnonces();
 }
@@ -5475,7 +5556,7 @@ async function marquerPourvue(id) {
 async function prolongerAnnonce(id) {
   const { error } = await sb.from('offres_emploi')
     .update({ expire_le: dansNJours(90), statut: 'publiee' }).eq('id', id);
-  if (error) return messageAnnonce('Prolongation refusée : ' + error.message, true);
+  if (error) return messageAnnonce('Prolongation refusée : ' + signalerErreur('prolongerAnnonce', error), true);
   messageAnnonce('Annonce prolongée de 90 jours.');
   await rafraichirAnnonces();
 }
@@ -5484,7 +5565,7 @@ async function supprimerAnnonce(id) {
   const j = mesAnnonces.find(x => x.id === id);
   if (!window.confirm('Retirer définitivement « ' + (j ? j.titre : 'cette annonce') + ' » ?')) return;
   const { error } = await sb.from('offres_emploi').delete().eq('id', id);
-  if (error) return messageAnnonce('Suppression refusée : ' + error.message, true);
+  if (error) return messageAnnonce('Suppression refusée : ' + signalerErreur('supprimerAnnonce', error), true);
   messageAnnonce('Annonce retirée.');
   await rafraichirAnnonces();
 }
@@ -6230,8 +6311,17 @@ async function submitForm(e) {
 
   const { error } = await sb.from('demandes_partenaires').insert(payload);
 
-  if (error) { alert("Erreur d'envoi. Réessayez ou écrivez à partenaires@orthoconnect.fr"); return; }
+  if (error) {
+    const zone = document.getElementById('formErreur');
+    zone.textContent = "Votre demande n'a pas pu être envoyée : "
+      + signalerErreur('submitForm', error)
+      + ' — écrivez à partenaires@orthoconnect.fr, le message y arrivera.';
+    zone.className = 'admin-message show ko';
+    zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
 
+  document.getElementById('formErreur').className = 'admin-message';
   document.getElementById('formSuccess').style.display = 'block';
   e.target.style.display = 'none';
   document.getElementById('formSuccess').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -6848,6 +6938,12 @@ async function chargerPraticiensAdmin() {
   if (colonneRecherche) {
     const r = await lire(colonnes + ', en_recherche');
     if (!r.error) return r;
+
+    // Une panne, un droit manquant ou un réseau coupé ne sont pas une
+    // colonne absente : dans ces cas-là l'erreur doit remonter à
+    // chargerAdmin, qui l'affiche, au lieu d'être avalée par un repli.
+    if (!colonneAbsente(r.error, ['en_recherche'])) return r;
+
     console.warn("Colonne en_recherche absente : carte_emploi.sql n'a pas été passé.");
     colonneRecherche = false;
   }

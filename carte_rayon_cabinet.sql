@@ -82,6 +82,23 @@ revoke select on public.praticiens from anon;
 --   and table_name in (select table_name from information_schema.views
 --                      where table_schema = 'public');
 
+-- 3.a bis  TOUTES les colonnes que le formulaire « Ma fiche cabinet »
+--      écrit, et lesquelles manquent. Une seule absente fait échouer
+--      l'enregistrement entier, avec une erreur PGRST204 qui ne nomme
+--      qu'elle : c'est la requête à lancer quand la fiche refuse de
+--      s'enregistrer.
+-- select c.colonne, (a.attname is not null) as existe
+-- from unnest(array[
+--        'cabinet_nom', 'telephone', 'cabinet_ville', 'cabinet_type',
+--        'annees_exercice', 'volume_patients', 'scanner', 'objectifs',
+--        'techniques', 'cabinet_lat', 'cabinet_lng'
+--      ]) as c(colonne)
+-- left join pg_attribute a
+--        on a.attrelid = 'public.praticiens'::regclass
+--       and a.attname = c.colonne
+--       and a.attnum > 0 and not a.attisdropped
+-- order by existe, c.colonne;
+
 -- 3.b  Les colonnes existent bien sur la table, elles :
 -- select column_name, data_type from information_schema.columns
 -- where table_schema = 'public' and table_name = 'praticiens'
