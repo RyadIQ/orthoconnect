@@ -1237,12 +1237,6 @@
   .job-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 8px; }
   .job-title { font-size: 16px; font-weight: 700; color: var(--navy); }
   .job-cab { font-size: 13px; color: var(--turquoise); font-weight: 600; margin-top: 2px; }
-  /* À la place du nom du cabinet, hors session : une mention qui dit
-     pourquoi il manque, assez sobre pour ne pas se lire comme le nom
-     d'un annonceur. */
-  .cabinet-masque { font-weight: 500; letter-spacing: 0; text-transform: none; }
-  .job-cab.cabinet-masque { color: var(--text-light); }
-  .detail-orga.cabinet-masque { color: rgba(255,255,255,0.6); }
   .job-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 10px 0; }
   .job-meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-light); }
 
@@ -1745,6 +1739,49 @@
   .champ-commune .form-note.ok { color: var(--success); font-weight: 600; }
 
   .badge-recherche { background: #FFF1E6; color: #C2410C; }
+
+  /* ===== INVITATION À S'INSCRIRE ===== */
+  .invitation-carte {
+    max-width: 680px; margin: 0 auto;
+    border: 1px solid var(--grey-border); border-radius: var(--radius);
+    background: var(--white); box-shadow: var(--shadow);
+    padding: 40px;
+  }
+  .invitation-cadenas { font-size: 34px; line-height: 1; margin-bottom: 16px; }
+  .invitation-carte h2 {
+    font-size: 24px; font-weight: 800; line-height: 1.25;
+    letter-spacing: -0.3px; margin-bottom: 14px;
+  }
+  .invitation-intro { color: var(--text-secondary); font-size: 15px; line-height: 1.7; }
+  .invitation-liste-titre {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-light);
+    margin: 28px 0 12px;
+  }
+  .invitation-liste { list-style: none; }
+  .invitation-liste li {
+    position: relative; padding-left: 26px; margin-bottom: 10px;
+    font-size: 14.5px; color: var(--text-secondary); line-height: 1.6;
+  }
+  .invitation-liste li::before {
+    content: '✓'; position: absolute; left: 0; top: 0;
+    color: var(--turquoise); font-weight: 800;
+  }
+  .invitation-liste strong { color: var(--text-main); font-weight: 600; }
+  .invitation-actions {
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .invitation-actions a { font-size: 14px; font-weight: 600; color: var(--navy); }
+  .invitation-note {
+    margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--grey-border);
+    font-size: 13px; color: var(--text-light); line-height: 1.6;
+  }
+  @media (max-width: 600px) {
+    .invitation-carte { padding: 26px 22px; }
+    .invitation-carte h2 { font-size: 20px; }
+    .invitation-actions .btn { width: 100%; justify-content: center; }
+  }
 
   /* ===== TARIF PRÉFÉRENTIEL ===== */
   .tarif-carte {
@@ -2649,6 +2686,77 @@
 </div>
 
 <!-- ==================== -->
+<!-- PAGE : INVITATION À S'INSCRIRE                                  -->
+<!-- Ce qu'un visiteur obtient à la place d'une fiche annonce.       -->
+<!-- Elle vit à l'adresse de l'annonce : le lien partagé garde son   -->
+<!-- sens, et la connexion depuis cette page y ramène directement.   -->
+<!-- ==================== -->
+<div class="page" id="page-invitation">
+  <section class="detail-hero">
+    <div class="container">
+      <button type="button" class="detail-retour" onclick="showPage('emploi')">&larr; Retour aux offres</button>
+      <div id="invitationHero"></div>
+    </div>
+  </section>
+
+  <section class="detail-body">
+    <div class="container">
+      <div class="invitation-carte">
+        <div class="invitation-cadenas" aria-hidden="true">🔒</div>
+        <h2>Le détail de cette annonce est réservé aux praticiens inscrits</h2>
+        <p class="invitation-intro">
+          Le poste, le profil recherché, les conditions et les coordonnées du cabinet
+          ne sont pas publiés : ils ne sont lisibles qu'une fois connecté.
+          L'inscription prend deux minutes et elle est gratuite.
+        </p>
+
+        <div class="invitation-liste-titre">Ce que votre compte vous donne</div>
+        <ul class="invitation-liste">
+          <li>Le détail de <strong>toutes les annonces</strong>, coordonnées du cabinet comprises, pour candidater en direct.</li>
+          <li>Le <strong>catalogue des formations</strong> et les tarifs préférentiels négociés auprès des organismes.</li>
+          <li>La <strong>carte de l'emploi</strong>, avec le nom des praticiens en recherche autour de vous.</li>
+          <li>La possibilité de <strong>publier vos propres annonces</strong> et de vous déclarer en recherche.</li>
+        </ul>
+
+        <div class="invitation-actions">
+          <button class="btn btn-turquoise" onclick="openAuth('signup')">Créer mon compte</button>
+          <a href="#" onclick="event.preventDefault(); openAuth('login')">J'ai déjà un compte</a>
+        </div>
+
+        <div class="invitation-note">
+          L'inscription est gratuite et réservée aux orthodontistes et aux internes en ODF.
+          Un numéro RPPS vous sera demandé, ou votre faculté de rattachement si vous êtes interne.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, matériel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="/emploi" onclick="showPage('emploi')">Toutes les offres</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ==================== -->
 <!-- PAGE : CONTENU INTROUVABLE                                     -->
 <!-- Une URL qui ne mène à rien vaut mieux qu'une page blanche :     -->
 <!-- on dit ce qui manque et on renvoie au catalogue concerné.       -->
@@ -2951,8 +3059,9 @@
                        oninput="majSlugAnnonce()">
                 <div class="form-note form-slug" id="anSlugInfo"></div>
                 <div class="form-note">
-                  Évitez d'y mettre le nom de votre cabinet : il est masqué aux visiteurs
-                  non inscrits partout ailleurs, mais l'intitulé, lui, s'affiche tel quel.
+                  Évitez d'y mettre le nom de votre cabinet : le reste de l'annonce n'est
+                  lisible que des praticiens inscrits, mais l'intitulé, lui, s'affiche pour
+                  tout le monde — c'est lui qui fait la liste, la carte et l'adresse.
                 </div>
               </div>
               <div class="form-row">
@@ -4234,7 +4343,7 @@ async function doSignup() {
     }
 
     closeAuth();
-    showPage('dashboard');
+    apresConnexion();
 
   } catch (e) {
     resetBtn();
@@ -4262,7 +4371,7 @@ async function doLogin() {
 
   closeAuth();
   await refreshAuthUI();
-  showPage('dashboard');
+  apresConnexion();
 }
 
 async function doLogout() {
@@ -5185,6 +5294,9 @@ function renderAnnonces() {
     return;
   }
 
+  // Sans compte, la carte s'arrête à l'intitulé, au contrat, au lieu
+  // et à la date : la description n'est plus servie par la vue
+  // publique, et le reste ne s'affiche pas davantage.
   zone.innerHTML = lignes.map(j => `
     <div class="job-card" onclick="ouvrirAnnonce(${j.id})">
       <div class="job-head">
@@ -5195,7 +5307,7 @@ function renderAnnonces() {
         </div>
         <span class="badge badge-contrat">${esc(libelleContrat(j.type_contrat))}</span>
       </div>
-      <div class="job-desc">${esc(extraitTexte(j.description, 220))}</div>
+      ${j.description ? `<div class="job-desc">${esc(extraitTexte(j.description, 220))}</div>` : ''}
       <div class="job-meta">
         <span>📍 ${esc(j.ville || '')}${j.departement ? ' (' + esc(j.departement) + ')' : ''}</span>
         <span>🗓 ${esc(formatDate(j.publie_le || j.created_at))}</span>
@@ -5204,20 +5316,12 @@ function renderAnnonces() {
   `).join('');
 }
 
-// Le nom du cabinet suit la règle des coordonnées : hors session il ne
-// s'affiche pas et, une fois emploi_cabinet_masque.sql passé, la vue
-// publique ne l'envoie même plus — elle n'en garde qu'un booléen, comme
-// a_contact. Le masquage à l'écran vaut en attendant, et couvre le
-// repli sur la table quand la vue manque.
-function aCabinet(j) {
-  return j.a_cabinet != null ? !!j.a_cabinet : !!j.cabinet;
-}
-
+// Le nom du cabinet n'apparaît qu'en session. La mention « Cabinet
+// réservé aux praticiens inscrits » a disparu avec le booléen a_cabinet
+// qui la portait : une carte d'annonce vue sans compte s'en tient à
+// l'intitulé, au contrat, au lieu et à la date.
 function renderCabinetAnnonce(j, classe) {
   if (currentUser && j.cabinet) return `<div class="${classe}">${esc(j.cabinet)}</div>`;
-  if (!currentUser && aCabinet(j)) {
-    return `<div class="${classe} cabinet-masque">Cabinet réservé aux praticiens inscrits</div>`;
-  }
   return '';
 }
 
@@ -5227,9 +5331,19 @@ function extraitTexte(t, max) {
 }
 
 // ─────── Fiche annonce ───────
+// L'annonce qu'un visiteur a demandée sans compte. Elle attend qu'il
+// s'inscrive ou se connecte, pour qu'il arrive sur ce qu'il voulait
+// voir et non sur son tableau de bord.
+let annonceVoulue = null;
+
 function ouvrirAnnonce(id) {
   const j = jobsDB.find(x => x.id === id);
   if (!j || !annonceActive(j)) return;
+
+  // Sans compte, il n'y a pas de fiche à montrer : la vue publique ne
+  // transmet plus ni le poste, ni le profil, ni les conditions. La page
+  // d'invitation prend sa place, à la même adresse.
+  if (!currentUser) { inviterPourAnnonce(j); return; }
 
   annonceOuverte = j;
   showPage('annonce', cheminAnnonce(j));
@@ -5261,29 +5375,56 @@ function ouvrirAnnonce(id) {
     .classList.toggle('pleine-largeur', !aside.innerHTML.trim());
 }
 
+function inviterPourAnnonce(j) {
+  annonceVoulue = j.id;
+
+  // L'adresse reste celle de l'annonce : le lien reste partageable, il
+  // est indexable sur ce qu'il a de public, et un rechargement une fois
+  // connecté ouvre la fiche sans détour.
+  showPage('invitation', cheminAnnonce(j));
+
+  majMeta(j.titre + " | Offre d'emploi | OrthoConnect",
+    "Offre d'emploi en orthodontie" + (j.ville ? ' à ' + j.ville : '')
+      + '. Le détail de l\'annonce est réservé aux praticiens inscrits sur OrthoConnect.',
+    cheminAnnonce(j));
+
+  // L'en-tête reprend ce qui est public, pour que le visiteur sache de
+  // quelle annonce on lui parle.
+  document.getElementById('invitationHero').innerHTML = `
+    <div class="detail-badges">
+      <span class="badge badge-contrat">${esc(libelleContrat(j.type_contrat))}</span>
+    </div>
+    <h1>${esc(j.titre)}</h1>
+    <div class="detail-meta">
+      ${j.ville ? `<div class="detail-meta-item"><strong>${esc(j.ville)}</strong>${j.departement ? 'Département ' + esc(j.departement) : 'Lieu'}</div>` : ''}
+      <div class="detail-meta-item"><strong>${esc(formatDate(j.publie_le || j.created_at))}</strong>Publiée le</div>
+    </div>`;
+}
+
+// Après une connexion ou une inscription : l'annonce demandée si le
+// visiteur en attendait une, le tableau de bord sinon.
+function apresConnexion() {
+  const id = annonceVoulue;
+  annonceVoulue = null;
+
+  if (id != null && jobsDB.some(j => j.id === id && annonceActive(j))) {
+    ouvrirAnnonce(id);
+    return;
+  }
+  showPage('dashboard');
+}
+
 // L'objet du mail est pré-rempli pour que le praticien n'ait plus qu'à
 // écrire son message, et pour que le cabinet identifie l'annonce.
 function objetCandidature(j) {
   return 'Candidature : ' + (j.titre || 'Annonce') + (j.ville ? ' - ' + j.ville : '');
 }
 
+// Cette carte ne s'affiche plus que pour un praticien connecté : sans
+// compte, ouvrirAnnonce n'atteint jamais la fiche, il renvoie sur la
+// page d'invitation. La branche « non connecté » qui vivait ici n'avait
+// donc plus de chemin pour être atteinte.
 function renderContactAnnonce(j) {
-  // Non connecté : la vue publique n'a même pas renvoyé les
-  // coordonnées, il n'y a rien à masquer, il n'y a rien à afficher.
-  if (!currentUser) {
-    return `<div class="contact-carte">
-        <div class="contact-titre">Contacter le cabinet</div>
-        <div class="contact-note" style="margin-top:0; margin-bottom:14px">
-          Les coordonnées du cabinet sont réservées aux praticiens inscrits.
-        </div>
-        <button type="button" class="btn btn-turquoise" style="width:100%; justify-content:center"
-                onclick="openAuth('login')">Se connecter pour voir le contact</button>
-        <div class="contact-note">
-          L'inscription est gratuite et réservée aux orthodontistes et internes en ODF.
-        </div>
-      </div>`;
-  }
-
   if (!j.contact_email && !j.contact_tel && !j.contact_nom) {
     return `<div class="contact-carte">
         <div class="contact-titre">Contacter le cabinet</div>
@@ -6077,6 +6218,9 @@ function etiquettesCarte(valeurs) {
     l.map(v => `<span class="carte-etiquette">${esc(v)}</span>`).join('') + '</div>';
 }
 
+// Hors session, la description n'est pas reçue : la fiche s'en tient
+// au repérage et le bouton mène à l'invitation, pas à un détail qui
+// n'existe pas de ce côté-là.
 function ficheOffre(j) {
   return `
     ${boutonFermerFiche()}
@@ -6086,7 +6230,10 @@ function ficheOffre(j) {
     <div class="carte-fiche-lieu">📍 ${esc(j.ville || '')}${j.departement ? ' (' + esc(j.departement) + ')' : ''}</div>
     ${j.description ? `<div class="carte-fiche-texte">${esc(extraitTexte(j.description, 170))}</div>` : ''}
     <a class="btn btn-turquoise btn-sm" href="${cheminAnnonce(j)}"
-       onclick="event.preventDefault(); fermerFicheCarte(); ouvrirAnnonce(${j.id})">Voir l'annonce</a>`;
+       onclick="event.preventDefault(); fermerFicheCarte(); ouvrirAnnonce(${j.id})">Voir l'annonce</a>
+    ${currentUser ? '' : `<div class="carte-fiche-note">
+      Le détail de l'annonce et les coordonnées du cabinet sont réservés aux praticiens inscrits.
+    </div>`}`;
 }
 
 // Le titre de la fiche est le seul endroit où un nom peut apparaître,
@@ -8245,6 +8392,11 @@ function showPage(page, chemin) {
   // qu'une fois la page affichée, pas avant.
   if (page === 'emploi') initCarte();
   else fermerFicheCarte();
+
+  // Passer à autre chose abandonne l'annonce en attente : se connecter
+  // une demi-heure plus tard depuis une autre page ne doit pas
+  // téléporter le praticien sur une annonce qu'il a quittée.
+  if (page !== 'invitation') annonceVoulue = null;
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
