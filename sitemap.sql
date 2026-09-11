@@ -15,9 +15,10 @@
 --   publiées et non expirées.
 --
 -- CE QUI N'Y ENTRE PAS
---   /mon-espace et /admin, privées et déjà en noindex ; les produits,
---   qui n'ont pas de fiche à eux ; les annonces expirées, qui ne
---   répondent plus.
+--   /mon-espace et /admin, privées et déjà en noindex ; /partenaires,
+--   hors ligne le temps d'être réécrite et en noindex elle aussi ; les
+--   produits, qui n'ont pas de fiche à eux ; les annonces expirées, qui
+--   ne répondent plus.
 --
 -- La date est celle du contenu quand il en porte une : une annonce
 -- prend sa date de publication, une formation sa date de vérification.
@@ -30,7 +31,6 @@ with entrees as (
   union all     select 'https://orthoconnect.fr/formations',      current_date,      'weekly',        '0.9',       2
   union all     select 'https://orthoconnect.fr/emploi',          current_date,      'daily',         '0.9',       3
   union all     select 'https://orthoconnect.fr/produits',        current_date,      'weekly',        '0.8',       4
-  union all     select 'https://orthoconnect.fr/partenaires',     current_date,      'monthly',       '0.5',       5
 
   -- Pages legales. Elles ne bougent pas quand un contenu arrive : leur
   -- date est celle de leur derniere revision, ecrite en toutes lettres
@@ -77,7 +77,7 @@ from entrees;
 --   where statut = 'publie' and slug is not null
 -- union all select 'annonces', count(*) from public.offres_emploi
 --   where statut = 'publiee' and expire_le > now() and slug is not null
--- union all select 'pages fixes', 8;
+-- union all select 'pages fixes', 7;
 
 -- Contenus publiés sans slug : ils manqueraient au sitemap.
 -- Repasse la section 4 de slugs_et_urls.sql s'il en sort quelque chose.

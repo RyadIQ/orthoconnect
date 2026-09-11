@@ -2461,7 +2461,7 @@
         <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="showPage('produits')">
           <div style="font-size:36px; margin-bottom:14px">🔬</div>
           <h3 style="font-size:16px; margin-bottom:8px">Matériel</h3>
-          <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Aligneurs, brackets, scanners. Fiches techniques et retours de praticiens qui les utilisent au fauteuil.</p>
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Aligneurs, brackets, scanners. Les fiches techniques de chaque système, mises côte à côte sur les mêmes critères.</p>
           <div style="margin-top:14px; color:var(--turquoise); font-size:13px; font-weight:600">Comparer</div>
         </div>
         <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="showPage('emploi')">
@@ -2557,29 +2557,22 @@
         <h4>Ressources</h4>
         <a href="/formations" onclick="showPage('formations')">Formations DPC</a>
         <a href="/produits" onclick="showPage('produits')">Comparatifs produits</a>
-        <a href="#">Offres d'emploi</a>
-        <a href="#">Actualités du secteur</a>
+        <a href="/emploi" onclick="showPage('emploi')">Offres d'emploi</a>
+        <a href="/actualites" onclick="requireAuth('actus')">Actualités du secteur</a>
       </div>
       <div class="footer-col">
         <h4>Produits</h4>
         <a href="/produits" onclick="showPage('produits')">Aligneurs</a>
         <a href="/produits" onclick="showPage('produits')">Brackets</a>
-        <a href="#">Caméras intra-orales</a>
-        <a href="#">Logiciels</a>
       </div>
       <div class="footer-col">
         <h4>OrthoConnect</h4>
-        <a href="#">À propos</a>
-        <a href="#">Contact</a>
+        <a href="mailto:contact@orthoconnect.fr">Contact</a>
       </div>
     </div>
     <div class="footer-bottom">
       <span>© 2026 OrthoConnect · orthoconnect.fr</span>
-      <span>
-        <a href="/partenaires" onclick="showPage('marques')" style="color:rgba(255,255,255,0.25); font-size:12px; text-decoration:none">Espace partenaires</a>
-        &nbsp;·&nbsp;
-        <span>Indépendant de tout syndicat et de toute société savante</span>
-      </span>
+      <span>Indépendant de tout syndicat et de toute société savante</span>
     </div>
   </footer>
 </div>
@@ -2643,7 +2636,6 @@
         <h4>Navigation</h4>
         <a href="/" onclick="showPage('landing')">Accueil</a>
         <a href="/produits" onclick="showPage('produits')">Produits</a>
-        <a href="/partenaires" onclick="showPage('marques')">Pour les marques</a>
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
@@ -2707,7 +2699,6 @@
         <h4>Navigation</h4>
         <a href="/" onclick="showPage('landing')">Accueil</a>
         <a href="/formations" onclick="showPage('formations')">Formations</a>
-        <a href="/partenaires" onclick="showPage('marques')">Pour les marques</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -2833,7 +2824,7 @@
       </div>
       <div class="footer-col">
         <h4>Publier</h4>
-        <a href="#" onclick="ouvrirMesAnnonces()">Déposer une annonce</a>
+        <a href="/mon-espace" onclick="ouvrirMesAnnonces()">Déposer une annonce</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -9677,8 +9668,10 @@ function appliquerRoute(chemin) {
         ouvrirParSlug(jobsDB, seg[1], slugAnnonce, ouvrirAnnonce, 'annonce');
         return;
 
+      // L'espace partenaires est hors ligne le temps d'etre reecrit.
+      // Son code reste en place, mais son adresse ramene a l'accueil.
       case 'partenaires':
-        showPage('marques'); return;
+        showPage('landing'); majUrl('/', true); return;
 
       case 'mentions-legales':
         showPage('mentions'); return;
@@ -9801,7 +9794,7 @@ function showPage(page, chemin) {
   // les policies RLS ne renvoient rien et n'acceptent aucune écriture.
   if (page === 'admin' && !estAdmin()) page = currentUser ? 'dashboard' : 'landing';
 
-  setNoindex(page === 'admin' || page === 'introuvable');
+  setNoindex(page === 'admin' || page === 'introuvable' || page === 'marques');
 
   // Sortir de la fiche démonte l'attente du tarif restée en cours.
   if (page !== 'formation') annulerGardeTarif();
