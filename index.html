@@ -1984,6 +1984,76 @@
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
+  /* ===== PAGES LÉGALES ===== */
+  .legal {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.5rem 5rem;
+    color: #1B2733;
+    line-height: 1.65;
+  }
+  .legal h1 {
+    font-size: 1.9rem;
+    line-height: 1.25;
+    color: var(--navy);
+    margin: 0 0 .4rem;
+    letter-spacing: -.015em;
+  }
+  .legal .legal-maj {
+    color: var(--text-secondary);
+    font-size: .875rem;
+    margin: 0 0 2.75rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--turquoise);
+  }
+  .legal h2 {
+    font-size: 1.125rem;
+    color: var(--navy);
+    margin: 2.5rem 0 .75rem;
+    letter-spacing: -.01em;
+  }
+  .legal h2:first-of-type { margin-top: 0; }
+  .legal p { margin: 0 0 1rem; }
+  .legal p strong { color: var(--navy); }
+  .legal a { color: #00838F; text-decoration: underline; text-underline-offset: 2px; }
+  .legal a:hover { color: var(--navy); }
+  .legal-encadre {
+    background: var(--grey-bg);
+    border-left: 3px solid var(--turquoise);
+    padding: 1.1rem 1.25rem;
+    margin: 1.5rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .legal-encadre p:last-child { margin-bottom: 0; }
+  .legal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0 1.5rem;
+    font-size: .9375rem;
+  }
+  .legal th, .legal td {
+    text-align: left;
+    padding: .7rem .9rem;
+    border-bottom: 1px solid #E3E9F0;
+    vertical-align: top;
+  }
+  .legal th {
+    color: var(--navy);
+    font-weight: 600;
+    background: var(--grey-bg);
+    border-bottom: 1px solid #D6DEE8;
+  }
+  .legal td:first-child { width: 42%; }
+  @media (max-width: 560px) {
+    .legal { padding: 2.5rem 1.15rem 4rem; }
+    .legal h1 { font-size: 1.5rem; }
+    .legal table, .legal thead, .legal tbody, .legal tr, .legal th, .legal td { display: block; }
+    .legal th { display: none; }
+    .legal td { border: none; padding: .15rem 0; }
+    .legal td:first-child { width: auto; font-weight: 600; color: var(--navy); padding-top: .9rem; }
+    .legal tr { border-bottom: 1px solid #E3E9F0; padding-bottom: .8rem; display: block; }
+  }
+
   .page.active .hero-content,
   .page.active .hero-visual { animation: fadeInUp 0.5s ease both; }
   .page.active .hero-visual { animation-delay: 0.1s; }
@@ -2360,8 +2430,9 @@
         <h4>OrthoConnect</h4>
         <a href="#">À propos</a>
         <a href="#">Contact</a>
-        <a href="#">Mentions légales</a>
-        <a href="#">CGU</a>
+        <a href="/mentions-legales" onclick="showPage('mentions')">Mentions légales</a>
+        <a href="/cgu" onclick="showPage('cgu')">CGU</a>
+        <a href="/confidentialite" onclick="showPage('confidentialite')">Confidentialité</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -3944,6 +4015,256 @@
     </div>
     <div class="footer-bottom">
       <span>© 2026 OrthoConnect · orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE : MENTIONS LEGALES                                    -->
+<!-- ============================================================ -->
+<div class="page" id="page-mentions">
+  <section class="legal">
+
+    <h1>Mentions légales</h1>
+    <p class="legal-maj">Dernière mise à jour : 11 septembre 2026</p>
+
+    <h2>Éditeur du site</h2>
+    <p>Le site orthoconnect.fr est édité par <strong>OrthoConnect</strong>, entreprise individuelle immatriculée sous le numéro SIRET 820 100 402 00040, dont le siège est situé à Toulouse, France.</p>
+    <p>Contact : <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a></p>
+
+    <h2>Directeur de la publication</h2>
+    <p>Le représentant légal de l'entreprise individuelle éditrice du site.</p>
+
+    <h2>Hébergement</h2>
+    <p>OVH SAS, 2 rue Kellermann, 59100 Roubaix, France. Téléphone : 1007.</p>
+
+    <h2>Objet du site</h2>
+    <p>OrthoConnect est une plateforme d'information et de mise en relation destinée aux professionnels de l'orthodontie. Elle référence des formations, des offres d'emploi et de collaboration, et du matériel professionnel.</p>
+    <p>OrthoConnect n'est pas un organisme de formation. Les formations présentées sont dispensées par des organismes tiers. L'inscription à une formation et la relation contractuelle qui en découle se nouent directement entre le praticien et l'organisme concerné, aux conditions de ce dernier.</p>
+
+    <h2>Propriété intellectuelle</h2>
+    <p>La structure du site, son identité visuelle, ses textes et ses développements sont la propriété de l'éditeur et sont protégés par le droit de la propriété intellectuelle. Toute reproduction ou représentation, totale ou partielle, sans autorisation écrite préalable est interdite.</p>
+    <p>Les marques, logos et visuels des organismes de formation, des fournisseurs et des cabinets restent la propriété de leurs titulaires respectifs. Ils sont affichés soit avec l'accord de leur titulaire, soit à titre d'information dans le cadre du référencement.</p>
+
+    <h2>Contenus publiés par les utilisateurs</h2>
+    <p>Les annonces d'emploi et de collaboration sont rédigées et publiées par les praticiens inscrits, sous leur seule responsabilité et sans validation préalable de l'éditeur. L'éditeur agit en qualité d'hébergeur de ces contenus au sens de la loi pour la confiance dans l'économie numérique.</p>
+    <p>Tout contenu manifestement illicite peut être signalé à <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>. Le signalement doit préciser l'URL concernée et le motif. L'éditeur procède au retrait dans les meilleurs délais après vérification.</p>
+
+    <h2>Responsabilité</h2>
+    <p>L'éditeur s'efforce de maintenir des informations exactes et à jour, sans pouvoir le garantir. Les tarifs, dates, programmes et conditions des formations relèvent des organismes qui les publient. Les informations contenues dans les annonces relèvent de leurs auteurs.</p>
+    <p>Le site peut contenir des liens vers des sites tiers, sur lesquels l'éditeur n'exerce aucun contrôle et dont il n'assume pas le contenu.</p>
+
+    <h2>Données personnelles</h2>
+    <p>Le traitement des données personnelles est décrit dans la <a href="/confidentialite">politique de confidentialité</a>.</p>
+
+    <h2>Droit applicable</h2>
+    <p>Le présent site est soumis au droit français. Tout litige relève de la compétence des tribunaux français.</p>
+
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, mat&eacute;riel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
+        <a href="/emploi" onclick="showPage('emploi')">Offres d'emploi</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE : CGU                                                 -->
+<!-- ============================================================ -->
+<div class="page" id="page-cgu">
+  <section class="legal">
+
+    <h1>Conditions générales d'utilisation</h1>
+    <p class="legal-maj">Dernière mise à jour : 11 septembre 2026</p>
+
+    <h2>1. Objet</h2>
+    <p>Les présentes conditions régissent l'accès et l'utilisation de la plateforme orthoconnect.fr, éditée par OrthoConnect, entreprise individuelle, SIRET 820 100 402 00040. La création d'un compte vaut acceptation sans réserve de ces conditions.</p>
+
+    <h2>2. Accès à la plateforme</h2>
+    <p>La consultation du catalogue de formations et des annonces d'emploi est ouverte à tous. La création d'un compte est réservée aux professionnels de l'orthodontie : praticiens libéraux, collaborateurs et internes en DES d'ODF.</p>
+    <p>L'inscription est gratuite pour les praticiens. Elle suppose de renseigner des informations exactes, dont le numéro RPPS, et de les tenir à jour. L'éditeur se réserve le droit de vérifier la qualité professionnelle déclarée et de refuser ou clôturer un compte en cas de déclaration inexacte.</p>
+
+    <h2>3. Compte et sécurité</h2>
+    <p>Les identifiants sont personnels et confidentiels. Le titulaire du compte répond de toute action effectuée depuis celui-ci. Toute utilisation suspecte doit être signalée sans délai à <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>.</p>
+
+    <h2>4. Formations et tarifs préférentiels</h2>
+    <p>Le catalogue de formations est informatif. Les programmes, dates, durées, prérequis et tarifs sont communiqués par les organismes et relèvent de leur responsabilité. OrthoConnect n'organise, ne dispense et ne certifie aucune formation.</p>
+    <p>Certaines formations peuvent faire l'objet d'un tarif négocié avec l'organisme. Le praticien connecté peut alors générer un code de réduction personnel, valable 90 jours à compter de sa génération, utilisable une seule fois et non cessible. L'application effective de la réduction relève de l'organisme, aux conditions qu'il fixe.</p>
+    <p>Le contrat de formation se conclut directement entre le praticien et l'organisme. OrthoConnect n'y est pas partie et ne peut être tenue responsable de son exécution, de son annulation ou de son remboursement.</p>
+
+    <h2>5. Publication d'annonces</h2>
+    <p>Un praticien inscrit peut publier une annonce d'emploi ou de collaboration. La publication est immédiate, sans validation préalable. L'auteur est seul responsable du contenu de son annonce, de son exactitude et de sa licéité.</p>
+    <p>Sont notamment interdits : toute mention discriminatoire au sens de l'article L.1132-1 du code du travail, toute proposition contraire aux règles déontologiques de la profession, toute annonce publiée pour le compte d'un tiers sans mandat, tout contenu publicitaire étranger à une offre d'emploi ou de collaboration.</p>
+    <p>Une annonce expire automatiquement 90 jours après sa publication. Son auteur est averti avant l'échéance et peut la prolonger. L'éditeur peut retirer sans préavis toute annonce contraire aux présentes conditions ou à la loi.</p>
+
+    <h2>6. Profil en recherche et carte</h2>
+    <p>Un praticien peut rendre son profil visible sur la carte des opportunités en activant l'option correspondante depuis son espace. Cette visibilité est facultative, désactivable à tout moment, et repose sur les informations qu'il renseigne lui-même.</p>
+    <div class="legal-encadre">
+      <p>Les points affichés sur la carte, qu'il s'agisse d'annonces ou de praticiens en recherche, sont volontairement décalés de 250 à 700 mètres. Ils désignent une zone et ne permettent jamais d'identifier une adresse précise.</p>
+    </div>
+    <p>Le nom d'un praticien en recherche n'est visible que des praticiens connectés. Le détail des annonces n'est accessible qu'aux titulaires d'un compte.</p>
+
+    <h2>7. Utilisations interdites</h2>
+    <p>Sont interdits l'extraction automatisée de données, la constitution de fichiers de prospection à partir des contenus du site, l'utilisation des coordonnées obtenues à des fins de démarchage commercial, toute tentative d'accès non autorisé, et tout usage de nature à perturber le fonctionnement de la plateforme.</p>
+
+    <h2>8. Propriété intellectuelle</h2>
+    <p>En publiant un contenu, l'utilisateur en conserve la propriété et concède à l'éditeur le droit non exclusif de l'afficher, de le reproduire et de l'adapter techniquement pour les besoins du service, pendant la durée de sa mise en ligne.</p>
+
+    <h2>9. Disponibilité et responsabilité</h2>
+    <p>L'éditeur s'efforce d'assurer la disponibilité du service sans y être tenu. Des interruptions peuvent survenir pour maintenance, mise à jour ou raison technique indépendante de sa volonté.</p>
+    <p>La plateforme met en relation. Elle ne garantit ni la conclusion d'un recrutement, ni la qualité d'une formation, ni la solvabilité ou le sérieux d'un utilisateur.</p>
+
+    <h2>10. Suspension et clôture</h2>
+    <p>L'utilisateur peut supprimer son compte à tout moment depuis son espace ou sur demande à <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>. L'éditeur peut suspendre ou clôturer un compte en cas de manquement aux présentes conditions, après information de l'intéressé sauf urgence ou illicéité manifeste.</p>
+
+    <h2>11. Évolution des conditions</h2>
+    <p>Les présentes conditions peuvent être modifiées. Les utilisateurs inscrits sont informés des modifications substantielles. La poursuite de l'utilisation après information vaut acceptation.</p>
+
+    <h2>12. Droit applicable</h2>
+    <p>Les présentes conditions sont soumises au droit français. En cas de litige, les parties rechercheront une solution amiable avant toute action contentieuse. À défaut, le litige relève des tribunaux français compétents.</p>
+
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, mat&eacute;riel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
+        <a href="/emploi" onclick="showPage('emploi')">Offres d'emploi</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE : POLITIQUE DE CONFIDENTIALITE                        -->
+<!-- ============================================================ -->
+<div class="page" id="page-confidentialite">
+  <section class="legal">
+
+    <h1>Politique de confidentialité</h1>
+    <p class="legal-maj">Dernière mise à jour : 11 septembre 2026</p>
+
+    <h2>Responsable du traitement</h2>
+    <p>OrthoConnect, entreprise individuelle, SIRET 820 100 402 00040, siège à Toulouse, France. Pour toute question relative à vos données : <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a></p>
+
+    <h2>Données collectées</h2>
+    <p>Lors de la création d'un compte : nom, prénom, adresse email, numéro RPPS, statut professionnel, ville et nom du cabinet le cas échéant.</p>
+    <p>Lors de l'utilisation du service : contenu des annonces publiées, paramètres du profil en recherche, codes de réduction générés, données techniques de connexion nécessaires à la sécurité du service.</p>
+    <p>Aucune donnée de santé et aucune donnée relative aux patients n'est collectée.</p>
+
+    <h2>Finalités et bases légales</h2>
+    <table>
+      <thead>
+        <tr><th>Traitement</th><th>Base légale</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Création et gestion du compte</td><td>Exécution des conditions d'utilisation</td></tr>
+        <tr><td>Publication et affichage des annonces</td><td>Exécution des conditions d'utilisation</td></tr>
+        <tr><td>Affichage du profil sur la carte des opportunités</td><td>Consentement, retirable à tout moment</td></tr>
+        <tr><td>Vérification de la qualité professionnelle</td><td>Intérêt légitime, réserver la plateforme aux professionnels</td></tr>
+        <tr><td>Sécurité du service et prévention des abus</td><td>Intérêt légitime</td></tr>
+        <tr><td>Information sur les évolutions du service</td><td>Intérêt légitime, avec désinscription possible</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Le numéro RPPS</h2>
+    <p>Le RPPS est collecté dans le seul but de vérifier que l'inscription émane bien d'un professionnel. Il n'est jamais affiché publiquement, jamais transmis à un tiers, et n'apparaît dans aucune donnée envoyée au navigateur des autres utilisateurs.</p>
+
+    <h2>Localisation et carte</h2>
+    <p>L'adresse du cabinet et la ville renseignée pour une annonce sont converties en coordonnées géographiques par l'API Adresse de l'État français, afin de permettre l'affichage sur la carte et le filtrage par rayon.</p>
+    <div class="legal-encadre">
+      <p>Les coordonnées affichées sur la carte sont volontairement décalées de 250 à 700 mètres. Le point visible désigne une zone, jamais une adresse. Le fond cartographique provient d'OpenStreetMap, qui reçoit une requête d'affichage de tuiles lors du chargement de la carte.</p>
+    </div>
+
+    <h2>Destinataires</h2>
+    <p>Les données ne sont ni vendues, ni louées, ni transmises à des fins publicitaires.</p>
+    <p>Elles sont traitées par les prestataires techniques nécessaires au fonctionnement du service : Supabase pour la base de données et l'authentification, avec hébergement en région Europe, et OVH pour le nom de domaine et l'infrastructure associée. Ces prestataires agissent en qualité de sous-traitants et n'accèdent aux données que pour l'exécution de leur mission.</p>
+    <p>Certaines informations sont rendues visibles aux autres utilisateurs selon les règles décrites dans les conditions d'utilisation. Le détail des annonces et le nom des praticiens en recherche ne sont accessibles qu'aux titulaires d'un compte.</p>
+
+    <h2>Durées de conservation</h2>
+    <table>
+      <thead>
+        <tr><th>Donnée</th><th>Durée</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Compte et profil</td><td>Durée d'activité du compte, puis 3 ans après la dernière connexion</td></tr>
+        <tr><td>Annonce publiée</td><td>90 jours en ligne, puis 12 mois d'archivage</td></tr>
+        <tr><td>Codes de réduction générés</td><td>90 jours de validité, puis 3 ans à titre de preuve</td></tr>
+        <tr><td>Données de connexion</td><td>12 mois</td></tr>
+      </tbody>
+    </table>
+    <p>La suppression d'un compte entraîne l'effacement du profil et le retrait des annonces associées, sous réserve des obligations légales de conservation.</p>
+
+    <h2>Vos droits</h2>
+    <p>Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité sur vos données, ainsi que du droit de définir des directives relatives à leur sort après votre décès.</p>
+    <p>Ces droits s'exercent par email à <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>. Une réponse vous est apportée dans un délai d'un mois. En cas de désaccord, vous pouvez introduire une réclamation auprès de la CNIL, 3 place de Fontenoy, 75007 Paris, <a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>.</p>
+
+    <h2>Cookies</h2>
+    <p>La plateforme n'utilise ni cookie publicitaire, ni traceur de mesure d'audience tiers. Seul un cookie technique de session est déposé pour vous maintenir connecté. Il est strictement nécessaire au fonctionnement du service et ne requiert pas de consentement préalable.</p>
+
+    <h2>Sécurité</h2>
+    <p>Les échanges sont chiffrés en HTTPS. L'accès aux données est contrôlé au niveau de la base par des règles de sécurité appliquées ligne par ligne. Les informations sensibles ne sont pas seulement masquées à l'écran, elles ne sont pas envoyées au navigateur des utilisateurs qui n'y ont pas droit.</p>
+
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, mat&eacute;riel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
+        <a href="/emploi" onclick="showPage('emploi')">Offres d'emploi</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
     </div>
   </footer>
 </div>
@@ -8057,13 +8378,16 @@ function remplirSelectsAdmin() {
 const ORIGINE = 'https://orthoconnect.fr';
 
 const CHEMINS_PAGE = {
-  landing:    '/',
-  formations: '/formations',
-  produits:   '/produits',
-  emploi:     '/emploi',
-  marques:    '/partenaires',
-  dashboard:  '/mon-espace',
-  admin:      '/admin'
+  landing:         '/',
+  formations:      '/formations',
+  produits:        '/produits',
+  emploi:          '/emploi',
+  marques:         '/partenaires',
+  mentions:        '/mentions-legales',
+  cgu:             '/cgu',
+  confidentialite: '/confidentialite',
+  dashboard:       '/mon-espace',
+  admin:           '/admin'
 };
 
 // Titre d'onglet et description par vue. Une fiche écrase les deux
@@ -8089,6 +8413,18 @@ const META_PAGES = {
   marques: {
     titre: 'Espace partenaires | OrthoConnect',
     description: "Présenter votre matériel aux orthodontistes : audience, formats de visibilité et prise de contact avec l'équipe OrthoConnect."
+  },
+  mentions: {
+    titre: 'Mentions légales | OrthoConnect',
+    description: "Informations légales de la plateforme OrthoConnect, éditeur, hébergeur et responsabilités."
+  },
+  cgu: {
+    titre: "Conditions générales d'utilisation | OrthoConnect",
+    description: "Conditions d'accès et d'utilisation de la plateforme OrthoConnect."
+  },
+  confidentialite: {
+    titre: 'Politique de confidentialité | OrthoConnect',
+    description: 'Traitement des données personnelles des praticiens inscrits sur OrthoConnect.'
   },
   dashboard: {
     titre: 'Mon espace praticien | OrthoConnect',
@@ -8254,6 +8590,15 @@ function appliquerRoute(chemin) {
 
       case 'partenaires':
         showPage('marques'); return;
+
+      case 'mentions-legales':
+        showPage('mentions'); return;
+
+      case 'cgu':
+        showPage('cgu'); return;
+
+      case 'confidentialite':
+        showPage('confidentialite'); return;
 
       case 'actualites':
         // Les actualités vivent dans l'espace praticien : sans compte,
