@@ -11,14 +11,14 @@
 -- d'URL à écrire.
 --
 -- CE QUI Y ENTRE
---   les pages fixes, le catalogue des formations publiées, les annonces
---   publiées et non expirées.
+--   les pages fixes, le catalogue des formations publiées, les fiches
+--   produits visibles, les annonces publiées et non expirées.
 --
 -- CE QUI N'Y ENTRE PAS
 --   /mon-espace et /admin, privées et déjà en noindex ; /partenaires,
 --   hors ligne le temps d'être réécrite et en noindex elle aussi ; les
---   produits, qui n'ont pas de fiche à eux ; les annonces expirées, qui
---   ne répondent plus.
+--   fiches produits masquées, que le comparatif n'affiche pas ; les
+--   annonces expirées, qui ne répondent plus.
 --
 -- La date est celle du contenu quand il en porte une : une annonce
 -- prend sa date de publication, une formation sa date de vérification.
@@ -47,9 +47,16 @@ with entrees as (
   where f.statut = 'publie' and f.slug is not null and f.slug <> ''
 
   union all
+  select 'https://orthoconnect.fr/produits/' || p.slug,
+         coalesce(p.modifie_le::date, p.cree_le::date, current_date),
+         'monthly', '0.6', 8
+  from public.produits p
+  where p.visible and p.slug is not null and p.slug <> ''
+
+  union all
   select 'https://orthoconnect.fr/emploi/' || j.slug,
          coalesce(j.publie_le::date, j.created_at::date, current_date),
-         'weekly', '0.7', 8
+         'weekly', '0.7', 9
   from public.offres_emploi j
   where j.statut = 'publiee' and j.expire_le > now()
     and j.slug is not null and j.slug <> ''
@@ -75,6 +82,8 @@ from entrees;
 -- Combien d'URL le sitemap contiendra, par famille :
 -- select 'formations' as famille, count(*) from public.formations
 --   where statut = 'publie' and slug is not null
+-- union all select 'produits', count(*) from public.produits
+--   where visible and slug is not null
 -- union all select 'annonces', count(*) from public.offres_emploi
 --   where statut = 'publiee' and expire_le > now() and slug is not null
 -- union all select 'pages fixes', 7;
@@ -83,5 +92,7 @@ from entrees;
 -- Repasse la section 4 de slugs_et_urls.sql s'il en sort quelque chose.
 -- select 'formations' as source, id, titre from public.formations
 --   where statut = 'publie' and (slug is null or slug = '')
--- union all select 'offres_emploi', id, titre from public.offres_emploi
+-- union all select 'produits', id::text, nom from public.produits
+--   where visible and (slug is null or slug = '')
+-- union all select 'offres_emploi', id::text, titre from public.offres_emploi
 --   where statut = 'publiee' and expire_le > now() and (slug is null or slug = '');

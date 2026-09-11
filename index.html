@@ -804,6 +804,10 @@
     letter-spacing: 0.5px;
   }
   .produit-name { font-size: 18px; font-weight: 800; color: var(--navy); margin-top: 4px; }
+  /* Le nom est un vrai lien, pour qu'un moteur suive la fiche, mais il
+     garde l'allure d'un titre de carte. */
+  .produit-name-lien { display: block; text-decoration: none; line-height: 1.3; }
+  .produit-name-lien:hover { color: var(--turquoise); }
   .produit-body { padding: 24px 28px; }
   .produit-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
   .produit-specs { margin-bottom: 20px; }
@@ -1280,6 +1284,10 @@
     font-size: 32px; font-weight: 800; line-height: 1.2;
     letter-spacing: -0.5px; margin-bottom: 10px; max-width: 820px;
   }
+  .detail-accroche {
+    font-size: 15px; color: rgba(255,255,255,0.8);
+    line-height: 1.6; max-width: 820px; margin-top: 8px;
+  }
   .detail-orga {
     font-size: 13px; font-weight: 600; color: var(--turquoise);
     text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px;
@@ -1496,6 +1504,7 @@
   }
   .formation-title-btn:hover { color: var(--turquoise); }
   .formation-card { cursor: pointer; }
+  .produit-card { cursor: pointer; }
 
   /* ===== EMPLOI ===== */
   .job-card { cursor: pointer; }
@@ -2719,6 +2728,53 @@
   </footer>
 </div>
 
+<!-- ==================== -->
+<!-- PAGE : FICHE PRODUIT -->
+<!-- Contenu injecte par ouvrirProduit()                            -->
+<!-- ==================== -->
+<div class="page" id="page-produit">
+  <section class="detail-hero">
+    <div class="container">
+      <button type="button" class="detail-retour" onclick="showPage('produits')">&larr; Retour au comparatif</button>
+      <div id="produitHero"></div>
+    </div>
+  </section>
+
+  <section class="detail-body">
+    <div class="container">
+      <div id="produitPrincipal"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, mat&eacute;riel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="/produits" onclick="showPage('produits')">Comparatif du mat&eacute;riel</a>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
 
 <!-- ==================== -->
 <!-- PAGE : EMPLOI        -->
@@ -4672,9 +4728,8 @@ let produitsDB = [];
 // Les categories portent le libelle affiche et la liste des champs de
 // chaque fiche. Elles changent rarement : un appel au chargement suffit.
 let categoriesProduits = [];
-// Ce que le comparatif montre a l'instant, filtre applique : c'est ce
-// que le balisage Product decrit.
-let produitsAffiches = [];
+// La fiche produit ouverte, comme formationOuverte et annonceOuverte.
+let produitOuvert = null;
 let jobsDB = [];
 let annonceEnCours = null;
 let actusDB = [];
@@ -7078,7 +7133,9 @@ function valeurRemplie(v) {
   return String(v).trim() !== '';
 }
 
-function renderCaracteristiques(p, cat) {
+// Les memes lignes servent a la carte du comparatif et a la fiche : la
+// seule difference est l'en-tete qui les coiffe, d'ou la separation.
+function lignesCaracteristiques(p, cat) {
   const champs = cat && Array.isArray(cat.champs) ? cat.champs : [];
   const valeurs = p.caracteristiques || {};
 
@@ -7111,21 +7168,91 @@ function renderCaracteristiques(p, cat) {
       </div>`;
   }).filter(Boolean);
 
-  if (!lignes.length) return '';
+  return lignes.join('');
+}
+
+function renderCaracteristiques(p, cat) {
+  const lignes = lignesCaracteristiques(p, cat);
+  if (!lignes) return '';
 
   return `<div class="produit-specs">
       <div class="produit-specs-title">Caractéristiques</div>
-      ${lignes.join('')}
+      ${lignes}
     </div>`;
+}
+
+// ─────── La fiche d'un produit ───────
+//
+// Meme mecanique que les formations et les annonces : une adresse par
+// fiche, batie sur le slug pose en base, et le catalogue deja en
+// memoire fournit tout ce que la fiche affiche. Aucune requete de plus.
+
+function ouvrirProduit(id) {
+  const p = produitsDB.find(x => String(x.id) === String(id));
+  if (!p) return;
+
+  produitOuvert = p;
+  showPage('produit', cheminProduit(p));
+  majMeta(p.nom + ' | OrthoConnect',
+    resumeMeta(p.accroche || p.presentation,
+      "Fiche technique d'un matériel d'orthodontie référencé sur OrthoConnect."),
+    cheminProduit(p), 'article');
+  renderDetailProduit(p);
+}
+
+function renderDetailProduit(p) {
+  const cat = categorieProduit(p.categorie);
+  const f = p.fournisseurs || null;
+
+  // ── En-tête ──
+  const badges = [
+    cat || p.categorie
+      ? `<span class="badge badge-categorie">${esc(cat ? cat.libelle : p.categorie)}</span>` : '',
+    f && f.partenaire ? '<span class="badge badge-pro">Partenaire</span>' : ''
+  ].filter(Boolean).join('');
+
+  const meta = [
+    p.pays_production
+      ? `<div class="detail-meta-item"><strong>${esc(p.pays_production)}</strong>Pays de production</div>` : '',
+    p.marquage_ce
+      ? `<div class="detail-meta-item"><strong>${esc(p.marquage_ce)}</strong>Marquage CE</div>` : ''
+  ].filter(Boolean).join('');
+
+  document.getElementById('produitHero').innerHTML = `
+    ${badges ? `<div class="detail-badges">${badges}</div>` : ''}
+    <h1>${esc(p.nom || '')}</h1>
+    ${f && f.nom ? `<div class="detail-orga">${esc(f.nom)}</div>` : ''}
+    ${p.accroche ? `<p class="detail-accroche">${esc(p.accroche)}</p>` : ''}
+    ${meta ? `<div class="detail-meta">${meta}</div>` : ''}`;
+
+  // ── Corps ──
+  const lignes = lignesCaracteristiques(p, cat);
+
+  const principal = [
+    blocDetail('Présentation', p.presentation
+      ? `<div class="detail-texte">${esc(p.presentation)}</div>` : ''),
+    blocDetail('Caractéristiques', lignes ? `<div class="produit-specs">${lignes}</div>` : ''),
+    blocDetail('Indications', listeDetail(p.indications)),
+    blocDetail('Limites', p.limites
+      ? `<div class="detail-texte">${esc(p.limites)}</div>` : ''),
+    blocDetail('Formation requise', p.formation_requise
+      ? `<div class="detail-texte">${esc(p.formation_requise)}</div>` : '')
+  ].filter(Boolean).join('');
+
+  document.getElementById('produitPrincipal').innerHTML = principal ||
+    '<div class="detail-texte">La fiche de ce matériel est en cours de rédaction.</div>';
+
+  majDonneesStructurees(p);
 }
 
 // ─────── Donnees structurees des fiches produits ───────
 //
-// Un seul script dans le head, remplace a chaque rendu et retire des
-// qu'on quitte le comparatif : sans ca, chaque passage en empilerait un
-// de plus. Ni prix, ni note, ni avis : ces champs n'existent pas en
-// base, et une donnee structuree inventee est une donnee fausse de
-// plus, lue par des machines qui la croiront.
+// Un seul objet Product, celui de la fiche ouverte. Le script est
+// remplace a chaque ouverture et retire des qu'on quitte la fiche :
+// sans ca, chaque passage en empilerait un de plus. Ni prix, ni note,
+// ni avis : ces champs n'existent pas en base, et une donnee structuree
+// inventee est une donnee fausse de plus, lue par des machines qui la
+// croiront.
 
 function ficheProduitJsonLd(p) {
   const cat = categorieProduit(p.categorie);
@@ -7158,10 +7285,10 @@ function ficheProduitJsonLd(p) {
   return fiche;
 }
 
-function majDonneesStructurees(produits) {
+function majDonneesStructurees(produit) {
   const existant = document.getElementById('donneesStructurees');
   if (existant) existant.remove();
-  if (!produits || !produits.length) return;
+  if (!produit) return;
 
   const el = document.createElement('script');
   el.type = 'application/ld+json';
@@ -7169,7 +7296,7 @@ function majDonneesStructurees(produits) {
   // Un « < » dans un nom de produit fermerait la balise a la relecture
   // du document : JSON comprend l'echappement unicode, pas les robots
   // une balise coupee en deux.
-  el.textContent = JSON.stringify(produits.map(ficheProduitJsonLd)).replace(/</g, '\\u003c');
+  el.textContent = JSON.stringify(ficheProduitJsonLd(produit)).replace(/</g, '\\u003c');
   document.head.appendChild(el);
 }
 
@@ -7190,9 +7317,6 @@ function renderProduitsDB(data) {
   const grid = document.getElementById('produitsGrid');
   if (!grid) return;
 
-  // Le balisage suit ce qui est reellement a l'ecran, filtre compris.
-  produitsAffiches = data || [];
-  majDonneesStructurees(produitsAffiches);
 
   if (!data.length) {
     grid.innerHTML = produitsDB.length
@@ -7211,12 +7335,13 @@ function renderProduitsDB(data) {
       ? nomFournisseur.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
       : '—';
     return `
-    <div class="produit-card">
+    <div class="produit-card" onclick="ouvrirProduit('${p.id}')">
       <div class="produit-header">
         <div>
           <div class="produit-brand-logo">${esc(initiale)}</div>
           <div class="produit-brand-name">${esc(nomFournisseur)}</div>
-          <div class="produit-name">${esc(p.nom || '')}</div>
+          <a class="produit-name produit-name-lien" href="${cheminProduit(p)}"
+             onclick="event.preventDefault(); event.stopPropagation(); ouvrirProduit('${p.id}')">${esc(p.nom || '')}</a>
           <div style="margin-top:8px">
             <span class="badge badge-categorie">${esc(cat ? cat.libelle : p.categorie || '')}</span>
             ${f && f.partenaire ? '<span class="badge badge-pro">Partenaire</span>' : ''}
@@ -7226,7 +7351,8 @@ function renderProduitsDB(data) {
       <div class="produit-body">
         <div class="produit-desc">${esc(p.presentation || '')}</div>
         ${renderCaracteristiques(p, cat)}
-        <button class="btn btn-outline btn-sm" style="margin-top:4px; width:100%; justify-content:center" onclick="requireAuth('accueil')">Demander une démo</button>
+        <button class="btn btn-outline btn-sm" style="margin-top:4px; width:100%; justify-content:center"
+                onclick="event.stopPropagation(); requireAuth('accueil')">Demander une démo</button>
       </div>
     </div>`;
   }).join('');
@@ -9617,8 +9743,10 @@ function slugifier(texte) {
 
 function slugFormation(f) { return f.slug || slugifier(f.titre); }
 function slugAnnonce(j)   { return j.slug || slugifier(j.titre); }
+function slugProduit(p)   { return p.slug || slugifier(p.nom); }
 function cheminFormation(f) { return '/formations/' + slugFormation(f); }
 function cheminAnnonce(j)   { return '/emploi/' + slugAnnonce(j); }
+function cheminProduit(p)   { return '/produits/' + slugProduit(p); }
 
 // Vrai pendant qu'on applique une adresse lue dans la barre : les
 // vues déclenchées ne doivent pas la réempiler par-dessus elle-même.
@@ -9759,7 +9887,9 @@ function appliquerRoute(chemin) {
         return;
 
       case 'produits':
-        showPage('produits'); return;
+        if (!seg[1]) { showPage('produits'); return; }
+        ouvrirParSlug(produitsDB, seg[1], slugProduit, ouvrirProduit, 'produit');
+        return;
 
       case 'emploi':
         if (!seg[1]) { showPage('emploi'); return; }
@@ -9825,6 +9955,11 @@ function pageIntrouvable(genre) {
       titre: 'Cette annonce est introuvable',
       texte: "Elle n'existe pas, ou elle a expiré : les offres quittent le site d'elles-mêmes à leur date de fin.",
       lien: 'Voir toutes les offres', chemin: '/emploi', page: 'emploi'
+    },
+    produit: {
+      titre: 'Cette fiche matériel est introuvable',
+      texte: "Elle n'existe pas, ou elle n'est plus publiée. Le comparatif est à jour, ce matériel y figure peut-être sous un autre nom.",
+      lien: 'Voir tout le matériel', chemin: '/produits', page: 'produits'
     },
     defaut: {
       titre: 'Cette page est introuvable',
@@ -9894,9 +10029,9 @@ function showPage(page, chemin) {
 
   setNoindex(page === 'admin' || page === 'introuvable' || page === 'marques');
 
-  // Le balisage Product ne vaut que sur le comparatif : ailleurs il
-  // decrirait des produits que la page n'affiche pas.
-  majDonneesStructurees(page === 'produits' ? produitsAffiches : null);
+  // Le balisage Product ne vaut que sur une fiche : ailleurs il
+  // decrirait un produit que la page n'affiche pas.
+  majDonneesStructurees(page === 'produit' ? produitOuvert : null);
 
   // Sortir de la fiche démonte l'attente du tarif restée en cours.
   if (page !== 'formation') annulerGardeTarif();
