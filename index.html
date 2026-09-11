@@ -1977,6 +1977,84 @@
     border: 1px dashed var(--grey-border); border-radius: var(--radius); font-size: 14px;
   }
 
+  /* ===== DEMANDES (ADMIN) ===== */
+
+  /* Le compteur de demandes nouvelles, pose sur l'onglet lui-meme : il
+     doit se lire aussi bien sur un onglet au repos, fond blanc, que sur
+     l'onglet actif, fond navy -- d'ou le turquoise plein plutot qu'un
+     aplat clair comme les autres badges. */
+  .admin-pastille {
+    margin-left: auto;
+    background: var(--turquoise); color: var(--white);
+    font-size: 11px; font-weight: 700; line-height: 1;
+    min-width: 18px; padding: 3px 6px;
+    border-radius: 9px; text-align: center;
+  }
+
+  .badge-nouvelle   { background: var(--turquoise-light); color: #007A86; }
+  .badge-transmise  { background: #E6F3FF; color: #1A6DC2; }
+  .badge-sans_suite { background: var(--grey-bg); color: var(--text-secondary); }
+  .badge-aboutie    { background: #E8F5E9; color: #2E7D32; }
+
+  .dem-ligne { cursor: pointer; }
+  .dem-produit-absent { color: var(--text-light); font-style: italic; }
+
+  /* Le detail. Meme fond et meme z-index que .auth-overlay, la seule
+     autre boite modale du site, mais plus large : elle porte un message
+     libre, deux champs et un historique. */
+  .dem-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,43,77,0.55);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .dem-overlay.open { display: flex; }
+  .dem-box {
+    background: var(--white);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 620px;
+    padding: 28px 28px 24px;
+    position: relative;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+  .dem-box h3 { font-size: 19px; font-weight: 800; color: var(--navy); margin-bottom: 4px; padding-right: 28px; }
+  .dem-box .dem-sous-titre { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
+
+  .dem-fiche {
+    background: var(--grey-bg); border-radius: var(--radius);
+    padding: 14px 16px; margin-bottom: 18px;
+    font-size: 13px; line-height: 1.7;
+  }
+  .dem-fiche div { display: flex; gap: 10px; }
+  .dem-fiche dt { color: var(--text-secondary); min-width: 104px; flex-shrink: 0; }
+  .dem-fiche dd { color: var(--navy); font-weight: 500; }
+
+  /* Le message est saisi librement par le praticien : les retours a la
+     ligne sont les siens, on les garde, et le mot trop long ne pousse
+     pas la boite hors de l'ecran. */
+  .dem-message {
+    border-left: 3px solid var(--turquoise);
+    padding: 2px 0 2px 14px; margin-bottom: 20px;
+    font-size: 14px; line-height: 1.65; color: var(--text-main);
+    white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+
+  .dem-actions { border-top: 1px solid var(--grey-border); padding-top: 18px; }
+  .dem-actions .form-group { margin-bottom: 14px; }
+  .dem-boutons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+  @media (max-width: 560px) {
+    .dem-box { padding: 22px 18px 18px; }
+    .dem-fiche div { flex-direction: column; gap: 0; }
+    .dem-fiche dt { min-width: 0; }
+  }
+
   @media (max-width: 900px) {
     .dash-grid { grid-template-columns: 1fr; }
     .dash-nav { position: static; flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
@@ -3396,6 +3474,7 @@
           <button onclick="showAdminPanel('sessions', this)">🗓 Sessions</button>
           <button onclick="showAdminPanel('codes', this)">🎟 Codes</button>
           <button onclick="showAdminPanel('annonces', this)">💼 Annonces</button>
+          <button onclick="showAdminPanel('demandes', this)">📨 Demandes<span class="admin-pastille" id="admPastilleDemandes" hidden>0</span></button>
           <button onclick="showPage('dashboard')" style="margin-top:12px; color:var(--text-light)">↩ Mon espace</button>
         </div>
 
@@ -3844,10 +3923,36 @@
             <div id="admCodesListe"></div>
           </div>
 
+          <!-- DEMANDES -->
+          <div class="dash-panel" id="adminPanel-demandes">
+            <h2>Demandes</h2>
+            <p class="panel-sub">Demandes adressées aux fournisseurs par les praticiens. Ouvrez une ligne pour lire le message et la suivre.</p>
+
+            <div class="admin-toolbar">
+              <span class="filter-label">Statut :</span>
+              <button class="filter-btn active" onclick="filtrerDemandes('tous', this)">Toutes</button>
+              <button class="filter-btn" onclick="filtrerDemandes('nouvelle', this)">Nouvelles</button>
+              <button class="filter-btn" onclick="filtrerDemandes('transmise', this)">Transmises</button>
+              <button class="filter-btn" onclick="filtrerDemandes('aboutie', this)">Abouties</button>
+              <button class="filter-btn" onclick="filtrerDemandes('sans_suite', this)">Sans suite</button>
+            </div>
+
+            <div id="admDemandesListe"></div>
+          </div>
+
         </div>
       </div>
     </div>
   </section>
+
+  <!-- Detail d'une demande. Dans #page-admin : quand la page se ferme,
+       la boite se ferme avec elle. -->
+  <div class="dem-overlay" id="demOverlay" onclick="if(event.target===this) fermerDemande()">
+    <div class="dem-box">
+      <button class="auth-close" onclick="fermerDemande()" aria-label="Fermer">&times;</button>
+      <div id="demContenu"></div>
+    </div>
+  </div>
 </div>
 
 <!-- =================== -->
@@ -7359,7 +7464,12 @@ let adminFormations = [];
 let adminSessions   = [];
 let adminCodes      = [];
 let adminAnnonces   = [];
+let adminDemandes   = [];
+// demandes_admin() peut ne pas encore exister sur la base : son echec
+// est garde ici et montre dans son onglet, sans emporter le reste.
+let erreurDemandes = null;
 let filtreStatutAnnonce = 'tous';
+let filtreStatutDemande = 'tous';
 let filtreStatutCode = 'tous';
 let filtreStatutFormation = 'tous';
 let rechercheInscrits = '';
@@ -7428,6 +7538,7 @@ async function ouvrirAdmin() {
 }
 
 function showAdminPanel(name, btn) {
+  fermerDemande();
   document.querySelectorAll('#page-admin .dash-panel').forEach(p => p.classList.remove('active'));
   const panel = document.getElementById('adminPanel-' + name);
   if (panel) panel.classList.add('active');
@@ -7471,7 +7582,7 @@ async function chargerPraticiensAdmin() {
 }
 
 async function chargerAdmin() {
-  const [pr, org, fo, se, co, an] = await Promise.all([
+  const [pr, org, fo, se, co, an, de, nb] = await Promise.all([
     chargerPraticiensAdmin(),
     sb.from('organismes').select('*').order('nom'),
     sb.from('formations').select('*, organismes(id, nom, logo_url, partenaire)').order('id', { ascending: false }),
@@ -7481,9 +7592,15 @@ async function chargerAdmin() {
       .order('created_at', { ascending: false }),
     sb.from('offres_emploi')
       .select('*, praticiens(nom, email)')
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false }),
+    // Jamais la table ni la vue pour lire : la fonction seule. Elle ne
+    // prend pas d'argument et rend ses lignes deja triees en cree_le desc.
+    sb.rpc('demandes_admin'),
+    sb.rpc('compte_demandes_nouvelles')
   ]);
 
+  // Les demandes sont volontairement hors de ce test : un onglet qui ne
+  // charge pas ne doit pas eteindre les six autres.
   const enErreur = [pr, org, fo, se, co, an].find(r => r.error);
   const boite = document.getElementById('adminErreur');
   if (enErreur) {
@@ -7501,6 +7618,9 @@ async function chargerAdmin() {
   adminCodes      = co.data  || [];
   adminAnnonces   = an.data  || [];
 
+  erreurDemandes  = de.error ? de.error.message : null;
+  adminDemandes   = de.data  || [];
+
   renderAdminDash();
   renderAdminInscrits();
   renderAdminOrganismes();
@@ -7508,6 +7628,8 @@ async function chargerAdmin() {
   renderAdminSessions();
   renderAdminCodes();
   renderAdminAnnonces();
+  renderAdminDemandes();
+  majPastilleDemandes(nb);
   remplirSelectsAdmin();
 }
 
@@ -8375,6 +8497,229 @@ async function depublierAnnonce(id) {
   if (!window.confirm('Dépublier « ' + (a ? a.titre : 'cette annonce') + ' » ? Elle repassera en brouillon chez son auteur.')) return;
   await changerStatutAnnonce(id, 'brouillon');
 }
+
+// ─────────── Demandes (admin) ───────────
+//
+// La lecture passe par demandes_admin(), jamais par la table ni par la
+// vue : c'est la fonction qui decide ce qu'un admin voit. L'ecriture,
+// elle, vise demandes_produits en direct, une policy admin l'autorise,
+// et ne touche que quatre colonnes.
+
+const TYPES_DEMANDE = {
+  grille_tarifaire:     'Grille tarifaire',
+  conditions_demarrage: 'Conditions de démarrage',
+  formation:            'Formation',
+  essai_cas:            'Essai sur un cas',
+  question:             'Question'
+};
+
+const STATUTS_DEMANDE = {
+  nouvelle:   'Nouvelle',
+  transmise:  'Transmise',
+  sans_suite: 'Sans suite',
+  aboutie:    'Aboutie'
+};
+
+// Une valeur inconnue s'affiche telle quelle plutot que de disparaitre :
+// si la base gagne un type, la ligne reste lisible en attendant.
+function libelleTypeDemande(t) { return TYPES_DEMANDE[t] || (t || '—'); }
+function libelleStatutDemande(s) { return STATUTS_DEMANDE[s] || (s || '—'); }
+
+function filtrerDemandes(statut, btn) {
+  filtreStatutDemande = statut;
+  document.querySelectorAll('#adminPanel-demandes .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAdminDemandes();
+}
+
+function majPastilleDemandes(res) {
+  const el = document.getElementById('admPastilleDemandes');
+  if (!el) return;
+
+  // compte_demandes_nouvelles() rend un entier. En cas d'echec on
+  // n'affiche rien plutot qu'un compteur faux.
+  const n = (res && !res.error && Number.isFinite(Number(res.data))) ? Number(res.data) : 0;
+  el.textContent = n;
+  el.hidden = n === 0;
+}
+
+function renderAdminDemandes() {
+  const zone = document.getElementById('admDemandesListe');
+  if (!zone) return;
+
+  if (erreurDemandes) {
+    zone.innerHTML = '<div class="admin-message ko show">Demandes non chargées : ' + esc(erreurDemandes)
+      + " — vérifie que la fonction demandes_admin() existe et que ton compte est en role = 'admin'.</div>";
+    return;
+  }
+
+  const lignes = filtreStatutDemande === 'tous'
+    ? adminDemandes
+    : adminDemandes.filter(d => d.statut === filtreStatutDemande);
+
+  if (!lignes.length) {
+    zone.innerHTML = '<div class="admin-empty">'
+      + (adminDemandes.length ? 'Aucune demande dans cette catégorie.' : 'Aucune demande pour le moment.')
+      + '</div>';
+    return;
+  }
+
+  zone.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Date</th><th>Praticien</th><th>Produit</th><th>Fournisseur</th><th>Type</th><th>Statut</th></tr>
+        </thead>
+        <tbody>
+          ${lignes.map(d => `
+            <tr class="dem-ligne" onclick="ouvrirDemande('${d.id}')">
+              <td style="white-space:nowrap">${esc(formatDate(d.cree_le))}</td>
+              <td>
+                <div class="admin-nom">${esc(d.praticien_nom || 'Praticien supprimé')}</div>
+                <div style="font-size:12px; color:var(--text-light)">
+                  ${esc([d.praticien_ville, libelleStatut(d.praticien_statut)].filter(Boolean).join(' · '))}
+                </div>
+              </td>
+              <td>${d.produit_nom
+                    ? esc(d.produit_nom)
+                    : '<span class="dem-produit-absent">fiche supprimée</span>'}</td>
+              <td>
+                ${esc(d.fournisseur_nom || '—')}
+                ${d.fournisseur_partenaire ? '<span class="badge badge-pro">Partenaire</span>' : ''}
+              </td>
+              <td>${esc(libelleTypeDemande(d.type_demande))}</td>
+              <td><span class="badge badge-${esc(d.statut || 'nouvelle')}">${esc(libelleStatutDemande(d.statut))}</span></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ─────────── Le detail d'une demande ───────────
+
+// L'identifiant arrive en chaine depuis l'attribut onclick : on compare
+// en chaine, sans prejuger d'un entier ou d'un uuid.
+function ouvrirDemande(id) {
+  const d = adminDemandes.find(x => String(x.id) === String(id));
+  if (!d) return;
+
+  const zone = document.getElementById('demContenu');
+  const cabinet = [d.praticien_cabinet, d.praticien_cabinet_ville].filter(Boolean).join(', ');
+
+  const ligne = (dt, dd) => dd
+    ? `<div><dt>${dt}</dt><dd>${dd}</dd></div>`
+    : '';
+
+  zone.innerHTML = `
+    <h3>${esc(libelleTypeDemande(d.type_demande))}</h3>
+    <div class="dem-sous-titre">
+      ${d.produit_nom ? esc(d.produit_nom) : 'Fiche produit supprimée'}
+      ${d.fournisseur_nom ? ' · ' + esc(d.fournisseur_nom) : ''}
+      · ${esc(formatDate(d.cree_le))}
+    </div>
+
+    <dl class="dem-fiche">
+      ${ligne('Praticien', esc(d.praticien_nom || 'Praticien supprimé'))}
+      ${ligne('Email', d.praticien_email
+          ? `<a href="mailto:${esc(d.praticien_email)}">${esc(d.praticien_email)}</a>` : '')}
+      ${ligne('Ville', esc(d.praticien_ville || ''))}
+      ${ligne('Statut', esc(d.praticien_statut ? libelleStatut(d.praticien_statut) : ''))}
+      ${ligne('Cabinet', esc(cabinet))}
+      ${ligne('Transmise le', d.transmise_le ? esc(formatDate(d.transmise_le)) : '')}
+      ${ligne('Canal', esc(d.canal_transmission || ''))}
+    </dl>
+
+    <div class="dem-message">${esc(d.message || 'Aucun message.')}</div>
+
+    <div class="dem-actions">
+      <div class="admin-message ko" id="demErreur"></div>
+
+      <div class="form-group">
+        <label for="demStatut">Statut</label>
+        <select id="demStatut" onchange="majCanalDemande()">
+          ${Object.keys(STATUTS_DEMANDE).map(s =>
+            `<option value="${s}"${d.statut === s ? ' selected' : ''}>${STATUTS_DEMANDE[s]}</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="form-group" id="demCanalGroupe">
+        <label for="demCanal">Canal de transmission</label>
+        <input type="text" id="demCanal" maxlength="120" value="${esc(d.canal_transmission || '')}"
+               placeholder="Email au fournisseur, appel, salon…">
+        <div class="form-note">Par où la demande est partie chez le fournisseur.</div>
+      </div>
+
+      <div class="form-group">
+        <label for="demNote">Note admin</label>
+        <textarea id="demNote" maxlength="1000" placeholder="Pour le suivi interne. Le praticien ne la voit pas.">${esc(d.note_admin || '')}</textarea>
+      </div>
+
+      <div class="dem-boutons">
+        <button class="btn btn-turquoise" onclick="enregistrerDemande('${d.id}')">Enregistrer</button>
+        <button class="btn btn-outline" onclick="fermerDemande()">Annuler</button>
+      </div>
+    </div>`;
+
+  majCanalDemande();
+  document.getElementById('demOverlay').classList.add('open');
+}
+
+function fermerDemande() {
+  const o = document.getElementById('demOverlay');
+  if (o) o.classList.remove('open');
+}
+
+// Le canal ne se demande que pour une demande transmise : ailleurs il
+// n'a rien a dire, et un champ vide de plus brouille la lecture.
+function majCanalDemande() {
+  const sel = document.getElementById('demStatut');
+  const grp = document.getElementById('demCanalGroupe');
+  if (sel && grp) grp.hidden = sel.value !== 'transmise';
+}
+
+async function enregistrerDemande(id) {
+  const d = adminDemandes.find(x => String(x.id) === String(id));
+  if (!d) return;
+
+  const statut = document.getElementById('demStatut').value;
+  const canal  = document.getElementById('demCanal').value.trim();
+  const note   = document.getElementById('demNote').value.trim();
+  const boite  = document.getElementById('demErreur');
+
+  if (statut === 'transmise' && !canal) {
+    boite.textContent = 'Indiquez par quel canal la demande a été transmise.';
+    boite.classList.add('show');
+    document.getElementById('demCanal').focus();
+    return;
+  }
+  boite.classList.remove('show');
+
+  const maj = { statut, note_admin: note || null };
+
+  if (statut === 'transmise') {
+    maj.canal_transmission = canal;
+    // « Passe a transmise » : la date marque le premier passage, une
+    // correction de canal ne la repousse pas.
+    if (!d.transmise_le) maj.transmise_le = new Date().toISOString();
+  }
+  // Repasser en sans_suite ou en aboutie ne fait pas oublier qu'elle est
+  // partie : transmise_le et canal_transmission restent en place.
+
+  const { error } = await sb.from('demandes_produits').update(maj).eq('id', d.id);
+  if (error) {
+    boite.textContent = 'Enregistrement refusé : ' + error.message;
+    boite.classList.add('show');
+    return;
+  }
+
+  fermerDemande();
+  adminMessage('Demande mise à jour.');
+  await chargerAdmin();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') fermerDemande();
+});
 
 // ─────────── Écriture commune ───────────
 async function ecrireAdmin(table, payload, id) {
