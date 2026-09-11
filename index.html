@@ -2054,6 +2054,52 @@
     .legal tr { border-bottom: 1px solid #E3E9F0; padding-bottom: .8rem; display: block; }
   }
 
+  /* ===== BARRE LÉGALE ===== */
+  /* Hors des blocs .page : une seule vue s'affiche a la fois, la barre
+     les suit toutes. Elle prolonge le navy du footer plutot que d'en
+     ouvrir un second -- d'ou l'absence de marge haute, le filet a peine
+     visible et un texte plus petit et plus efface que .footer-bottom.
+     Sur les deux vues sans footer, le padding bas de .dash-body suffit
+     a la decoller du contenu.
+     Que des div et des span ici : footer et nav sont stylés comme
+     sélecteurs d'element, le premier ajouterait 80 px de marge haute,
+     le second passerait la barre en position fixed. */
+  .barre-legale {
+    background: var(--navy);
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .barre-legale-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 24px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+  }
+  .barre-legale-liens { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .barre-legale a {
+    color: rgba(255,255,255,0.45);
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+  .barre-legale a:hover { color: var(--turquoise); }
+
+  /* Sous 560 px les deux blocs ne tiennent plus cote a cote : ils
+     s'empilent centres plutot que de se coller aux bords. */
+  @media (max-width: 560px) {
+    .barre-legale-inner {
+      justify-content: center;
+      text-align: center;
+      padding: 12px 16px;
+      gap: 4px 18px;
+    }
+    .barre-legale-liens { justify-content: center; }
+  }
+
   .page.active .hero-content,
   .page.active .hero-visual { animation: fadeInUp 0.5s ease both; }
   .page.active .hero-visual { animation-delay: 0.1s; }
@@ -2430,9 +2476,6 @@
         <h4>OrthoConnect</h4>
         <a href="#">À propos</a>
         <a href="#">Contact</a>
-        <a href="/mentions-legales" onclick="showPage('mentions')">Mentions légales</a>
-        <a href="/cgu" onclick="showPage('cgu')">CGU</a>
-        <a href="/confidentialite" onclick="showPage('confidentialite')">Confidentialité</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -4267,6 +4310,23 @@
       <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
     </div>
   </footer>
+</div>
+
+<!-- ============================================================ -->
+<!-- BARRE LEGALE                                               -->
+<!-- Hors des blocs .page, donc affichee sous n'importe quelle   -->
+<!-- vue, y compris le tableau de bord et l'admin qui n'ont pas  -->
+<!-- de footer.                                                  -->
+<!-- ============================================================ -->
+<div class="barre-legale">
+  <div class="barre-legale-inner">
+    <span>&copy; 2026 OrthoConnect</span>
+    <span class="barre-legale-liens">
+      <a href="/mentions-legales" onclick="showPage('mentions')">Mentions légales</a>
+      <a href="/cgu" onclick="showPage('cgu')">CGU</a>
+      <a href="/confidentialite" onclick="showPage('confidentialite')">Confidentialité</a>
+    </span>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
