@@ -7,6 +7,18 @@
 <title>OrthoConnect | Formations, matériel et postes en orthodontie</title>
 <meta name="description" id="metaDescription" content="La plateforme des orthodontistes : formations DPC vérifiées, comparatif de matériel et offres d'emploi en ODF.">
 <link rel="canonical" id="lienCanonique" href="https://orthoconnect.fr/">
+
+<!-- Partage social. Les robots des reseaux ne lancent pas le JavaScript :
+     ce qu'ils lisent, ce sont ces valeurs-la, celles de l'accueil. Le
+     routeur les met a jour ensuite, pour un partage depuis un onglet
+     deja ouvert. -->
+<meta property="og:site_name" content="OrthoConnect">
+<meta property="og:type" id="ogType" content="website">
+<meta property="og:url" id="ogUrl" content="https://orthoconnect.fr/">
+<meta property="og:title" id="ogTitre" content="OrthoConnect | Formations, matériel et postes en orthodontie">
+<meta property="og:description" id="ogDescription" content="La plateforme des orthodontistes : formations DPC vérifiées, comparatif de matériel et offres d'emploi en ODF.">
+<meta property="og:image" content="https://orthoconnect.fr/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Raleway:wght@900&display=swap" rel="stylesheet">
 <style>
@@ -4660,6 +4672,9 @@ let produitsDB = [];
 // Les categories portent le libelle affiche et la liste des champs de
 // chaque fiche. Elles changent rarement : un appel au chargement suffit.
 let categoriesProduits = [];
+// Ce que le comparatif montre a l'instant, filtre applique : c'est ce
+// que le balisage Product decrit.
+let produitsAffiches = [];
 let jobsDB = [];
 let annonceEnCours = null;
 let actusDB = [];
@@ -6054,7 +6069,7 @@ function ouvrirAnnonce(id) {
   showPage('annonce', cheminAnnonce(j));
   majMeta(j.titre + ' | Emploi | OrthoConnect',
     resumeMeta(j.description, "Offre d'emploi en orthodontie publiée sur OrthoConnect."),
-    cheminAnnonce(j));
+    cheminAnnonce(j), 'article');
 
   document.getElementById('annonceHero').innerHTML = `
     <div class="detail-badges">
@@ -6091,7 +6106,7 @@ function inviterPourAnnonce(j) {
   majMeta(j.titre + " | Offre d'emploi | OrthoConnect",
     "Offre d'emploi en orthodontie" + (j.ville ? ' à ' + j.ville : '')
       + '. Le détail de l\'annonce est réservé aux praticiens inscrits sur OrthoConnect.',
-    cheminAnnonce(j));
+    cheminAnnonce(j), 'article');
 
   // L'en-tête reprend ce qui est public, pour que le visiteur sache de
   // quelle annonce on lui parle.
@@ -7104,6 +7119,60 @@ function renderCaracteristiques(p, cat) {
     </div>`;
 }
 
+// ─────── Donnees structurees des fiches produits ───────
+//
+// Un seul script dans le head, remplace a chaque rendu et retire des
+// qu'on quitte le comparatif : sans ca, chaque passage en empilerait un
+// de plus. Ni prix, ni note, ni avis : ces champs n'existent pas en
+// base, et une donnee structuree inventee est une donnee fausse de
+// plus, lue par des machines qui la croiront.
+
+function ficheProduitJsonLd(p) {
+  const cat = categorieProduit(p.categorie);
+  const f = p.fournisseurs || null;
+
+  const fiche = { '@context': 'https://schema.org', '@type': 'Product', name: p.nom || '' };
+  if (p.presentation) fiche.description = p.presentation;
+  if (f && f.nom) fiche.brand = { '@type': 'Brand', name: f.nom };
+  if (cat || p.categorie) fiche.category = cat ? cat.libelle : p.categorie;
+
+  // Les memes champs que la fiche a l'ecran, dans le meme ordre, sans
+  // les vides. Le libelle, jamais la cle : additionalProperty se lit.
+  const champs = cat && Array.isArray(cat.champs) ? cat.champs : [];
+  const valeurs = p.caracteristiques || {};
+  const proprietes = [];
+
+  champs.forEach(ch => {
+    const v = valeurs[ch.cle];
+    if (!valeurRemplie(v)) return;
+    proprietes.push({
+      '@type': 'PropertyValue',
+      name: ch.libelle,
+      value: Array.isArray(v)
+        ? v.filter(x => String(x == null ? '' : x).trim() !== '').join(', ')
+        : String(v)
+    });
+  });
+
+  if (proprietes.length) fiche.additionalProperty = proprietes;
+  return fiche;
+}
+
+function majDonneesStructurees(produits) {
+  const existant = document.getElementById('donneesStructurees');
+  if (existant) existant.remove();
+  if (!produits || !produits.length) return;
+
+  const el = document.createElement('script');
+  el.type = 'application/ld+json';
+  el.id = 'donneesStructurees';
+  // Un « < » dans un nom de produit fermerait la balise a la relecture
+  // du document : JSON comprend l'echappement unicode, pas les robots
+  // une balise coupee en deux.
+  el.textContent = JSON.stringify(produits.map(ficheProduitJsonLd)).replace(/</g, '\\u003c');
+  document.head.appendChild(el);
+}
+
 // Les filtres suivent les categories en base, libelle_pluriel a
 // l'appui : « Aligneurs », « Brackets », et ce qui viendra ensuite.
 function renderFiltresProduits() {
@@ -7120,6 +7189,10 @@ function renderFiltresProduits() {
 function renderProduitsDB(data) {
   const grid = document.getElementById('produitsGrid');
   if (!grid) return;
+
+  // Le balisage suit ce qui est reellement a l'ecran, filtre compris.
+  produitsAffiches = data || [];
+  majDonneesStructurees(produitsAffiches);
 
   if (!data.length) {
     grid.innerHTML = produitsDB.length
@@ -7330,7 +7403,7 @@ async function ouvrirFormation(id) {
   showPage('formation', cheminFormation(f));
   majMeta(f.titre + ' | OrthoConnect',
     resumeMeta(f.description, 'Formation en orthodontie référencée sur OrthoConnect.'),
-    cheminFormation(f));
+    cheminFormation(f), 'article');
   renderDetailFormation(f, null, []);
 
   // Programme, sessions et tarif arrivent après le premier rendu : la
@@ -9578,14 +9651,29 @@ function resumeMeta(texte, repli) {
   return coupe.slice(0, coupe.lastIndexOf(' ')).trimEnd() + '…';
 }
 
-function majMeta(titre, description, chemin) {
+function majContenu(id, valeur) {
+  const el = document.getElementById(id);
+  if (el && valeur != null) el.setAttribute('content', valeur);
+}
+
+// Le quatrieme argument distingue une fiche d'une vue de catalogue. Les
+// vues n'en passent pas : website est la valeur qui leur convient.
+function majMeta(titre, description, chemin, type) {
   if (titre) document.title = titre;
 
   const desc = document.getElementById('metaDescription');
   if (desc && description != null) desc.setAttribute('content', description);
 
+  const url = ORIGINE + (chemin || cheminCourant());
+
   const canonique = document.getElementById('lienCanonique');
-  if (canonique) canonique.setAttribute('href', ORIGINE + (chemin || cheminCourant()));
+  if (canonique) canonique.setAttribute('href', url);
+
+  // og:image ne bouge pas : le site n'a qu'une image de partage.
+  if (titre) majContenu('ogTitre', titre);
+  majContenu('ogDescription', description);
+  majContenu('ogUrl', url);
+  majContenu('ogType', type || 'website');
 }
 
 // ─────── L'adresse publique, montrée à qui rédige ───────
@@ -9805,6 +9893,10 @@ function showPage(page, chemin) {
   if (page === 'admin' && !estAdmin()) page = currentUser ? 'dashboard' : 'landing';
 
   setNoindex(page === 'admin' || page === 'introuvable' || page === 'marques');
+
+  // Le balisage Product ne vaut que sur le comparatif : ailleurs il
+  // decrirait des produits que la page n'affiche pas.
+  majDonneesStructurees(page === 'produits' ? produitsAffiches : null);
 
   // Sortir de la fiche démonte l'attente du tarif restée en cours.
   if (page !== 'formation') annulerGardeTarif();
