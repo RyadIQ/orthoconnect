@@ -32,17 +32,24 @@ with entrees as (
   union all     select 'https://orthoconnect.fr/produits',        current_date,      'weekly',        '0.8',       4
   union all     select 'https://orthoconnect.fr/partenaires',     current_date,      'monthly',       '0.5',       5
 
+  -- Pages legales. Elles ne bougent pas quand un contenu arrive : leur
+  -- date est celle de leur derniere revision, ecrite en toutes lettres
+  -- en tete de chaque page, et non la date du jour.
+  union all     select 'https://orthoconnect.fr/mentions-legales', date '2026-09-11', 'yearly',        '0.3',       6
+  union all     select 'https://orthoconnect.fr/cgu',              date '2026-09-11', 'yearly',        '0.3',       6
+  union all     select 'https://orthoconnect.fr/confidentialite',  date '2026-09-11', 'yearly',        '0.3',       6
+
   union all
   select 'https://orthoconnect.fr/formations/' || f.slug,
          coalesce(f.verifie_le::date, current_date),
-         'monthly', '0.8', 6
+         'monthly', '0.8', 7
   from public.formations f
   where f.statut = 'publie' and f.slug is not null and f.slug <> ''
 
   union all
   select 'https://orthoconnect.fr/emploi/' || j.slug,
          coalesce(j.publie_le::date, j.created_at::date, current_date),
-         'weekly', '0.7', 7
+         'weekly', '0.7', 8
   from public.offres_emploi j
   where j.statut = 'publiee' and j.expire_le > now()
     and j.slug is not null and j.slug <> ''
@@ -70,7 +77,7 @@ from entrees;
 --   where statut = 'publie' and slug is not null
 -- union all select 'annonces', count(*) from public.offres_emploi
 --   where statut = 'publiee' and expire_le > now() and slug is not null
--- union all select 'pages fixes', 5;
+-- union all select 'pages fixes', 8;
 
 -- Contenus publiés sans slug : ils manqueraient au sitemap.
 -- Repasse la section 4 de slugs_et_urls.sql s'il en sort quelque chose.
