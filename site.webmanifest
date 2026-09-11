@@ -1,0 +1,15 @@
+{
+  "name": "OrthoConnect",
+  "short_name": "OrthoConnect",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0F2B4D",
+  "background_color": "#0F2B4D",
+  "icons": [
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
