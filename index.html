@@ -239,8 +239,10 @@
   .badge-hybride { background: #F0E6FF; color: #7A1AC2; }
   .badge-new { background: var(--turquoise-light); color: #007A86; }
   .badge-pro { background: #FFF8E6; color: #9E6B00; }
-  .badge-aligneur { background: #E8F5E9; color: #2E7D32; }
-  .badge-bracket { background: #FCE4EC; color: #AD1457; }
+  /* Une seule classe pour toutes les categories : elles viennent de
+     categories_produits, une classe par categorie condamnerait chaque
+     nouvelle a sortir sans style. */
+  .badge-categorie { background: var(--turquoise-light); color: #007A86; }
 
   /* ===== SECTION HEADERS ===== */
   .section-header {
@@ -819,7 +821,20 @@
   }
   .spec-row:last-child { border: none; }
   .spec-key { color: var(--text-secondary); }
-  .spec-val { font-weight: 600; color: var(--navy); }
+  .spec-val { font-weight: 600; color: var(--navy); text-align: right; }
+
+  /* Un texte_long ou une liste ne tiennent pas dans la colonne de
+     droite d'une ligne en space-between : ces deux types passent sous
+     leur libelle, sur toute la largeur. */
+  .spec-row-bloc { display: block; }
+  .spec-row-bloc .spec-key { display: block; margin-bottom: 5px; }
+  .spec-row-bloc .spec-val { font-weight: 500; text-align: left; overflow-wrap: anywhere; }
+  .spec-liste { list-style: none; }
+  .spec-liste li { position: relative; padding-left: 15px; margin-bottom: 3px; }
+  .spec-liste li::before {
+    content: '·'; position: absolute; left: 4px;
+    color: var(--turquoise); font-weight: 700;
+  }
   .avis-section { margin-top: 20px; }
   .avis-title {
     font-size: 13px;
@@ -2660,11 +2675,8 @@
   </section>
 
   <div class="filters-bar">
-    <div class="filters-inner">
-      <span class="filter-label">Catégorie :</span>
-      <button class="filter-btn active" onclick="filterProduits('all', this)">Tous</button>
-      <button class="filter-btn" onclick="filterProduits('aligneur', this)">Aligneurs</button>
-      <button class="filter-btn" onclick="filterProduits('bracket', this)">Brackets</button>
+    <div class="filters-inner" id="produitsFiltres">
+      <!-- Rendu par renderFiltresProduits() depuis categories_produits. -->
     </div>
   </div>
 
@@ -4446,6 +4458,9 @@ let currentUser = null;      // session Supabase
 let currentProfile = null;   // ligne dans praticiens
 let formationsDB = [];
 let produitsDB = [];
+// Les categories portent le libelle affiche et la liste des champs de
+// chaque fiche. Elles changent rarement : un appel au chargement suffit.
+let categoriesProduits = [];
 let jobsDB = [];
 let annonceEnCours = null;
 let actusDB = [];
@@ -4652,22 +4667,25 @@ function setStat(id, valeur) {
 
 async function loadCatalogues() {
   try {
-    const [f, p, j, a, av, pc] = await Promise.all([
+    const [f, p, j, a, av, pc, cp] = await Promise.all([
       chargerFormationsPubliques(),
-      sb.from('produits').select('*').eq('actif', true).order('id'),
+      sb.from('produits').select('*').eq('visible', true).order('id'),
       chargerAnnonces(),
       sb.from('actualites').select('*').eq('actif', true).order('publie_le', { ascending: false }),
       sb.from('avis').select('id', { count: 'exact', head: true }),
-      chargerPraticiensCarte()
+      chargerPraticiensCarte(),
+      sb.from('categories_produits').select('*').eq('actif', true).order('ordre')
     ]);
 
     formationsDB = (f.data || []).map(normaliserFormation);
     produitsDB = p.data || [];
+    categoriesProduits = cp.data || [];
     jobsDB = j.data || [];
     actusDB = a.data || [];
     praticiensCarte = pc || [];
 
     renderFormationsDB(formationsDB);
+    renderFiltresProduits();
     renderProduitsDB(produitsDB);
     remplirFiltresAnnonces();
     renderAnnonces();
@@ -6815,6 +6833,81 @@ function filterFormations(format, btn) {
   renderFormationsDB(format === 'all' ? formationsDB : formationsDB.filter(f => f.format === format));
 }
 
+// ─────────── Caracteristiques d'un produit ───────────
+//
+// La categorie n'est plus une valeur en dur : produits.categorie est le
+// code d'une ligne de categories_produits, qui porte le libelle affiche
+// et, dans champs, la liste ordonnee des caracteristiques de cette
+// famille. Les valeurs, elles, vivent dans produits.caracteristiques,
+// en jsonb, sous la cle du champ.
+
+function categorieProduit(code) {
+  return categoriesProduits.find(c => c.code === code) || null;
+}
+
+// Vide, c'est : absent, chaine blanche, tableau sans rien de rempli.
+// Ces champs-la ne s'affichent pas du tout, plutot que de rendre une
+// ligne avec un libelle et rien en face.
+function valeurRemplie(v) {
+  if (v === null || v === undefined) return false;
+  if (Array.isArray(v)) return v.some(x => String(x == null ? '' : x).trim() !== '');
+  return String(v).trim() !== '';
+}
+
+function renderCaracteristiques(p, cat) {
+  const champs = cat && Array.isArray(cat.champs) ? cat.champs : [];
+  const valeurs = p.caracteristiques || {};
+
+  const lignes = champs.map(ch => {
+    const v = valeurs[ch.cle];
+    if (!valeurRemplie(v)) return '';
+
+    // Une liste se rend en enumeration, un texte_long en paragraphe :
+    // ni l'un ni l'autre ne tient dans la colonne de droite d'une
+    // ligne cle/valeur. Le libelle, jamais la cle.
+    if (ch.type === 'liste' || Array.isArray(v)) {
+      const items = (Array.isArray(v) ? v : [v])
+        .filter(x => String(x == null ? '' : x).trim() !== '');
+      return `<div class="spec-row spec-row-bloc">
+          <span class="spec-key">${esc(ch.libelle)}</span>
+          <ul class="spec-liste spec-val">${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+        </div>`;
+    }
+
+    if (ch.type === 'texte_long') {
+      return `<div class="spec-row spec-row-bloc">
+          <span class="spec-key">${esc(ch.libelle)}</span>
+          <span class="spec-val">${esc(v)}</span>
+        </div>`;
+    }
+
+    return `<div class="spec-row">
+        <span class="spec-key">${esc(ch.libelle)}</span>
+        <span class="spec-val">${esc(v)}</span>
+      </div>`;
+  }).filter(Boolean);
+
+  if (!lignes.length) return '';
+
+  return `<div class="produit-specs">
+      <div class="produit-specs-title">Caractéristiques</div>
+      ${lignes.join('')}
+    </div>`;
+}
+
+// Les filtres suivent les categories en base, libelle_pluriel a
+// l'appui : « Aligneurs », « Brackets », et ce qui viendra ensuite.
+function renderFiltresProduits() {
+  const zone = document.getElementById('produitsFiltres');
+  if (!zone) return;
+
+  zone.innerHTML = '<span class="filter-label">Catégorie :</span>'
+    + `<button class="filter-btn active" onclick="filterProduits('all', this)">Tous</button>`
+    + categoriesProduits.map(c =>
+        `<button class="filter-btn" onclick="filterProduits('${esc(c.code)}', this)">`
+        + esc(c.libelle_pluriel || c.libelle || c.code) + '</button>').join('');
+}
+
 function renderProduitsDB(data) {
   const grid = document.getElementById('produitsGrid');
   if (!grid) return;
@@ -6829,7 +6922,7 @@ function renderProduitsDB(data) {
   }
 
   grid.innerHTML = data.map(p => {
-    const specs = typeof p.specs === 'string' ? JSON.parse(p.specs) : (p.specs || []);
+    const cat = categorieProduit(p.categorie);
     const initiale = p.marque.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
     return `
     <div class="produit-card">
@@ -6839,7 +6932,7 @@ function renderProduitsDB(data) {
           <div class="produit-brand-name">${p.marque}</div>
           <div class="produit-name">${p.nom}</div>
           <div style="margin-top:8px">
-            <span class="badge badge-${p.categorie}">${p.categorie === 'aligneur' ? 'Aligneur' : 'Bracket'}</span>
+            <span class="badge badge-categorie">${esc(cat ? cat.libelle : p.categorie || '')}</span>
           </div>
         </div>
         <div class="produit-rating">
@@ -6850,10 +6943,7 @@ function renderProduitsDB(data) {
       </div>
       <div class="produit-body">
         <div class="produit-desc">${p.description || ''}</div>
-        <div class="produit-specs">
-          <div class="produit-specs-title">Caractéristiques</div>
-          ${specs.map(s => `<div class="spec-row"><span class="spec-key">${s.k}</span><span class="spec-val">${s.v}</span></div>`).join('')}
-        </div>
+        ${renderCaracteristiques(p, cat)}
         <div class="avis-section">
           <div class="avis-title">Avis praticiens</div>
           <div id="avis-${p.id}" style="font-size:13px; color:var(--text-secondary); padding:12px 0">Chargement...</div>
