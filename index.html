@@ -285,9 +285,6 @@
     transform: translateY(-2px);
   }
 
-  /* ===== STARS ===== */
-  .stars { color: var(--warning); font-size: 14px; letter-spacing: 1px; }
-
   /* ===== FOOTER ===== */
   footer {
     background: var(--navy);
@@ -795,11 +792,6 @@
     letter-spacing: 0.5px;
   }
   .produit-name { font-size: 18px; font-weight: 800; color: var(--navy); margin-top: 4px; }
-  .produit-rating {
-    text-align: right;
-  }
-  .produit-rating-value { font-size: 22px; font-weight: 800; color: var(--navy); }
-  .produit-rating-count { font-size: 12px; color: var(--text-light); }
   .produit-body { padding: 24px 28px; }
   .produit-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
   .produit-specs { margin-bottom: 20px; }
@@ -835,21 +827,6 @@
     content: '·'; position: absolute; left: 4px;
     color: var(--turquoise); font-weight: 700;
   }
-  .avis-section { margin-top: 20px; }
-  .avis-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--grey-border);
-  }
-  .avis-item { padding: 12px 0; border-bottom: 1px solid var(--grey-bg); }
-  .avis-item:last-child { border: none; }
-  .avis-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-  .avis-author { font-size: 13px; font-weight: 600; color: var(--navy); }
-  .avis-date { font-size: 11px; color: var(--text-light); }
-  .avis-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
 
   /* ====================== */
   /* === PAGE 4: MARQUES === */
@@ -1992,6 +1969,35 @@
     border: 1px dashed var(--grey-border); border-radius: var(--radius); font-size: 14px;
   }
 
+  /* ===== PRODUITS ET FOURNISSEURS (ADMIN) ===== */
+
+  /* Les champs d'une fiche produit ne sont pas fixes : ils sont rendus
+     a partir de categories_produits.champs quand la categorie change. */
+  .pr-champs { margin-top: 4px; }
+  .pr-champs:empty { display: none; }
+  .pr-champs-vide {
+    font-size: 13px; color: var(--text-secondary);
+    padding: 12px 14px; border: 1px dashed var(--grey-border);
+    border-radius: var(--radius-sm);
+  }
+
+  /* La fiche fournisseur porte deux blocs qui ne vivent pas au meme
+     endroit en base : la table, et le contact qui passe par RPC. */
+  .four-bloc {
+    border-top: 1px solid var(--grey-border);
+    margin-top: 18px; padding-top: 16px;
+  }
+  .four-bloc-titre {
+    font-size: 13px; font-weight: 700; color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .four-bloc-note {
+    font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;
+  }
+
+  .badge-visible { background: #E8F5E9; color: #2E7D32; }
+  .badge-masque  { background: var(--grey-bg); color: var(--text-secondary); }
+
   /* ===== DEMANDES (ADMIN) ===== */
 
   /* Le compteur de demandes nouvelles, pose sur l'onglet lui-meme : il
@@ -2663,12 +2669,8 @@
           <div class="page-hero-stat-lbl">Produits</div>
         </div>
         <div class="page-hero-stat">
-          <div class="page-hero-stat-val" id="statPageAvis">&mdash;</div>
-          <div class="page-hero-stat-lbl">Avis publiés</div>
-        </div>
-        <div class="page-hero-stat">
           <div class="page-hero-stat-val" id="statPageMarques">&mdash;</div>
-          <div class="page-hero-stat-lbl">Marques</div>
+          <div class="page-hero-stat-lbl">Fournisseurs</div>
         </div>
       </div>
     </div>
@@ -3486,6 +3488,8 @@
           <button onclick="showAdminPanel('sessions', this)">🗓 Sessions</button>
           <button onclick="showAdminPanel('codes', this)">🎟 Codes</button>
           <button onclick="showAdminPanel('annonces', this)">💼 Annonces</button>
+          <button onclick="showAdminPanel('produits', this)">📦 Produits</button>
+          <button onclick="showAdminPanel('fournisseurs', this)">🏭 Fournisseurs</button>
           <button onclick="showAdminPanel('demandes', this)">📨 Demandes<span class="admin-pastille" id="admPastilleDemandes" hidden>0</span></button>
           <button onclick="showPage('dashboard')" style="margin-top:12px; color:var(--text-light)">↩ Mon espace</button>
         </div>
@@ -3933,6 +3937,209 @@
             </div>
 
             <div id="admCodesListe"></div>
+          </div>
+
+          <!-- PRODUITS -->
+          <div class="dash-panel" id="adminPanel-produits">
+            <h2>Produits</h2>
+            <p class="panel-sub">Fiches matériel. Une fiche naît masquée : elle n'apparaît sur le comparatif qu'une fois publiée.</p>
+
+            <div class="admin-toolbar">
+              <button class="btn btn-turquoise btn-sm" onclick="ouvrirFormProduit(null)">+ Nouvelle fiche</button>
+              <span class="spacer"></span>
+              <span class="filter-label">Affichage :</span>
+              <button class="filter-btn active" onclick="filtrerProduitsAdmin('tous', this)">Toutes</button>
+              <button class="filter-btn" onclick="filtrerProduitsAdmin('visible', this)">Publiées</button>
+              <button class="filter-btn" onclick="filtrerProduitsAdmin('masque', this)">Masquées</button>
+            </div>
+
+            <div class="admin-form" id="prForm" style="display:none">
+              <h3 id="prFormTitre">Nouvelle fiche</h3>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prFournisseur">Fournisseur</label>
+                  <select id="prFournisseur"></select>
+                </div>
+                <div class="form-group">
+                  <label for="prCategorie">Catégorie</label>
+                  <select id="prCategorie" onchange="renderChampsCategorie()"></select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="prNom">Nom</label>
+                <input type="text" id="prNom" placeholder="Aligneurs Serena">
+                <div class="form-note">L'adresse publique est tirée du nom, la base la pose à l'enregistrement.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="prAccroche">Accroche</label>
+                <input type="text" id="prAccroche" maxlength="160" placeholder="En une phrase, ce qui distingue ce matériel.">
+              </div>
+
+              <div class="form-group">
+                <label for="prPresentation">Présentation</label>
+                <textarea id="prPresentation" placeholder="Le texte affiché sur la fiche du comparatif."></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prPays">Pays de production</label>
+                  <input type="text" id="prPays" placeholder="France">
+                </div>
+                <div class="form-group">
+                  <label for="prVisuel">Visuel</label>
+                  <input type="url" id="prVisuel" placeholder="https://…">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prFormation">Formation requise</label>
+                  <input type="text" id="prFormation" placeholder="Formation d'une journée chez le fournisseur">
+                </div>
+                <div class="form-group">
+                  <label for="prMarquage">Marquage CE</label>
+                  <input type="text" id="prMarquage" placeholder="Classe IIa">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="prIndications">Indications</label>
+                <textarea id="prIndications" placeholder="Une indication par ligne."></textarea>
+                <div class="form-note">Une par ligne.</div>
+              </div>
+
+              <div class="form-group">
+                <label for="prLimites">Limites</label>
+                <textarea id="prLimites" placeholder="Ce que ce matériel ne permet pas de traiter."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="prOrdre">Ordre d'affichage</label>
+                <input type="number" id="prOrdre" value="0">
+              </div>
+
+              <div class="four-bloc">
+                <div class="four-bloc-titre">Caractéristiques de la catégorie</div>
+                <div class="four-bloc-note" id="prChampsNote">Choisissez une catégorie pour voir ses champs.</div>
+                <div class="pr-champs" id="prChamps"></div>
+              </div>
+
+              <div class="admin-form-actions">
+                <button class="btn btn-turquoise btn-sm" onclick="enregistrerProduit()">Enregistrer</button>
+                <button class="btn btn-outline btn-sm" onclick="fermerFormProduit()">Annuler</button>
+              </div>
+            </div>
+
+            <div id="admProduitsListe"></div>
+          </div>
+
+          <!-- FOURNISSEURS -->
+          <div class="dash-panel" id="adminPanel-fournisseurs">
+            <h2>Fournisseurs</h2>
+            <p class="panel-sub">Fabricants et distributeurs référencés. Leurs coordonnées ne sortent jamais du panel.</p>
+
+            <div class="admin-toolbar">
+              <button class="btn btn-turquoise btn-sm" onclick="ouvrirFormFournisseur(null)">+ Nouveau fournisseur</button>
+            </div>
+
+            <div class="admin-form" id="fourForm" style="display:none">
+              <h3 id="fourFormTitre">Nouveau fournisseur</h3>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fourNom">Nom</label>
+                  <input type="text" id="fourNom" placeholder="Serena Dental">
+                </div>
+                <div class="form-group">
+                  <label for="fourPays">Pays</label>
+                  <input type="text" id="fourPays" placeholder="France">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fourSite">Site</label>
+                  <input type="url" id="fourSite" placeholder="https://exemple.fr">
+                </div>
+                <div class="form-group">
+                  <label for="fourLogo">Logo</label>
+                  <input type="url" id="fourLogo" placeholder="https://…">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="fourPresentation">Présentation</label>
+                <textarea id="fourPresentation"></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fourPartenaireDepuis">Partenaire depuis</label>
+                  <input type="date" id="fourPartenaireDepuis">
+                </div>
+                <div class="form-group">
+                  <label>&nbsp;</label>
+                  <label class="admin-check"><input type="checkbox" id="fourPartenaire"> Partenaire</label>
+                  <label class="admin-check"><input type="checkbox" id="fourActif" checked> Actif</label>
+                </div>
+              </div>
+
+              <div class="four-bloc">
+                <div class="four-bloc-titre">Contact</div>
+                <div class="four-bloc-note">
+                  Ces coordonnées ne sont ni lues ni écrites en direct : elles passent par
+                  contacts_admin() et maj_contact_fournisseur(). Elles ne quittent jamais ce panel.
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="fourContactNom">Nom du contact</label>
+                    <input type="text" id="fourContactNom">
+                  </div>
+                  <div class="form-group">
+                    <label for="fourContactFonction">Fonction</label>
+                    <input type="text" id="fourContactFonction" placeholder="Responsable France">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="fourEmail">Email</label>
+                    <input type="email" id="fourEmail">
+                  </div>
+                  <div class="form-group">
+                    <label for="fourTelephone">Téléphone</label>
+                    <input type="text" id="fourTelephone">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="fourLienRdv">Lien de rendez-vous</label>
+                    <input type="url" id="fourLienRdv" placeholder="https://…">
+                  </div>
+                  <div class="form-group">
+                    <label for="fourZone">Zone couverte</label>
+                    <input type="text" id="fourZone" placeholder="France, Benelux">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="fourNoteInterne">Note interne</label>
+                  <textarea id="fourNoteInterne" placeholder="Pour l'équipe. N'apparaît nulle part ailleurs que sur cet écran."></textarea>
+                </div>
+              </div>
+
+              <div class="admin-form-actions">
+                <button class="btn btn-turquoise btn-sm" onclick="enregistrerFournisseur()">Enregistrer</button>
+                <button class="btn btn-outline btn-sm" onclick="fermerFormFournisseur()">Annuler</button>
+              </div>
+            </div>
+
+            <div id="admFournisseursListe"></div>
           </div>
 
           <!-- DEMANDES -->
@@ -4667,12 +4874,13 @@ function setStat(id, valeur) {
 
 async function loadCatalogues() {
   try {
-    const [f, p, j, a, av, pc, cp] = await Promise.all([
+    const [f, p, j, a, pc, cp] = await Promise.all([
       chargerFormationsPubliques(),
-      sb.from('produits').select('*').eq('visible', true).order('id'),
+      sb.from('produits')
+        .select('*, fournisseurs(id, nom, logo_url, partenaire)')
+        .eq('visible', true).order('ordre'),
       chargerAnnonces(),
       sb.from('actualites').select('*').eq('actif', true).order('publie_le', { ascending: false }),
-      sb.from('avis').select('id', { count: 'exact', head: true }),
       chargerPraticiensCarte(),
       sb.from('categories_produits').select('*').eq('actif', true).order('ordre')
     ]);
@@ -4709,8 +4917,7 @@ async function loadCatalogues() {
     setStat('statPageDpc', formationsDB.filter(x => x.dpc).length);
 
     setStat('statPageProduits', produitsDB.length);
-    setStat('statPageAvis', av.count || 0);
-    setStat('statPageMarques', distinct(produitsDB, 'marque'));
+    setStat('statPageMarques', distinct(produitsDB, 'fournisseur_id'));
   } catch (e) {
     console.error('Chargement catalogues:', e);
   }
@@ -6923,65 +7130,33 @@ function renderProduitsDB(data) {
 
   grid.innerHTML = data.map(p => {
     const cat = categorieProduit(p.categorie);
-    const initiale = p.marque.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const f = p.fournisseurs || null;
+    const nomFournisseur = f ? (f.nom || '') : '';
+    const initiale = nomFournisseur
+      ? nomFournisseur.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+      : '—';
     return `
     <div class="produit-card">
       <div class="produit-header">
         <div>
-          <div class="produit-brand-logo">${initiale}</div>
-          <div class="produit-brand-name">${p.marque}</div>
-          <div class="produit-name">${p.nom}</div>
+          <div class="produit-brand-logo">${esc(initiale)}</div>
+          <div class="produit-brand-name">${esc(nomFournisseur)}</div>
+          <div class="produit-name">${esc(p.nom || '')}</div>
           <div style="margin-top:8px">
             <span class="badge badge-categorie">${esc(cat ? cat.libelle : p.categorie || '')}</span>
+            ${f && f.partenaire ? '<span class="badge badge-pro">Partenaire</span>' : ''}
           </div>
-        </div>
-        <div class="produit-rating">
-          <div class="produit-rating-value">${p.note}</div>
-          <div class="stars">${'★'.repeat(Math.floor(p.note))}</div>
-          <div class="produit-rating-count">${p.nb_avis} avis</div>
         </div>
       </div>
       <div class="produit-body">
-        <div class="produit-desc">${p.description || ''}</div>
+        <div class="produit-desc">${esc(p.presentation || '')}</div>
         ${renderCaracteristiques(p, cat)}
-        <div class="avis-section">
-          <div class="avis-title">Avis praticiens</div>
-          <div id="avis-${p.id}" style="font-size:13px; color:var(--text-secondary); padding:12px 0">Chargement...</div>
-          <button class="btn btn-outline btn-sm" style="margin-top:12px; width:100%; justify-content:center" onclick="requireAuth('accueil')">Demander une démo</button>
-        </div>
+        <button class="btn btn-outline btn-sm" style="margin-top:4px; width:100%; justify-content:center" onclick="requireAuth('accueil')">Demander une démo</button>
       </div>
     </div>`;
   }).join('');
-
-  data.forEach(p => loadAvis(p.id));
 }
 
-async function loadAvis(produitId) {
-  const el = document.getElementById('avis-' + produitId);
-  if (!el) return;
-
-  const { data } = await sb.from('avis')
-    .select('note, texte, created_at, praticiens(nom, ville)')
-    .eq('produit_id', produitId)
-    .order('created_at', { ascending: false })
-    .limit(3);
-
-  if (!data || !data.length) {
-    el.innerHTML = '<em style="color:var(--text-light)">Aucun avis pour le moment. Soyez le premier à partager votre expérience.</em>';
-    return;
-  }
-
-  el.innerHTML = data.map(a => `
-    <div class="avis-item">
-      <div class="avis-header">
-        <span class="avis-author">${a.praticiens ? 'Dr. ' + a.praticiens.nom : 'Praticien'}</span>
-        <span class="avis-date">${formatDate(a.created_at)}</span>
-      </div>
-      <div class="stars" style="font-size:12px; margin-bottom:4px">${'★'.repeat(a.note)}</div>
-      <div class="avis-text">${a.texte}</div>
-    </div>
-  `).join('');
-}
 
 function filterProduits(cat, btn) {
   document.querySelectorAll('#page-produits .filter-btn').forEach(b => b.classList.remove('active'));
@@ -7554,6 +7729,15 @@ let adminFormations = [];
 let adminSessions   = [];
 let adminCodes      = [];
 let adminAnnonces   = [];
+let adminProduits     = [];
+let adminFournisseurs = [];
+// fournisseurs_contacts n'est pas lisible en direct : contacts_admin()
+// la rend, indexee ici par fournisseur_id.
+let adminContacts = {};
+let erreurContacts = null;
+let filtreVisibiliteProduit = 'tous';
+let prodEnCours = null;
+let fourEnCours = null;
 let adminDemandes   = [];
 // demandes_admin() peut ne pas encore exister sur la base : son echec
 // est garde ici et montre dans son onglet, sans emporter le reste.
@@ -7672,7 +7856,7 @@ async function chargerPraticiensAdmin() {
 }
 
 async function chargerAdmin() {
-  const [pr, org, fo, se, co, an, de, nb] = await Promise.all([
+  const [pr, org, fo, se, co, an, de, nb, pd, fr, ct] = await Promise.all([
     chargerPraticiensAdmin(),
     sb.from('organismes').select('*').order('nom'),
     sb.from('formations').select('*, organismes(id, nom, logo_url, partenaire)').order('id', { ascending: false }),
@@ -7686,12 +7870,18 @@ async function chargerAdmin() {
     // Jamais la table ni la vue pour lire : la fonction seule. Elle ne
     // prend pas d'argument et rend ses lignes deja triees en cree_le desc.
     sb.rpc('demandes_admin'),
-    sb.rpc('compte_demandes_nouvelles')
+    sb.rpc('compte_demandes_nouvelles'),
+    // Toutes les fiches, publiees ou non : c'est l'ecran qui les publie.
+    sb.from('produits').select('*, fournisseurs(id, nom)').order('ordre'),
+    sb.from('fournisseurs').select('*').order('nom'),
+    // Jamais de select sur fournisseurs_contacts : la table n'est pas
+    // lisible, meme par un admin. La fonction seule.
+    sb.rpc('contacts_admin')
   ]);
 
   // Les demandes sont volontairement hors de ce test : un onglet qui ne
   // charge pas ne doit pas eteindre les six autres.
-  const enErreur = [pr, org, fo, se, co, an].find(r => r.error);
+  const enErreur = [pr, org, fo, se, co, an, pd, fr].find(r => r.error);
   const boite = document.getElementById('adminErreur');
   if (enErreur) {
     boite.textContent = "Chargement impossible : " + enErreur.error.message
@@ -7708,6 +7898,15 @@ async function chargerAdmin() {
   adminCodes      = co.data  || [];
   adminAnnonces   = an.data  || [];
 
+  adminProduits     = pd.data || [];
+  adminFournisseurs = fr.data || [];
+
+  // Comme les demandes : une RPC absente n'eteint pas l'administration,
+  // elle se signale dans l'ecran qui s'en sert.
+  erreurContacts = ct.error ? ct.error.message : null;
+  adminContacts = {};
+  (ct.data || []).forEach(c => { adminContacts[c.fournisseur_id] = c; });
+
   erreurDemandes  = de.error ? de.error.message : null;
   adminDemandes   = de.data  || [];
 
@@ -7718,6 +7917,8 @@ async function chargerAdmin() {
   renderAdminSessions();
   renderAdminCodes();
   renderAdminAnnonces();
+  renderAdminProduits();
+  renderAdminFournisseurs();
   renderAdminDemandes();
   majPastilleDemandes(nb);
   remplirSelectsAdmin();
@@ -8586,6 +8787,406 @@ async function depublierAnnonce(id) {
   const a = adminAnnonces.find(x => x.id === id);
   if (!window.confirm('Dépublier « ' + (a ? a.titre : 'cette annonce') + ' » ? Elle repassera en brouillon chez son auteur.')) return;
   await changerStatutAnnonce(id, 'brouillon');
+}
+
+// ─────────── Produits (admin) ───────────
+//
+// La fiche n'a pas un jeu de champs fixe : categories_produits.champs
+// dit lesquels, et leurs valeurs vont dans produits.caracteristiques
+// sous la cle du champ. Changer de categorie regenere donc le
+// formulaire. slug est pose par un trigger : il n'est jamais envoye.
+
+function filtrerProduitsAdmin(etat, btn) {
+  filtreVisibiliteProduit = etat;
+  document.querySelectorAll('#adminPanel-produits .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAdminProduits();
+}
+
+function renderAdminProduits() {
+  const zone = document.getElementById('admProduitsListe');
+  if (!zone) return;
+
+  const lignes = filtreVisibiliteProduit === 'tous'
+    ? adminProduits
+    : adminProduits.filter(p => !!p.visible === (filtreVisibiliteProduit === 'visible'));
+
+  if (!lignes.length) {
+    zone.innerHTML = '<div class="admin-empty">'
+      + (adminProduits.length ? 'Aucune fiche dans cette catégorie.' : 'Aucune fiche pour le moment.')
+      + '</div>';
+    return;
+  }
+
+  zone.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Produit</th><th>Fournisseur</th><th>Catégorie</th><th>Ordre</th><th>État</th><th class="col-actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          ${lignes.map(p => {
+            const cat = categorieProduit(p.categorie);
+            const f = p.fournisseurs || null;
+            return `
+            <tr>
+              <td>
+                <div class="admin-nom">${esc(p.nom || 'Sans nom')}</div>
+                <div style="font-size:12px; color:var(--text-light)">${esc(p.accroche || '')}</div>
+              </td>
+              <td>${esc(f ? f.nom : '—')}</td>
+              <td>${esc(cat ? cat.libelle : p.categorie || '—')}</td>
+              <td>${p.ordre === null || p.ordre === undefined ? '—' : esc(p.ordre)}</td>
+              <td><span class="badge badge-${p.visible ? 'visible' : 'masque'}">${p.visible ? 'Publiée' : 'Masquée'}</span></td>
+              <td class="col-actions">
+                <button class="btn btn-outline btn-sm" onclick="ouvrirFormProduit('${p.id}')">Éditer</button>
+                <button class="btn btn-outline btn-sm" onclick="basculerVisibiliteProduit('${p.id}')">${p.visible ? 'Dépublier' : 'Publier'}</button>
+                <button class="btn btn-outline btn-sm" onclick="supprimerProduit('${p.id}')">Supprimer</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// Les champs de la categorie choisie. Les valeurs deja saisies sont
+// reprises de la fiche en cours : changer de categorie ne les invente
+// pas, il expose celles que la nouvelle categorie sait montrer.
+function renderChampsCategorie() {
+  const zone = document.getElementById('prChamps');
+  const note = document.getElementById('prChampsNote');
+  if (!zone) return;
+
+  const cat = categorieProduit(document.getElementById('prCategorie').value);
+  const champs = cat && Array.isArray(cat.champs) ? cat.champs : [];
+
+  const p = prodEnCours ? adminProduits.find(x => String(x.id) === String(prodEnCours)) : null;
+  const valeurs = (p && p.caracteristiques) || {};
+
+  if (note) {
+    note.textContent = !cat
+      ? 'Choisissez une catégorie pour voir ses champs.'
+      : (champs.length
+          ? 'Propres à la catégorie « ' + cat.libelle + ' ».'
+          : 'La catégorie « ' + cat.libelle + ' » ne définit aucun champ.');
+  }
+
+  if (!champs.length) { zone.innerHTML = ''; return; }
+
+  zone.innerHTML = champs.map(ch => {
+    const v = valeurs[ch.cle];
+    const aide = ch.aide ? `<div class="form-note">${esc(ch.aide)}</div>` : '';
+
+    if (ch.type === 'liste') {
+      const lignes = Array.isArray(v) ? v.join('\n') : (v == null ? '' : String(v));
+      return `<div class="form-group">
+          <label>${esc(ch.libelle)}</label>
+          <textarea class="pr-car" data-cle="${esc(ch.cle)}" data-type="liste"
+                    placeholder="Une par ligne.">${esc(lignes)}</textarea>
+          <div class="form-note">Une par ligne.</div>${aide}
+        </div>`;
+    }
+
+    if (ch.type === 'texte_long') {
+      return `<div class="form-group">
+          <label>${esc(ch.libelle)}</label>
+          <textarea class="pr-car" data-cle="${esc(ch.cle)}" data-type="texte_long">${esc(v == null ? '' : v)}</textarea>${aide}
+        </div>`;
+    }
+
+    return `<div class="form-group">
+        <label>${esc(ch.libelle)}</label>
+        <input type="text" class="pr-car" data-cle="${esc(ch.cle)}" data-type="texte"
+               value="${esc(v == null ? '' : v)}">${aide}
+      </div>`;
+  }).join('');
+}
+
+// Les champs liste d'une categorie n'ont pas d'id -- ils sont reperes
+// par data-cle -- donc ils ne peuvent pas passer par lignesEnTableau(),
+// qui lit un id. Meme decoupage, depuis la valeur.
+function lignesDeTexte(valeur) {
+  return String(valeur == null ? '' : valeur).split('\n').map(l => l.trim()).filter(Boolean);
+}
+
+function ouvrirFormProduit(id) {
+  prodEnCours = id;
+  const p = id ? adminProduits.find(x => String(x.id) === String(id)) : null;
+
+  const selF = document.getElementById('prFournisseur');
+  selF.innerHTML = '<option value="">Choisir un fournisseur</option>'
+    + adminFournisseurs.map(f => `<option value="${esc(f.id)}">${esc(f.nom)}</option>`).join('');
+  selF.value = p ? (p.fournisseur_id || '') : '';
+
+  const selC = document.getElementById('prCategorie');
+  selC.innerHTML = '<option value="">Choisir une catégorie</option>'
+    + categoriesProduits.map(c => `<option value="${esc(c.code)}">${esc(c.libelle)}</option>`).join('');
+  selC.value = p ? (p.categorie || '') : '';
+
+  document.getElementById('prFormTitre').textContent = p ? 'Éditer ' + (p.nom || '') : 'Nouvelle fiche';
+  document.getElementById('prNom').value          = p ? (p.nom || '') : '';
+  document.getElementById('prAccroche').value     = p ? (p.accroche || '') : '';
+  document.getElementById('prPresentation').value = p ? (p.presentation || '') : '';
+  document.getElementById('prPays').value         = p ? (p.pays_production || '') : '';
+  document.getElementById('prVisuel').value       = p ? (p.visuel_url || '') : '';
+  document.getElementById('prFormation').value    = p ? (p.formation_requise || '') : '';
+  document.getElementById('prMarquage').value     = p ? (p.marquage_ce || '') : '';
+  document.getElementById('prLimites').value      = p ? (p.limites || '') : '';
+  document.getElementById('prOrdre').value        = p && p.ordre !== null && p.ordre !== undefined ? p.ordre : 0;
+  document.getElementById('prIndications').value  =
+    p && Array.isArray(p.indications) ? p.indications.join('\n') : '';
+
+  renderChampsCategorie();
+
+  const f = document.getElementById('prForm');
+  f.style.display = 'block';
+  f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function fermerFormProduit() {
+  prodEnCours = null;
+  document.getElementById('prForm').style.display = 'none';
+}
+
+async function enregistrerProduit() {
+  const nom = document.getElementById('prNom').value.trim();
+  const fournisseur = document.getElementById('prFournisseur').value;
+  const categorie = document.getElementById('prCategorie').value;
+
+  if (!nom) return adminMessage('Le nom de la fiche est obligatoire.', true);
+  // fournisseur_id est NOT NULL en base : on le dit ici plutot que de
+  // laisser partir un insert qui sera refuse.
+  if (!fournisseur) return adminMessage('Choisissez le fournisseur de cette fiche.', true);
+  if (!categorie) return adminMessage('Choisissez la catégorie de cette fiche.', true);
+
+  const caracteristiques = {};
+  document.querySelectorAll('#prChamps .pr-car').forEach(el => {
+    const cle = el.dataset.cle;
+    if (el.dataset.type === 'liste') {
+      const items = lignesDeTexte(el.value);
+      if (items.length) caracteristiques[cle] = items;
+    } else {
+      const v = el.value.trim();
+      if (v) caracteristiques[cle] = v;
+    }
+  });
+
+  const ordre = parseInt(document.getElementById('prOrdre').value, 10);
+
+  // slug est pose par un trigger : il n'entre jamais dans la charge.
+  const payload = {
+    fournisseur_id:    fournisseur,
+    nom,
+    categorie,
+    accroche:          document.getElementById('prAccroche').value.trim() || null,
+    presentation:      document.getElementById('prPresentation').value.trim() || null,
+    pays_production:   document.getElementById('prPays').value.trim() || null,
+    formation_requise: document.getElementById('prFormation').value.trim() || null,
+    marquage_ce:       document.getElementById('prMarquage').value.trim() || null,
+    indications:       lignesEnTableau('prIndications'),
+    limites:           document.getElementById('prLimites').value.trim() || null,
+    visuel_url:        document.getElementById('prVisuel').value.trim() || null,
+    ordre:             Number.isFinite(ordre) ? ordre : 0,
+    caracteristiques
+  };
+
+  // Une fiche nait masquee : c'est le bouton Publier qui la montre.
+  if (!prodEnCours) payload.visible = false;
+
+  if (await ecrireAdmin('produits', payload, prodEnCours)) fermerFormProduit();
+}
+
+async function basculerVisibiliteProduit(id) {
+  const p = adminProduits.find(x => String(x.id) === String(id));
+  if (!p) return;
+
+  const { error } = await sb.from('produits').update({ visible: !p.visible }).eq('id', p.id);
+  if (error) return adminMessage('Modification refusée : ' + error.message, true);
+
+  adminMessage(p.visible ? 'Fiche dépubliée.' : 'Fiche publiée.');
+  await chargerAdmin();
+  await loadCatalogues();
+}
+
+async function supprimerProduit(id) {
+  const p = adminProduits.find(x => String(x.id) === String(id));
+  if (!window.confirm('Supprimer la fiche « ' + (p ? p.nom : '') + ' » ? Cette action est définitive.')) return;
+
+  const { error } = await sb.from('produits').delete().eq('id', id);
+  if (error) return adminMessage('Suppression refusée : ' + error.message, true);
+
+  adminMessage('Fiche supprimée.');
+  await chargerAdmin();
+  await loadCatalogues();
+}
+
+// ─────────── Fournisseurs (admin) ───────────
+//
+// La fiche vit dans fournisseurs, le contact dans
+// fournisseurs_contacts, qui n'est ni lisible ni ecrivable en direct.
+// Un seul contact par fournisseur : des champs a plat, pas de liste.
+
+function renderAdminFournisseurs() {
+  const zone = document.getElementById('admFournisseursListe');
+  if (!zone) return;
+
+  if (!adminFournisseurs.length) {
+    zone.innerHTML = '<div class="admin-empty">Aucun fournisseur pour le moment.</div>';
+    return;
+  }
+
+  const alerte = erreurContacts
+    ? '<div class="admin-message ko show">Coordonnées non chargées : ' + esc(erreurContacts)
+      + ' — vérifie que la fonction contacts_admin() existe.</div>'
+    : '';
+
+  zone.innerHTML = alerte + `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Fournisseur</th><th>Pays</th><th>Contact</th><th>Fiches</th><th>État</th><th class="col-actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          ${adminFournisseurs.map(f => {
+            const c = adminContacts[f.id] || null;
+            const nb = adminProduits.filter(p => p.fournisseur_id === f.id).length;
+            return `
+            <tr>
+              <td>
+                <div class="admin-nom">${esc(f.nom || 'Sans nom')}</div>
+                ${f.partenaire ? '<span class="badge badge-pro">Partenaire</span>' : ''}
+              </td>
+              <td>${esc(f.pays || '—')}</td>
+              <td>
+                ${c && c.contact_nom
+                  ? `<div>${esc(c.contact_nom)}</div>
+                     <div style="font-size:12px; color:var(--text-light)">${esc(c.email || c.telephone || '')}</div>`
+                  : '<span style="color:var(--text-light)">—</span>'}
+              </td>
+              <td>${nb}</td>
+              <td><span class="badge badge-${f.actif ? 'visible' : 'masque'}">${f.actif ? 'Actif' : 'Inactif'}</span></td>
+              <td class="col-actions">
+                <button class="btn btn-outline btn-sm" onclick="ouvrirFormFournisseur('${f.id}')">Éditer</button>
+                <button class="btn btn-outline btn-sm" onclick="supprimerFournisseur('${f.id}')">Supprimer</button>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function ouvrirFormFournisseur(id) {
+  fourEnCours = id;
+  const f = id ? adminFournisseurs.find(x => String(x.id) === String(id)) : null;
+  const c = (f && adminContacts[f.id]) || null;
+
+  document.getElementById('fourFormTitre').textContent = f ? 'Éditer ' + (f.nom || '') : 'Nouveau fournisseur';
+  document.getElementById('fourNom').value          = f ? (f.nom || '') : '';
+  document.getElementById('fourPays').value         = f ? (f.pays || '') : '';
+  document.getElementById('fourSite').value         = f ? (f.site_url || '') : '';
+  document.getElementById('fourLogo').value         = f ? (f.logo_url || '') : '';
+  document.getElementById('fourPresentation').value = f ? (f.presentation || '') : '';
+  document.getElementById('fourPartenaire').checked = f ? !!f.partenaire : false;
+  document.getElementById('fourActif').checked      = f ? !!f.actif : true;
+  document.getElementById('fourPartenaireDepuis').value =
+    f && f.partenaire_depuis ? String(f.partenaire_depuis).slice(0, 10) : '';
+
+  document.getElementById('fourContactNom').value      = c ? (c.contact_nom || '') : '';
+  document.getElementById('fourContactFonction').value = c ? (c.contact_fonction || '') : '';
+  document.getElementById('fourTelephone').value       = c ? (c.telephone || '') : '';
+  document.getElementById('fourEmail').value           = c ? (c.email || '') : '';
+  document.getElementById('fourLienRdv').value         = c ? (c.lien_rdv || '') : '';
+  document.getElementById('fourZone').value            = c ? (c.zone_couverte || '') : '';
+  document.getElementById('fourNoteInterne').value     = c ? (c.note_interne || '') : '';
+
+  const el = document.getElementById('fourForm');
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function fermerFormFournisseur() {
+  fourEnCours = null;
+  document.getElementById('fourForm').style.display = 'none';
+}
+
+async function enregistrerFournisseur() {
+  const nom = document.getElementById('fourNom').value.trim();
+  if (!nom) return adminMessage('Le nom du fournisseur est obligatoire.', true);
+
+  const vide = (id) => document.getElementById(id).value.trim() || null;
+
+  // slug est pose par un trigger, comme pour les produits.
+  const payload = {
+    nom,
+    pays:              vide('fourPays'),
+    site_url:          vide('fourSite'),
+    logo_url:          vide('fourLogo'),
+    presentation:      vide('fourPresentation'),
+    partenaire:        document.getElementById('fourPartenaire').checked,
+    partenaire_depuis: vide('fourPartenaireDepuis'),
+    actif:             document.getElementById('fourActif').checked
+  };
+
+  // Le contact a besoin de l'identifiant du fournisseur : a la creation,
+  // on le recupere de l'insert avant d'appeler la fonction.
+  let id = fourEnCours;
+  if (id) {
+    const { error } = await sb.from('fournisseurs').update(payload).eq('id', id);
+    if (error) return adminMessage('Enregistrement refusé : ' + error.message, true);
+  } else {
+    const { data, error } = await sb.from('fournisseurs').insert(payload).select('id').single();
+    if (error) return adminMessage('Enregistrement refusé : ' + error.message, true);
+    id = data.id;
+  }
+
+  const contact = {
+    p_fournisseur_id:   id,
+    p_contact_nom:      vide('fourContactNom'),
+    p_contact_fonction: vide('fourContactFonction'),
+    p_telephone:        vide('fourTelephone'),
+    p_email:            vide('fourEmail'),
+    p_lien_rdv:         vide('fourLienRdv'),
+    p_zone_couverte:    vide('fourZone'),
+    p_note_interne:     vide('fourNoteInterne')
+  };
+
+  // On n'ecrit un contact que s'il y a quelque chose a ecrire, ou s'il
+  // en existait un -- pour qu'un champ vide puisse aussi l'effacer.
+  const renseigne = Object.keys(contact).some(k => k !== 'p_fournisseur_id' && contact[k]);
+  if (renseigne || adminContacts[id]) {
+    const { error } = await sb.rpc('maj_contact_fournisseur', contact);
+    if (error) {
+      adminMessage('Fournisseur enregistré, mais ses coordonnées non : ' + error.message, true);
+      await chargerAdmin();
+      return;
+    }
+  }
+
+  fermerFormFournisseur();
+  adminMessage(fourEnCours ? 'Modifications enregistrées.' : 'Fournisseur créé.');
+  await chargerAdmin();
+  await loadCatalogues();
+}
+
+async function supprimerFournisseur(id) {
+  const f = adminFournisseurs.find(x => String(x.id) === String(id));
+  const nb = adminProduits.filter(p => p.fournisseur_id === id).length;
+
+  // fournisseur_id est NOT NULL sur produits : la base refusera tant
+  // qu'une fiche pointe dessus. Autant le dire avant.
+  if (nb) return adminMessage(
+    'Impossible : ' + nb + (nb > 1 ? ' fiches pointent' : ' fiche pointe')
+    + ' sur ce fournisseur. Supprimez-les ou rattachez-les ailleurs d\'abord.', true);
+
+  if (!window.confirm('Supprimer « ' + (f ? f.nom : '') + ' » ? Cette action est définitive.')) return;
+
+  const { error } = await sb.from('fournisseurs').delete().eq('id', id);
+  if (error) return adminMessage('Suppression refusée : ' + error.message, true);
+
+  adminMessage('Fournisseur supprimé.');
+  await chargerAdmin();
 }
 
 // ─────────── Demandes (admin) ───────────
