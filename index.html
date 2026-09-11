@@ -2061,6 +2061,10 @@
      visible et un texte plus petit et plus efface que .footer-bottom.
      Sur les deux vues sans footer, le padding bas de .dash-body suffit
      a la decoller du contenu.
+     Les liens sont centres plutot que ranges a droite : onze des douze
+     .footer-bottom n'ont que leur copyright, a gauche, et deux vues
+     n'ont pas de footer du tout -- un bloc colle a droite y ferait un
+     zigzag avec la ligne du dessus.
      Que des div et des span ici : footer et nav sont stylés comme
      sélecteurs d'element, le premier ajouterait 80 px de marge haute,
      le second passerait la barre en position fixed. */
@@ -2073,14 +2077,11 @@
     margin: 0 auto;
     padding: 14px 24px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 6px 24px;
+    justify-content: center;
+    gap: 6px 20px;
     font-size: 12px;
-    color: rgba(255,255,255,0.35);
   }
-  .barre-legale-liens { display: flex; flex-wrap: wrap; gap: 6px 20px; }
   .barre-legale a {
     color: rgba(255,255,255,0.45);
     text-decoration: none;
@@ -2088,16 +2089,10 @@
   }
   .barre-legale a:hover { color: var(--turquoise); }
 
-  /* Sous 560 px les deux blocs ne tiennent plus cote a cote : ils
-     s'empilent centres plutot que de se coller aux bords. */
+  /* Sous 560 px les trois liens passent sur deux lignes : on resserre
+     les marges laterales pour leur laisser la largeur. */
   @media (max-width: 560px) {
-    .barre-legale-inner {
-      justify-content: center;
-      text-align: center;
-      padding: 12px 16px;
-      gap: 4px 18px;
-    }
-    .barre-legale-liens { justify-content: center; }
+    .barre-legale-inner { padding: 12px 16px; gap: 6px 18px; }
   }
 
   .page.active .hero-content,
@@ -4320,12 +4315,9 @@
 <!-- ============================================================ -->
 <div class="barre-legale">
   <div class="barre-legale-inner">
-    <span>&copy; 2026 OrthoConnect</span>
-    <span class="barre-legale-liens">
-      <a href="/mentions-legales" onclick="showPage('mentions')">Mentions légales</a>
-      <a href="/cgu" onclick="showPage('cgu')">CGU</a>
-      <a href="/confidentialite" onclick="showPage('confidentialite')">Confidentialité</a>
-    </span>
+    <a href="/mentions-legales" onclick="showPage('mentions')">Mentions légales</a>
+    <a href="/cgu" onclick="showPage('cgu')">CGU</a>
+    <a href="/confidentialite" onclick="showPage('confidentialite')">Confidentialité</a>
   </div>
 </div>
 
