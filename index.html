@@ -3048,7 +3048,7 @@
       <div class="dash-hello" id="dashHello">Bonjour</div>
       <div class="dash-sub" id="dashSub">Votre espace praticien OrthoConnect</div>
       <div class="dash-profile-alert" id="dashAlert">
-        <span>Complétez votre fiche cabinet pour recevoir des recommandations adaptées à votre pratique.</span>
+        <span>Votre fiche cabinet n'est pas encore complète.</span>
         <button class="btn btn-turquoise btn-sm" onclick="showDashPanel('cabinet')">Compléter ma fiche</button>
       </div>
     </div>
@@ -3076,7 +3076,7 @@
           <!-- ACCUEIL -->
           <div class="dash-panel active" id="panel-accueil">
             <h2>Tableau de bord</h2>
-            <p class="panel-sub">Votre activité et vos recommandations du moment.</p>
+            <p class="panel-sub">Votre activité, et les dernières entrées du catalogue.</p>
 
             <div class="stat-grid">
               <div class="stat-card">
@@ -3097,17 +3097,17 @@
               </div>
             </div>
 
-            <div class="dash-section-title">Formations recommandées pour vous</div>
-            <div id="dashRecoFormations"></div>
+            <div class="dash-section-title">Dernières formations ajoutées</div>
+            <div id="dashDernieresFormations"></div>
 
             <div class="dash-section-title">Dernières actualités</div>
-            <div id="dashRecoActus"></div>
+            <div id="dashDernieresActus"></div>
           </div>
 
           <!-- FICHE CABINET -->
           <div class="dash-panel" id="panel-cabinet">
             <h2>Ma fiche cabinet</h2>
-            <p class="panel-sub">Ces informations restent privées. Elles servent à personnaliser vos recommandations.</p>
+            <p class="panel-sub">Ces informations restent privées.</p>
 
             <div class="profile-saved" id="profileSaved">✓ Votre fiche a bien été enregistrée.</div>
             <div class="admin-message" id="profileMessage"></div>
@@ -5271,8 +5271,13 @@ function renderDashboard() {
     cb.checked = (p.techniques || []).includes(cb.value);
   });
 
-  // Recommandations
-  document.getElementById('dashRecoFormations').innerHTML = formationsDB.slice(0,3).map(f => `
+  // Les trois dernieres entrees du catalogue, pas les trois premieres
+  // arrivees. Le catalogue public ne rapporte aucune date de creation
+  // -- COLONNES_CARTE ne l'inclut pas et l'y ajouter supposerait qu'elle
+  // existe sur la vue comme sur la table -- donc on classe par id
+  // decroissant, ce que fait deja la liste des formations en admin.
+  const dernieresFormations = formationsDB.slice().sort((a, b) => b.id - a.id).slice(0, 3);
+  document.getElementById('dashDernieresFormations').innerHTML = dernieresFormations.map(f => `
     <div class="item-row">
       <div>
         <div class="item-title">${f.titre}</div>
@@ -5284,7 +5289,12 @@ function renderDashboard() {
     </div>
   `).join('');
 
-  document.getElementById('dashRecoActus').innerHTML = actusDB.slice(0,3).map(a => `
+  // Les actualites arrivent deja triees en publie_le desc ; on le
+  // refait ici pour que le bloc ne depende pas de l'ordre de chargement.
+  const dernieresActus = actusDB.slice()
+    .sort((a, b) => String(b.publie_le || '').localeCompare(String(a.publie_le || '')))
+    .slice(0, 3);
+  document.getElementById('dashDernieresActus').innerHTML = dernieresActus.map(a => `
     <div class="news-item">
       <div class="news-date">${formatDate(a.publie_le)}</div>
       <div class="news-title">${a.titre}</div>
