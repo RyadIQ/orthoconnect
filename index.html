@@ -360,11 +360,11 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 64px;
-    align-items: center;
   }
+  /* Le hero n'a plus qu'une colonne depuis que la pile de cartes a
+     disparu. Sans cette largeur, le titre s'etirerait sur les 1200 px
+     du conteneur et se lirait mal. */
+  .hero-content { max-width: 720px; }
   .hero-eyebrow {
     display: inline-flex;
     align-items: center;
@@ -401,68 +401,6 @@
     gap: 12px;
     flex-wrap: wrap;
   }
-  .hero-stats {
-    display: flex;
-    gap: 32px;
-    margin-top: 48px;
-    padding-top: 32px;
-    border-top: 1px solid rgba(255,255,255,0.12);
-  }
-  .hero-stat-value {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--white);
-    line-height: 1;
-  }
-  .hero-stat-label {
-    font-size: 13px;
-    color: rgba(255,255,255,0.55);
-    margin-top: 4px;
-  }
-  .hero-visual {
-    position: relative;
-  }
-  .hero-card {
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: var(--radius);
-    padding: 20px;
-    backdrop-filter: blur(10px);
-    margin-bottom: 12px;
-    transition: transform var(--transition);
-  }
-  .hero-card:hover { transform: translateX(4px); }
-  .hero-card-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
-  .hero-card-icon {
-    width: 38px; height: 38px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .hero-card-title { font-size: 14px; font-weight: 600; color: var(--white); }
-  .hero-card-sub { font-size: 12px; color: rgba(255,255,255,0.5); }
-  .hero-card-meta {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .hero-chip {
-    background: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.7);
-    font-size: 11px;
-    padding: 3px 9px;
-    border-radius: 20px;
-    font-weight: 500;
-  }
-
   /* AUDIENCE SECTION */
   .audience-section {
     padding: 80px 0;
@@ -546,40 +484,6 @@
   .step p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
 
   /* CHIFFRES */
-  .metrics-section {
-    background: var(--navy);
-    padding: 64px 0;
-    color: var(--white);
-  }
-  .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 32px;
-    text-align: center;
-  }
-  /* Le bloc ne doit pas dépendre de ce qu'on y écrit. La valeur suit
-     la largeur disponible entre 32 px — la taille du cas mobile
-     d'aujourd'hui — et les 40 px du desktop, sans qu'une media query
-     ait à trancher ; les bornes sont en rem pour rester fidèles à la
-     taille de police choisie par le lecteur. La coupure des mots
-     encaisse le reste : un libellé plus long, ou l'agrandissement de
-     police à 130 %, qui reproduit la situation des 430 px sans
-     qu'aucune media query ne se déclenche. */
-  .metric-value {
-    font-size: clamp(2rem, 5vw, 2.5rem);
-    font-weight: 800;
-    color: var(--turquoise);
-    line-height: 1;
-    margin-bottom: 8px;
-    overflow-wrap: break-word;
-    hyphens: auto;
-  }
-  .metric-label {
-    font-size: 14px; color: rgba(255,255,255,0.6);
-    overflow-wrap: break-word;
-    hyphens: auto;
-  }
-
   /* CTA BAND */
   .cta-band {
     padding: 80px 0;
@@ -1006,25 +910,22 @@
     .features-4grid { grid-template-columns: 1fr !important; }
   }
   @media (max-width: 1024px) {
-    .hero-inner { grid-template-columns: 1fr; }
-    .hero-visual { display: none; }
     .produits-grid { grid-template-columns: 1fr; }
   }
   @media (min-width: 769px) and (max-width: 1024px) {
     .footer-inner { grid-template-columns: 1fr 1fr; }
     .formations-grid { grid-template-columns: repeat(2, 1fr); }
   }
-  @media (min-width: 481px) and (max-width: 1024px) {
-    .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-  }
   @media (max-width: 768px) {
     .nav-links { display: none; }
     .hamburger { display: flex; }
-    .hero { padding: 60px 0 48px; }
-    .hero h1 { font-size: 32px; }
-    .hero p { font-size: 16px; }
-    .hero-stats { gap: 20px; }
-    .hero-stat-value { font-size: 22px; }
+    /* Le hero doit tenir sous la barre de navigation sans defilement.
+       Seuls les blancs se resserrent, les corps de texte ne bougent
+       pas. */
+    .hero { padding: 40px 0 44px; }
+    .hero-eyebrow { margin-bottom: 16px; }
+    .hero h1 { font-size: 32px; margin-bottom: 16px; }
+    .hero p { font-size: 16px; margin-bottom: 24px; }
     .audience-grid { grid-template-columns: 1fr; }
     .steps-grid { grid-template-columns: 1fr; }
     .formations-grid { grid-template-columns: 1fr; }
@@ -1038,12 +939,14 @@
     .page-hero-meta { gap: 12px; }
   }
 
-  /* Petits mobiles. « Indépendant » en 40 px mesure 190 px : deux
-     colonnes de ce gabarit ne tiennent pas dans 320 px — la grille
-     poussait la page hors de l'écran. La taille de la valeur, elle,
-     est désormais tenue par le clamp de .metric-value. */
+  /* Petits mobiles. Sous la barre fixe il reste peu de hauteur : les
+     blancs du hero se resserrent d'un cran de plus, les corps de texte
+     restent ceux de la charte. */
   @media (max-width: 480px) {
-    .metrics-grid { grid-template-columns: 1fr; gap: 22px; }
+    .hero { padding: 28px 0 32px; }
+    .hero-eyebrow { margin-bottom: 12px; }
+    .hero h1 { margin-bottom: 12px; }
+    .hero p { margin-bottom: 18px; }
   }
 
   /* ===== ANIMATIONS ===== */
@@ -2293,9 +2196,7 @@
     .barre-legale-inner { padding: 12px 16px; gap: 6px 18px; }
   }
 
-  .page.active .hero-content,
-  .page.active .hero-visual { animation: fadeInUp 0.5s ease both; }
-  .page.active .hero-visual { animation-delay: 0.1s; }
+  .page.active .hero-content { animation: fadeInUp 0.5s ease both; }
 </style>
 </head>
 <body>
@@ -2481,64 +2382,6 @@
         <div style="margin-top:14px; font-size:13px; color:rgba(255,255,255,0.5)">
           Inscription gratuite. Réservé aux praticiens et internes en ODF.
         </div>
-        <div class="hero-stats">
-          <div>
-            <div class="hero-stat-value" id="heroStatFormations">&mdash;</div>
-            <div class="hero-stat-label">Formations recensées</div>
-          </div>
-          <div>
-            <div class="hero-stat-value" id="heroStatPostes">&mdash;</div>
-            <div class="hero-stat-label">Postes à pourvoir</div>
-          </div>
-          <div>
-            <div class="hero-stat-value" id="heroStatProduits">&mdash;</div>
-            <div class="hero-stat-label">Matériels comparés</div>
-          </div>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <div class="hero-card">
-          <div class="hero-card-header">
-            <div class="hero-card-icon" style="background: rgba(0,184,200,0.15)">📚</div>
-            <div>
-              <div class="hero-card-title">Catalogue des formations</div>
-              <div class="hero-card-sub">Le programme complet de chaque session, séquence par séquence</div>
-            </div>
-          </div>
-          <div class="hero-card-meta">
-            <span class="hero-chip">Présentiel</span>
-            <span class="hero-chip">Distanciel</span>
-            <span class="hero-chip">Éligibilité DPC</span>
-          </div>
-        </div>
-        <div class="hero-card">
-          <div class="hero-card-header">
-            <div class="hero-card-icon" style="background: rgba(255,200,60,0.15)">🔬</div>
-            <div>
-              <div class="hero-card-title">Comparatif brackets</div>
-              <div class="hero-card-sub">Caractéristiques techniques confrontées, système par système</div>
-            </div>
-          </div>
-          <div class="hero-card-meta">
-            <span class="hero-chip">Auto-ligaturant</span>
-            <span class="hero-chip">Céramique</span>
-            <span class="hero-chip">Slot 0,022</span>
-          </div>
-        </div>
-        <div class="hero-card">
-          <div class="hero-card-header">
-            <div class="hero-card-icon" style="background: rgba(40,167,69,0.15)">💼</div>
-            <div>
-              <div class="hero-card-title">Offres et collaborations</div>
-              <div class="hero-card-sub">Les annonces des praticiens, situées sur la carte des opportunités</div>
-            </div>
-          </div>
-          <div class="hero-card-meta">
-            <span class="hero-chip">Collaboration</span>
-            <span class="hero-chip">Remplacement</span>
-            <span class="hero-chip">Association</span>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -2560,7 +2403,7 @@
         <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="showPage('produits')">
           <div style="font-size:36px; margin-bottom:14px">🔬</div>
           <h3 style="font-size:16px; margin-bottom:8px">Matériel</h3>
-          <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Aligneurs, brackets, scanners. Les fiches techniques de chaque système, mises côte à côte sur les mêmes critères.</p>
+          <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Aligneurs, brackets, caméras intra-orales, logiciels. Les fiches techniques de chaque système, mises côte à côte sur les mêmes critères.</p>
           <div style="margin-top:14px; color:var(--turquoise); font-size:13px; font-weight:600">Comparer</div>
         </div>
         <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="showPage('emploi')">
@@ -2605,29 +2448,6 @@
     </div>
   </section>
 
-  <section class="metrics-section">
-    <div class="container">
-      <div class="metrics-grid">
-        <div>
-          <div class="metric-value">Gratuit</div>
-          <div class="metric-label">Aucune cotisation, aucun frais d'inscription</div>
-        </div>
-        <div>
-          <div class="metric-value">Vérifié</div>
-          <div class="metric-label">Accès réservé aux praticiens et internes en ODF</div>
-        </div>
-        <div>
-          <div class="metric-value">Indépendant</div>
-          <div class="metric-label">Aucune société savante ni syndicat derrière la plateforme</div>
-        </div>
-        <div>
-          <div class="metric-value">Sans spam</div>
-          <div class="metric-label">Vos coordonnées ne sont transmises à personne</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section class="cta-band">
     <div class="container">
       <h2>Ouvrez votre compte en une minute</h2>
@@ -2658,11 +2478,6 @@
         <a href="/produits" onclick="showPage('produits')">Comparatifs produits</a>
         <a href="/emploi" onclick="showPage('emploi')">Offres d'emploi</a>
         <a href="/actualites" onclick="requireAuth('actus')">Actualités du secteur</a>
-      </div>
-      <div class="footer-col">
-        <h4>Produits</h4>
-        <a href="/produits" onclick="showPage('produits')">Aligneurs</a>
-        <a href="/produits" onclick="showPage('produits')">Brackets</a>
       </div>
       <div class="footer-col">
         <h4>OrthoConnect</h4>
@@ -5087,10 +4902,6 @@ async function loadCatalogues() {
     const distinct = (rows, champ) => new Set(rows.map(r => r[champ]).filter(Boolean)).size;
 
     // Tous ces chiffres viennent de Supabase : aucun compteur en dur dans le HTML.
-    setStat('heroStatFormations', formationsDB.length);
-    setStat('heroStatPostes', jobsDB.length);
-    setStat('heroStatProduits', produitsDB.length);
-
     setStat('statPageFormations', formationsDB.length);
     // nomOrganisme et pas la colonne texte « organisme » : celle-ci
     // n'existe pas dans la vue publique, le compteur tomberait à 0
