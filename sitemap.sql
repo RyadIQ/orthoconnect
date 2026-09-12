@@ -37,7 +37,7 @@ with entrees as (
   -- en tete de chaque page, et non la date du jour.
   union all     select 'https://orthoconnect.fr/mentions-legales', date '2026-09-11', 'yearly',        '0.3',       6
   union all     select 'https://orthoconnect.fr/cgu',              date '2026-09-11', 'yearly',        '0.3',       6
-  union all     select 'https://orthoconnect.fr/confidentialite',  date '2026-09-11', 'yearly',        '0.3',       6
+  union all     select 'https://orthoconnect.fr/confidentialite',  date '2026-09-12', 'yearly',        '0.3',       6
 
   union all
   select 'https://orthoconnect.fr/formations/' || f.slug,
