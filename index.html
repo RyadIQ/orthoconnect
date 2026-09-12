@@ -463,19 +463,6 @@
     text-align: center;
     padding: 32px 24px;
   }
-  .step-number {
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    background: var(--turquoise-light);
-    color: var(--turquoise);
-    font-size: 20px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    border: 2px solid var(--turquoise);
-  }
   .step h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
   .step p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
 
@@ -2393,7 +2380,7 @@
   <section class="audience-section">
     <div class="container">
       <div class="section-header">
-        <h2>Quatre rubriques, aucune cotisation</h2>
+        <h2>Quatre rubriques, un seul compte</h2>
         <div class="section-divider"></div>
         <p>Que vous soyez interne en DES, collaborateur ou installé, vous accédez à tout dès l'ouverture du compte.</p>
       </div>
@@ -2435,19 +2422,16 @@
       </div>
       <div class="steps-grid">
         <div class="step">
-          <div class="step-number" style="font-size:15px">DES</div>
           <h3>Vous êtes interne</h3>
-          <p>Repérez les organismes qui forment vraiment, trouvez un premier poste de remplaçant ou d'adjoint, et voyez quel matériel équipe les cabinets avant d'y mettre les pieds.</p>
+          <p>Repérez les organismes qui forment vraiment, trouvez un premier poste de remplaçant ou d'adjoint, et voyez quels systèmes équipent les cabinets avant d'y mettre les pieds.</p>
         </div>
         <div class="step">
-          <div class="step-number" style="font-size:15px">Collab</div>
           <h3>Vous êtes collaborateur</h3>
           <p>Comparez les conditions pratiquées ailleurs, montez en compétence sur une technique que le cabinet n'utilise pas encore, et gardez un œil sur les opportunités d'association.</p>
         </div>
         <div class="step">
-          <div class="step-number" style="font-size:15px">Titulaire</div>
           <h3>Vous êtes installé</h3>
-          <p>Décidez d'un investissement matériel sur des fiches techniques détaillées, comparables d'un système à l'autre, plutôt que sur une plaquette commerciale, et diffusez vos annonces de recrutement.</p>
+          <p>Décidez d'un investissement sur des fiches techniques détaillées, comparables d'un système à l'autre, et diffusez vos annonces de recrutement.</p>
         </div>
       </div>
     </div>
@@ -2455,8 +2439,8 @@
 
   <section class="cta-band">
     <div class="container">
-      <h2>Ouvrez votre compte en une minute</h2>
-      <p>Vérification par numéro RPPS. Aucune cotisation, aucune donnée transmise à des tiers.</p>
+      <h2>Créez votre compte en une minute</h2>
+      <p>Vérification par numéro RPPS. Aucune donnée transmise à des tiers.</p>
       <div class="cta-band-buttons">
         <a class="btn btn-turquoise" onclick="openAuth('signup')">Ouvrir mon compte</a>
         <a href="/formations" class="btn btn-outline" onclick="showPage('formations')">Parcourir d'abord</a>
@@ -7399,7 +7383,7 @@ function renderProduitsDB(data) {
       ? catalogueVide('🔍', 'Aucun produit dans cette catégorie',
           "Aucun matériel référencé ne correspond à ce filtre pour l'instant. Essayez une autre catégorie, ou revenez sur « Tous ».")
       : catalogueVide('🔬', 'Comparatif en cours de constitution',
-          "Les fiches matériel sont en cours de rédaction. La comparaison porte sur les caractéristiques techniques de chaque système, relevées avant mise en ligne. Revenez d'ici peu.");
+          "Les fiches produits sont en cours de rédaction. La comparaison porte sur les caractéristiques techniques de chaque système, relevées avant mise en ligne. Revenez d'ici peu.");
     return;
   }
 
