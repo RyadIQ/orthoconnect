@@ -2325,7 +2325,7 @@
     </a>
     <ul class="nav-links">
       <li><a href="/formations" onclick="showPage('formations')" id="nav-formations">Formations</a></li>
-      <li><a href="/produits" onclick="showPage('produits')" id="nav-produits">Produits &amp; matériels</a></li>
+      <li><a href="/produits" onclick="showPage('produits')" id="nav-produits">Produits</a></li>
       <li><a href="/emploi" onclick="showPage('emploi')" id="nav-emploi">Emploi</a></li>
       <li><a href="/actualites" onclick="requireAuth('actus')" id="nav-actu">Actualités</a></li>
       <li id="navLoginItem"><a href="#" class="nav-cta btn nav-login-btn" onclick="openAuth('signup')">Espace praticien</a></li>
@@ -2353,7 +2353,7 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="/" onclick="showPage('landing'); toggleMenu()">Accueil</a>
   <a href="/formations" onclick="showPage('formations'); toggleMenu()">Formations</a>
-  <a href="/produits" onclick="showPage('produits'); toggleMenu()">Produits &amp; matériels</a>
+  <a href="/produits" onclick="showPage('produits'); toggleMenu()">Produits</a>
   <a href="/emploi" onclick="showPage('emploi'); toggleMenu()">Emploi</a>
   <a href="/actualites" onclick="requireAuth('actus'); toggleMenu()">Actualités</a>
   <div class="mobile-menu-sep"></div>
@@ -2406,7 +2406,7 @@
         </div>
         <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="showPage('produits')">
           <div style="font-size:36px; margin-bottom:14px">🔬</div>
-          <h3 style="font-size:16px; margin-bottom:8px">Matériel</h3>
+          <h3 style="font-size:16px; margin-bottom:8px">Produits</h3>
           <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Aligneurs, brackets, caméras intra-orales, logiciels. Les fiches techniques de chaque système, mises côte à côte sur les mêmes critères.</p>
           <div style="margin-top:14px; color:var(--turquoise); font-size:13px; font-weight:600">Comparer</div>
         </div>
@@ -9771,7 +9771,7 @@ const META_PAGES = {
     description: "Le catalogue des formations en orthodontie : organismes vérifiés, éligibilité DPC, dates, tarifs et tarif préférentiel réservé aux praticiens inscrits."
   },
   produits: {
-    titre: 'Comparatif du matériel orthodontique | OrthoConnect',
+    titre: "Matériel et logiciels d'orthodontie, comparés | OrthoConnect",
     description: "Aligneurs, brackets et matériel d'orthodontie comparés sur pièces : les caractéristiques techniques de chaque système, fiche par fiche."
   },
   emploi: {
@@ -10038,7 +10038,7 @@ function pageIntrouvable(genre) {
     produit: {
       titre: 'Cette fiche matériel est introuvable',
       texte: "Elle n'existe pas, ou elle n'est plus publiée. Le comparatif est à jour, ce matériel y figure peut-être sous un autre nom.",
-      lien: 'Voir tout le matériel', chemin: '/produits', page: 'produits'
+      lien: 'Voir tous les produits', chemin: '/produits', page: 'produits'
     },
     defaut: {
       titre: 'Cette page est introuvable',
