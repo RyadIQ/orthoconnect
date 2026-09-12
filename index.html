@@ -947,6 +947,14 @@
     .hero-eyebrow { margin-bottom: 12px; }
     .hero h1 { margin-bottom: 12px; }
     .hero p { margin-bottom: 18px; }
+
+    /* Les deux boutons ne tiennent plus cote a cote : 334 px pour 327
+       disponibles a 375 px de large. Laisses au retour a la ligne, ils
+       se rangeraient en escalier, 191 px puis 131. Ils s'empilent donc
+       sur toute la largeur, de meme taille et centres. L'ecart de 12 px
+       ne change pas, c'est celui du rang. */
+    .hero-ctas { flex-direction: column; align-items: stretch; }
+    .hero-ctas .btn { justify-content: center; }
   }
 
   /* ===== ANIMATIONS ===== */
