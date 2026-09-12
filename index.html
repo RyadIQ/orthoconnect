@@ -1993,6 +1993,81 @@
     border: 1px dashed var(--grey-border); border-radius: var(--radius); font-size: 14px;
   }
 
+  /* ===== DEMANDE D'INFORMATIONS (FICHE PRODUIT) ===== */
+
+  .produit-action {
+    border: 1px solid var(--grey-border); border-radius: var(--radius);
+    background: var(--grey-bg);
+    padding: 20px 24px; margin-bottom: 32px;
+    display: flex; align-items: center; gap: 14px 20px; flex-wrap: wrap;
+  }
+  .produit-action-note {
+    font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+  }
+  /* L'etat apres envoi : le meme gabarit qu'un bouton, mais inerte. */
+  .produit-action-faite {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 22px; border-radius: var(--radius-sm);
+    background: #E8F5E9; color: #2E7D32;
+    font-size: 14px; font-weight: 600;
+  }
+
+  /* Fournisseur partenaire : ses coordonnees remplacent la demande,
+     il n'y a rien a relayer. */
+  .contact-partenaire {
+    border: 1px solid var(--turquoise); border-radius: var(--radius);
+    background: var(--turquoise-light);
+    padding: 20px 24px; margin-bottom: 32px;
+  }
+  .contact-partenaire-titre {
+    font-size: 13px; font-weight: 700; color: var(--navy);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px;
+  }
+  .contact-partenaire-ligne {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    font-size: 14px; line-height: 1.7; color: var(--navy);
+  }
+  .contact-partenaire-ligne dt { color: var(--text-secondary); min-width: 104px; flex-shrink: 0; }
+  .contact-partenaire-ligne dd { font-weight: 500; }
+  .contact-partenaire a { color: #00838F; }
+  .contact-partenaire .btn { margin-top: 16px; }
+
+  /* Le panneau de confirmation. Meme fond et meme z-index que les deux
+     autres boites modales du site. */
+  .dp-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,43,77,0.55);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .dp-overlay.open { display: flex; }
+  .dp-box {
+    background: var(--white);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 540px;
+    padding: 28px 28px 24px;
+    position: relative;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+  .dp-box h3 {
+    font-size: 19px; font-weight: 800; color: var(--navy);
+    margin-bottom: 12px; padding-right: 28px; line-height: 1.3;
+  }
+  .dp-texte {
+    font-size: 14px; line-height: 1.7; color: var(--text-secondary);
+    margin-bottom: 18px;
+  }
+  .dp-boutons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+
+  .badge-documentation_envoyee { background: #F0E6FF; color: #7A1AC2; }
+  .badge-oriente_fournisseur   { background: #FFF3E6; color: #B26A00; }
+
   /* ===== PRODUITS ET FOURNISSEURS (ADMIN) ===== */
 
   /* Les champs d'une fiche produit ne sont pas fixes : ils sont rendus
@@ -2745,9 +2820,33 @@
 
   <section class="detail-body">
     <div class="container">
+      <div id="produitAction"></div>
       <div id="produitPrincipal"></div>
     </div>
   </section>
+
+  <!-- Confirmation d'une demande d'informations. Dans #page-produit :
+       quitter la fiche ferme la boite avec elle. -->
+  <div class="dp-overlay" id="dpOverlay" onclick="if(event.target===this) fermerDemandeProduit()">
+    <div class="dp-box">
+      <button class="auth-close" onclick="fermerDemandeProduit()" aria-label="Fermer">&times;</button>
+      <h3 id="dpTitre"></h3>
+      <p class="dp-texte">Votre demande est transmise &agrave; OrthoConnect, qui la relaie au fournisseur ou vous adresse directement la documentation. Les informations transmises sont votre nom, votre adresse email, votre ville et votre statut professionnel. Rien d'autre n'est communiqu&eacute;. Vous pouvez demander la suppression de cette demande &agrave; tout moment.</p>
+
+      <div class="admin-message ko" id="dpErreur"></div>
+
+      <div class="form-group">
+        <input type="text" id="dpMessage" maxlength="240"
+               aria-label="Message, facultatif"
+               placeholder="Une pr&eacute;cision &agrave; ajouter, facultatif">
+      </div>
+
+      <div class="dp-boutons">
+        <button class="btn btn-outline" onclick="fermerDemandeProduit()">Annuler</button>
+        <button class="btn btn-turquoise" onclick="confirmerDemandeProduit()">Confirmer ma demande</button>
+      </div>
+    </div>
+  </div>
 
   <footer>
     <div class="footer-inner">
@@ -4215,6 +4314,8 @@
               <button class="filter-btn active" onclick="filtrerDemandes('tous', this)">Toutes</button>
               <button class="filter-btn" onclick="filtrerDemandes('nouvelle', this)">Nouvelles</button>
               <button class="filter-btn" onclick="filtrerDemandes('transmise', this)">Transmises</button>
+              <button class="filter-btn" onclick="filtrerDemandes('documentation_envoyee', this)">Documentation envoyée</button>
+              <button class="filter-btn" onclick="filtrerDemandes('oriente_fournisseur', this)">Orientées</button>
               <button class="filter-btn" onclick="filtrerDemandes('aboutie', this)">Abouties</button>
               <button class="filter-btn" onclick="filtrerDemandes('sans_suite', this)">Sans suite</button>
             </div>
@@ -4733,6 +4834,13 @@ let produitsDB = [];
 let categoriesProduits = [];
 // La fiche produit ouverte, comme formationOuverte et annonceOuverte.
 let produitOuvert = null;
+// Les coordonnees des fournisseurs partenaires, par fournisseur_id.
+// contacts_partenaires n'expose que ce qui est montrable : la note
+// interne de fournisseurs_contacts n'y est pas.
+let contactsPartenaires = {};
+// Les demandes en cours du praticien connecte, par produit : seules
+// celles qui sont nouvelle ou transmise empechent d'en refaire une.
+let mesDemandesProduits = [];
 let jobsDB = [];
 let annonceEnCours = null;
 let actusDB = [];
@@ -4939,7 +5047,7 @@ function setStat(id, valeur) {
 
 async function loadCatalogues() {
   try {
-    const [f, p, j, a, pc, cp] = await Promise.all([
+    const [f, p, j, a, pc, cp, ct] = await Promise.all([
       chargerFormationsPubliques(),
       sb.from('produits')
         .select('*, fournisseurs(id, nom, logo_url, partenaire)')
@@ -4947,12 +5055,19 @@ async function loadCatalogues() {
       chargerAnnonces(),
       sb.from('actualites').select('*').eq('actif', true).order('publie_le', { ascending: false }),
       chargerPraticiensCarte(),
-      sb.from('categories_produits').select('*').eq('actif', true).order('ordre')
+      sb.from('categories_produits').select('*').eq('actif', true).order('ordre'),
+      sb.from('contacts_partenaires').select('*')
     ]);
 
     formationsDB = (f.data || []).map(normaliserFormation);
     produitsDB = p.data || [];
     categoriesProduits = cp.data || [];
+
+    // La vue peut ne pas exister : une fiche partenaire s'affiche alors
+    // sans coordonnees plutot que le catalogue pas du tout.
+    if (ct.error) console.warn('Contacts partenaires indisponibles :', ct.error.message);
+    contactsPartenaires = {};
+    (ct.data || []).forEach(c => { contactsPartenaires[c.fournisseur_id] = c; });
     jobsDB = j.data || [];
     actusDB = a.data || [];
     praticiensCarte = pc || [];
@@ -5226,6 +5341,15 @@ async function refreshAuthUI() {
     if (cd.error) console.warn('Codes indisponibles :', cd.error.message);
     codesPraticien = cd.data || [];
 
+    // Seules les demandes encore en cours sont lues : une fois la
+    // documentation envoyee ou le praticien oriente, il peut en refaire
+    // une sur le meme produit.
+    const dp = await sb.from('demandes_produits')
+      .select('produit_id, statut').eq('praticien_id', currentUser.id)
+      .in('statut', STATUTS_DEMANDE_EN_COURS);
+    if (dp.error) console.warn('Demandes produits indisponibles :', dp.error.message);
+    mesDemandesProduits = dp.data || [];
+
     await chargerMesAnnonces();
 
     navUser.classList.add('show');
@@ -5245,6 +5369,7 @@ async function refreshAuthUI() {
     currentProfile = null;
     savedIds = [];
     codesPraticien = [];
+    mesDemandesProduits = [];
     mesAnnonces = [];
     navUser.classList.remove('show');
     if (loginBtn) loginBtn.classList.remove('hide');
@@ -5253,6 +5378,10 @@ async function refreshAuthUI() {
     majVisibiliteAdmin();
     majReferenceRayon();
   }
+
+  // Se connecter depuis une fiche produit change ce que son bouton
+  // propose : il suit, sans qu'il faille quitter la fiche.
+  if (produitOuvert) renderActionProduit(produitOuvert);
 }
 
 // ═══════════════════════════════════════════════
@@ -7245,7 +7374,132 @@ function renderDetailProduit(p) {
   document.getElementById('produitPrincipal').innerHTML = principal ||
     '<div class="detail-texte">La fiche de ce matériel est en cours de rédaction.</div>';
 
+  renderActionProduit(p);
   majDonneesStructurees(p);
+}
+
+// ─────── Demander des informations sur un produit ───────
+//
+// Rien n'est saisi : ce qui part au fournisseur, c'est la fiche du
+// praticien, deja en base. Le panneau ne fait que le dire et recueillir
+// le consentement. Un fournisseur partenaire, lui, donne ses
+// coordonnees en clair : il n'y a rien a relayer.
+
+// Nouvelle ou transmise : la demande est encore en cours et il n'y a
+// pas lieu d'en refaire une. La regle est ecrite ici et pas seulement
+// dans le filtre de la requete qui remplit la liste, pour qu'une ligne
+// arrivee par un autre chemin ne la contourne pas.
+const STATUTS_DEMANDE_EN_COURS = ['nouvelle', 'transmise'];
+
+function demandeEnCoursPour(produitId) {
+  return mesDemandesProduits.some(d =>
+    String(d.produit_id) === String(produitId)
+    && STATUTS_DEMANDE_EN_COURS.includes(d.statut));
+}
+
+function renderActionProduit(p) {
+  const zone = document.getElementById('produitAction');
+  if (!zone || !p) return;
+
+  const f = p.fournisseurs || null;
+  if (f && f.partenaire) { zone.innerHTML = renderContactPartenaire(f); return; }
+
+  if (demandeEnCoursPour(p.id)) {
+    zone.innerHTML = `<div class="produit-action">
+        <span class="produit-action-faite">✓ Demande envoyée</span>
+        <div class="produit-action-note">
+          Nous revenons vers vous. Vous pourrez en refaire une lorsque celle-ci aura été traitée.
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Le bouton porte toujours le meme appel : c'est ouvrirDemandeProduit
+  // qui renvoie a l'inscription, faute de quoi il resterait cable sur
+  // l'inscription apres une connexion faite depuis cette page.
+  zone.innerHTML = `<div class="produit-action">
+      <button class="btn btn-turquoise" onclick="ouvrirDemandeProduit('${p.id}')">Demander des informations</button>
+      ${currentUser ? '' : `<div class="produit-action-note">
+        Réservé aux praticiens inscrits. La création d'un compte est gratuite.
+      </div>`}
+    </div>`;
+}
+
+function renderContactPartenaire(f) {
+  const c = contactsPartenaires[f.id] || null;
+  if (!c) return '';
+
+  const ligne = (dt, dd) => dd ? `<div class="contact-partenaire-ligne"><dt>${dt}</dt><dd>${dd}</dd></div>` : '';
+  const interlocuteur = [c.contact_nom, c.contact_fonction].filter(Boolean).join(', ');
+
+  const lignes = [
+    ligne('Interlocuteur', esc(interlocuteur)),
+    ligne('Téléphone', c.telephone
+      ? `<a href="tel:${esc(String(c.telephone).replace(/\s+/g, ''))}">${esc(c.telephone)}</a>` : ''),
+    ligne('Email', c.email
+      ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : '')
+  ].filter(Boolean).join('');
+
+  const rdv = c.lien_rdv
+    ? `<a class="btn btn-turquoise" href="${esc(c.lien_rdv)}" target="_blank" rel="noopener">Prendre rendez-vous</a>`
+    : '';
+
+  if (!lignes && !rdv) return '';
+
+  return `<div class="contact-partenaire">
+      <div class="contact-partenaire-titre">Contacter ${esc(f.nom || 'le fournisseur')}</div>
+      <dl>${lignes}</dl>
+      ${rdv}
+    </div>`;
+}
+
+function ouvrirDemandeProduit(id) {
+  const p = produitsDB.find(x => String(x.id) === String(id));
+  if (!p) return;
+
+  // Meme porte que requireAuth : sans compte, on inscrit.
+  if (!currentUser) { openAuth('signup'); return; }
+  if (demandeEnCoursPour(p.id)) return;
+
+  document.getElementById('dpTitre').textContent =
+    'Demander des informations sur ' + (p.nom || '');
+  document.getElementById('dpMessage').value = '';
+  document.getElementById('dpErreur').classList.remove('show');
+  document.getElementById('dpOverlay').classList.add('open');
+}
+
+function fermerDemandeProduit() {
+  const o = document.getElementById('dpOverlay');
+  if (o) o.classList.remove('open');
+}
+
+async function confirmerDemandeProduit() {
+  const p = produitOuvert;
+  if (!p || !currentUser) return;
+
+  const boite = document.getElementById('dpErreur');
+  const message = document.getElementById('dpMessage').value.trim();
+
+  const { error } = await sb.from('demandes_produits').insert({
+    praticien_id:    currentUser.id,
+    produit_id:      p.id,
+    fournisseur_id:  p.fournisseur_id,
+    type_demande:    'interet',
+    message:         message || null,
+    consentement:    true,
+    consentement_le: new Date().toISOString()
+  });
+
+  if (error) {
+    boite.textContent = 'Demande non enregistrée : ' + error.message;
+    boite.classList.add('show');
+    return;
+  }
+
+  // La liste locale suit, pour que le bouton change sans relire la base.
+  mesDemandesProduits.push({ produit_id: p.id, statut: 'nouvelle' });
+  fermerDemandeProduit();
+  renderActionProduit(p);
 }
 
 // ─────── Donnees structurees des fiches produits ───────
@@ -9401,6 +9655,7 @@ async function supprimerFournisseur(id) {
 // et ne touche que quatre colonnes.
 
 const TYPES_DEMANDE = {
+  interet:              "Demande d'informations",
   grille_tarifaire:     'Grille tarifaire',
   conditions_demarrage: 'Conditions de démarrage',
   formation:            'Formation',
@@ -9409,10 +9664,12 @@ const TYPES_DEMANDE = {
 };
 
 const STATUTS_DEMANDE = {
-  nouvelle:   'Nouvelle',
-  transmise:  'Transmise',
-  sans_suite: 'Sans suite',
-  aboutie:    'Aboutie'
+  nouvelle:               'Nouvelle',
+  transmise:              'Transmise',
+  documentation_envoyee:  'Documentation envoyée',
+  oriente_fournisseur:    'Orienté vers le fournisseur',
+  sans_suite:             'Sans suite',
+  aboutie:                'Aboutie'
 };
 
 // Une valeur inconnue s'affiche telle quelle plutot que de disparaitre :
@@ -10035,6 +10292,7 @@ function showPage(page, chemin) {
   // Le balisage Product ne vaut que sur une fiche : ailleurs il
   // decrirait un produit que la page n'affiche pas.
   majDonneesStructurees(page === 'produit' ? produitOuvert : null);
+  if (page !== 'produit') fermerDemandeProduit();
 
   // Sortir de la fiche démonte l'attente du tarif restée en cours.
   if (page !== 'formation') annulerGardeTarif();
