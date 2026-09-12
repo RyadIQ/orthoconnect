@@ -459,9 +459,14 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 32px;
   }
+  /* Ni bordure ni fond : le padding n'est pas un retrait de carte,
+     c'est du blanc. Les 32 px verticaux logeaient la pastille ; sans
+     elle, le blanc au-dessus des titres est celui que .section-header
+     pose deja, comme dans toutes les autres sections. Le padding
+     lateral reste, il tient la mesure du texte centre. */
   .step {
     text-align: center;
-    padding: 32px 24px;
+    padding: 0 24px;
   }
   .step h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
   .step p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
