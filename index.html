@@ -1996,6 +1996,20 @@
   .badge-visible { background: #E8F5E9; color: #2E7D32; }
   .badge-masque  { background: var(--grey-bg); color: var(--text-secondary); }
 
+  /* ===== CARTE DE L'ANNUAIRE (ADMIN) ===== */
+  #carteAnnuaire { height: 560px; width: 100%; background: var(--grey-bg); }
+  .annuaire-recentrage { margin: 14px 0 22px; }
+  .annuaire-fiche { font-size: 13px; line-height: 1.5; color: var(--text-main); min-width: 200px; }
+  .annuaire-fiche-nom { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+  .annuaire-fiche-ligne { margin-top: 6px; }
+  .annuaire-sans summary {
+    cursor: pointer; font-size: 14px; font-weight: 700; color: var(--navy); padding: 6px 0;
+  }
+  .annuaire-sans[open] summary { margin-bottom: 12px; }
+  @media (max-width: 700px) {
+    #carteAnnuaire { height: 60vh; min-height: 320px; }
+  }
+
   /* ===== DEMANDES (ADMIN) ===== */
 
   /* Le compteur de demandes nouvelles, pose sur l'onglet lui-meme : il
@@ -3460,6 +3474,7 @@
           <button onclick="showAdminPanel('produits', this)">📦 Produits</button>
           <button onclick="showAdminPanel('fournisseurs', this)">🏭 Fournisseurs</button>
           <button onclick="showAdminPanel('demandes', this)">📨 Demandes<span class="admin-pastille" id="admPastilleDemandes" hidden>0</span></button>
+          <button onclick="showAdminPanel('annuaire', this); ouvrirCarteAnnuaire()">🗺 Carte de l'annuaire</button>
           <button onclick="showPage('dashboard')" style="margin-top:12px; color:var(--text-light)">↩ Mon espace</button>
         </div>
 
@@ -4128,6 +4143,64 @@
             </div>
 
             <div id="admDemandesListe"></div>
+          </div>
+
+          <!-- CARTE DE L'ANNUAIRE -->
+          <div class="dash-panel" id="adminPanel-annuaire">
+            <h2>Carte de l'annuaire</h2>
+            <p class="panel-sub">Couverture des orthodontistes référencés. Page réservée à l'administration, en lecture seule.</p>
+
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-val" id="annuaireStatLignes">—</div>
+                <div class="stat-lbl">Lignes</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="annuaireStatDistincts">—</div>
+                <div class="stat-lbl">Praticiens distincts</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="annuaireStatPoints">—</div>
+                <div class="stat-lbl">Points affichés</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="annuaireStatSans">—</div>
+                <div class="stat-lbl">Lignes sans coordonnées</div>
+              </div>
+            </div>
+
+            <div class="admin-toolbar">
+              <input type="text" class="admin-search" id="annuaireRecherche" placeholder="Rechercher un nom ou une ville"
+                     aria-label="Rechercher un nom ou une ville" oninput="rechercherAnnuaire()">
+              <span class="filter-label">Statut :</span>
+              <button class="filter-btn active" data-annuaire-statut onclick="filtrerAnnuaire('tous', this)">Tous</button>
+              <button class="filter-btn" data-annuaire-statut onclick="filtrerAnnuaire('non_revendiquee', this)">Non revendiquées</button>
+              <button class="filter-btn" data-annuaire-statut onclick="filtrerAnnuaire('en_attente', this)">En attente</button>
+              <button class="filter-btn" data-annuaire-statut onclick="filtrerAnnuaire('revendiquee', this)">Revendiquées</button>
+              <span class="spacer"></span>
+              <button class="filter-btn" onclick="ouvrirCarteAnnuaire(true)">Actualiser</button>
+            </div>
+
+            <div class="carte-zone">
+              <div id="carteAnnuaire"></div>
+              <div class="carte-etat cachee" id="annuaireEtat" role="status"></div>
+            </div>
+
+            <div class="admin-toolbar annuaire-recentrage">
+              <span class="filter-label">Recentrer :</span>
+              <button class="filter-btn" onclick="recentrerAnnuaire('metropole')">Métropole</button>
+              <button class="filter-btn" onclick="recentrerAnnuaire('guadeloupe')">Guadeloupe</button>
+              <button class="filter-btn" onclick="recentrerAnnuaire('martinique')">Martinique</button>
+              <button class="filter-btn" onclick="recentrerAnnuaire('guyane')">Guyane</button>
+              <button class="filter-btn" onclick="recentrerAnnuaire('reunion')">La Réunion</button>
+              <button class="filter-btn" onclick="recentrerAnnuaire('caledonie')">Nouvelle-Calédonie</button>
+              <button class="filter-btn" onclick="recentrerAnnuaire('polynesie')">Polynésie</button>
+            </div>
+
+            <details class="annuaire-sans">
+              <summary>Lignes sans coordonnées (<span id="annuaireSansCompte">0</span>)</summary>
+              <div id="annuaireSansListe"></div>
+            </details>
           </div>
 
         </div>
@@ -8092,6 +8165,247 @@ function adminMessage(texte, estErreur) {
   el.textContent = texte;
   el.className = 'admin-message show ' + (estErreur ? 'ko' : 'ok');
   if (!estErreur) setTimeout(() => { el.className = 'admin-message'; }, 4000);
+}
+
+// ═══════════════════════════════════════════════
+// CARTE DE L'ANNUAIRE (ADMIN)
+// Lecture seule. Le panel vit dans #page-admin, derrière la garde de
+// showPage ; la vraie barrière reste la policy is_admin() de la table.
+// Les données ne sont demandées qu'à l'ouverture du panel.
+// ═══════════════════════════════════════════════
+const MARKERCLUSTER_DIST = 'https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/';
+const ANNUAIRE_COLONNES = 'id, rpps, nom, prenom, cabinet, adresse, code_postal, ville, latitude, longitude, telephone, statut';
+const ANNUAIRE_TAILLE_PAGE = 1000;
+const ANNUAIRE_STATUTS = new Map([
+  ['non_revendiquee', 'Non revendiquée'],
+  ['en_attente', 'En attente'],
+  ['revendiquee', 'Revendiquée']
+]);
+const ANNUAIRE_ZONES = {
+  metropole:  BORNES_FRANCE,
+  guadeloupe: [[15.8, -61.85], [16.55, -61.0]],
+  martinique: [[14.35, -61.25], [14.9, -60.8]],
+  guyane:     [[2.1, -54.7], [5.85, -51.6]],
+  reunion:    [[-21.42, 55.2], [-20.85, 55.85]],
+  caledonie:  [[-22.75, 163.9], [-19.5, 168.2]],
+  polynesie:  [[-17.95, -150.0], [-17.4, -149.1]]
+};
+
+let annuaireCarte = null;
+let annuaireGroupe = null;
+let annuaireLignes = [];
+let annuaireStatut = 'tous';
+let annuaireEnCours = false;
+let annuaireCharge = false;
+let annuaireMinuteur = null;
+
+function etatAnnuaire(texte) {
+  const el = document.getElementById('annuaireEtat');
+  el.textContent = texte;
+  el.classList.toggle('cachee', !texte);
+}
+
+function normaliserAnnuaire(v) {
+  return String(v || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[-'’]/g, ' ');
+}
+
+function libelleStatutAnnuaire(statut) {
+  return ANNUAIRE_STATUTS.get(statut) || statut || '—';
+}
+
+async function chargerLeafletAnnuaire() {
+  await chargerLeaflet();
+  // chargerLeaflet garde sa promesse après un succès, et initCarte
+  // s'arrête dès qu'elle en trouve une : sans cette remise à zéro, la
+  // carte de l'emploi ne se construirait plus après un passage ici.
+  carteChargement = null;
+
+  if (L.markerClusterGroup) return;
+
+  ['MarkerCluster.css', 'MarkerCluster.Default.css'].forEach(fichier => {
+    const href = MARKERCLUSTER_DIST + fichier;
+    if (document.querySelector('link[href="' + href + '"]')) return;
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = href;
+    document.head.appendChild(css);
+  });
+
+  await new Promise((resolve, reject) => {
+    const js = document.createElement('script');
+    js.src = MARKERCLUSTER_DIST + 'leaflet.markercluster.js';
+    js.onload = () => resolve();
+    js.onerror = () => { js.remove(); reject(new Error('CDN injoignable')); };
+    document.head.appendChild(js);
+  });
+}
+
+// PostgREST plafonne chaque requête à 1000 lignes. Le tri sur id rend
+// les pages stables : sans lui, une ligne pourrait sauter d'une page à
+// l'autre et être comptée deux fois, ou pas du tout.
+async function lireLignesAnnuaire() {
+  const lignes = [];
+  for (let debut = 0; ; debut += ANNUAIRE_TAILLE_PAGE) {
+    const r = await sb.from('annuaire_praticiens')
+      .select(ANNUAIRE_COLONNES)
+      .order('id')
+      .range(debut, debut + ANNUAIRE_TAILLE_PAGE - 1);
+    if (r.error) throw new Error(r.error.message);
+    const page = r.data || [];
+    lignes.push(...page);
+    if (page.length) etatAnnuaire(lignes.length + ' lignes chargées…');
+    if (page.length < ANNUAIRE_TAILLE_PAGE) return lignes;
+  }
+}
+
+function preparerLigneAnnuaire(ligne) {
+  const lat = parseFloat(ligne.latitude);
+  const lng = parseFloat(ligne.longitude);
+  const valide = Number.isFinite(lat) && Number.isFinite(lng)
+    && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+  return {
+    ...ligne,
+    lat: valide ? lat : null,
+    lng: valide ? lng : null,
+    texteRecherche: normaliserAnnuaire([ligne.nom, ligne.prenom, ligne.ville].join(' ')),
+    marqueur: null
+  };
+}
+
+async function ouvrirCarteAnnuaire(actualiser) {
+  if (!estAdmin() || annuaireEnCours) return;
+
+  if (annuaireCharge && !actualiser) {
+    construireCarteAnnuaire();
+    if (annuaireCarte) setTimeout(() => { annuaireCarte.invalidateSize(); }, 60);
+    return;
+  }
+
+  annuaireEnCours = true;
+  etatAnnuaire('Chargement de la carte…');
+  try {
+    await chargerLeafletAnnuaire();
+    annuaireLignes = (await lireLignesAnnuaire()).map(preparerLigneAnnuaire);
+    annuaireCharge = true;
+    construireCarteAnnuaire();
+    renderAnnuaire();
+    // Une table protégée par RLS répond vide plutôt qu'en erreur.
+    etatAnnuaire(annuaireLignes.length ? '' : "Aucune ligne reçue. Vérifie que la table est remplie et que ton compte est bien en role = 'admin'.");
+  } catch (e) {
+    etatAnnuaire('Chargement impossible : ' + e.message);
+  } finally {
+    annuaireEnCours = false;
+  }
+}
+
+// Leaflet mesure son conteneur : si le panel a été quitté pendant le
+// chargement, la construction attend sa prochaine ouverture.
+function construireCarteAnnuaire() {
+  if (annuaireCarte) return;
+  if (!document.getElementById('adminPanel-annuaire').classList.contains('active')) return;
+
+  annuaireCarte = L.map('carteAnnuaire', { center: CARTE_CENTRE, zoom: CARTE_ZOOM, scrollWheelZoom: false });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(annuaireCarte);
+
+  annuaireGroupe = L.markerClusterGroup({ showCoverageOnHover: false }).addTo(annuaireCarte);
+  annuaireCarte.on('click', () => { annuaireCarte.scrollWheelZoom.enable(); });
+
+  renderAnnuaire();
+  setTimeout(() => {
+    annuaireCarte.invalidateSize();
+    recentrerAnnuaire('metropole');
+  }, 0);
+}
+
+function recentrerAnnuaire(zone) {
+  if (annuaireCarte) annuaireCarte.fitBounds(ANNUAIRE_ZONES[zone], { padding: [24, 24] });
+}
+
+function ficheAnnuaire(l) {
+  const identite = [l.nom, l.prenom].filter(Boolean).join(' ') || '—';
+  const commune = [l.code_postal, l.ville].filter(Boolean).join(' ');
+  const adresse = [l.adresse, commune].filter(Boolean).join(', ') || '—';
+  return '<div class="annuaire-fiche">'
+    + '<div class="annuaire-fiche-nom">' + esc(identite) + '</div>'
+    + '<div>' + esc(l.cabinet || 'Cabinet non renseigné') + '</div>'
+    + '<div class="annuaire-fiche-ligne">' + esc(adresse) + '</div>'
+    + '<div class="annuaire-fiche-ligne">' + esc(l.telephone || 'Téléphone non renseigné') + '</div>'
+    + '<div class="annuaire-fiche-ligne">Statut : ' + esc(libelleStatutAnnuaire(l.statut)) + '</div>'
+    + '</div>';
+}
+
+function marqueurAnnuaire(l) {
+  if (!l.marqueur) {
+    l.marqueur = L.marker([l.lat, l.lng], {
+      icon: L.divIcon({
+        className: '',
+        html: '<span class="carte-pin carte-pin-offre"></span>',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      })
+    }).bindPopup(() => ficheAnnuaire(l));
+  }
+  return l.marqueur;
+}
+
+function filtrerAnnuaire(statut, btn) {
+  annuaireStatut = statut;
+  document.querySelectorAll('#adminPanel-annuaire [data-annuaire-statut]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAnnuaire();
+}
+
+function rechercherAnnuaire() {
+  clearTimeout(annuaireMinuteur);
+  annuaireMinuteur = setTimeout(renderAnnuaire, 200);
+}
+
+function renderAnnuaire() {
+  const termes = normaliserAnnuaire(document.getElementById('annuaireRecherche').value).split(/\s+/).filter(Boolean);
+  const visibles = annuaireLignes.filter(l =>
+    (annuaireStatut === 'tous' || l.statut === annuaireStatut)
+    && termes.every(t => l.texteRecherche.includes(t)));
+  const points = visibles.filter(l => l.lat !== null);
+  const sans = visibles.filter(l => l.lat === null);
+  const totalSans = annuaireLignes.filter(l => l.lat === null).length;
+
+  document.getElementById('annuaireStatLignes').textContent = annuaireLignes.length;
+  document.getElementById('annuaireStatDistincts').textContent = new Set(annuaireLignes.map(l => l.rpps).filter(Boolean)).size;
+  document.getElementById('annuaireStatPoints').textContent = points.length;
+  document.getElementById('annuaireStatSans').textContent = totalSans;
+  document.getElementById('annuaireSansCompte').textContent =
+    sans.length === totalSans ? totalSans : sans.length + ' sur ' + totalSans;
+
+  if (annuaireGroupe) {
+    annuaireGroupe.clearLayers();
+    annuaireGroupe.addLayers(points.map(marqueurAnnuaire));
+  }
+
+  const liste = document.getElementById('annuaireSansListe');
+  if (!sans.length) {
+    liste.innerHTML = '<div class="admin-empty">Aucune ligne sans coordonnées pour ces critères.</div>';
+    return;
+  }
+  liste.innerHTML = '<div class="admin-table-wrap"><table class="admin-table"><thead><tr>'
+    + '<th>Id</th><th>Nom</th><th>Prénom</th><th>Cabinet</th><th>Adresse</th><th>Code postal</th><th>Ville</th><th>Téléphone</th><th>Statut</th>'
+    + '</tr></thead><tbody>'
+    + sans.map(l => '<tr>'
+      + '<td>' + esc(l.id) + '</td>'
+      + '<td class="admin-nom">' + esc(l.nom) + '</td>'
+      + '<td>' + esc(l.prenom) + '</td>'
+      + '<td>' + esc(l.cabinet) + '</td>'
+      + '<td>' + esc(l.adresse) + '</td>'
+      + '<td>' + esc(l.code_postal) + '</td>'
+      + '<td>' + esc(l.ville) + '</td>'
+      + '<td>' + esc(l.telephone) + '</td>'
+      + '<td>' + esc(libelleStatutAnnuaire(l.statut)) + '</td>'
+      + '</tr>').join('')
+    + '</tbody></table></div>';
 }
 
 // en_recherche n'existe qu'une fois carte_emploi.sql passé. On la
