@@ -3030,6 +3030,31 @@
 </div>
 
 <!-- ==================== -->
+<!-- PAGE : VÉRIFICATION  -->
+<!-- À la place de l'espace praticien pour un compte non validé. -->
+<!-- ==================== -->
+<div class="page" id="page-verification">
+  <section class="dash-hero">
+    <div class="container">
+      <div class="dash-hello" id="verifTitre"></div>
+      <div class="dash-sub">Votre espace praticien OrthoConnect</div>
+    </div>
+  </section>
+  <section class="dash-body">
+    <div class="container">
+      <p id="verifTexte" style="font-size:15px; margin-bottom:10px"></p>
+      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:22px">
+        Pour toute question : <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>
+      </p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap">
+        <button class="btn btn-turquoise btn-sm" onclick="showPage('landing')">Retour à l'accueil</button>
+        <button class="btn btn-outline btn-sm" onclick="doLogout()">Se déconnecter</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== -->
 <!-- PAGE : DASHBOARD     -->
 <!-- ==================== -->
 <div class="page" id="page-dashboard">
@@ -3466,6 +3491,7 @@
         <div class="dash-nav">
           <button class="active" onclick="showAdminPanel('accueil', this)">📊 Tableau de bord</button>
           <button onclick="showAdminPanel('inscrits', this)">👥 Inscrits</button>
+          <button onclick="showAdminPanel('comptes', this)">✅ Comptes à valider<span class="admin-pastille" id="admPastilleComptes" hidden>0</span></button>
           <button onclick="showAdminPanel('organismes', this)">🏢 Organismes</button>
           <button onclick="showAdminPanel('formations', this)">📚 Formations</button>
           <button onclick="showAdminPanel('sessions', this)">🗓 Sessions</button>
@@ -4145,6 +4171,14 @@
             <div id="admDemandesListe"></div>
           </div>
 
+          <!-- COMPTES À VALIDER -->
+          <div class="dash-panel" id="adminPanel-comptes">
+            <h2>Comptes à valider</h2>
+            <p class="panel-sub">Inscriptions en attente de vérification. L'annuaire ne référence que les orthodontistes en exercice : une absence ne suffit pas à conclure.</p>
+            <div class="admin-message ko" id="admComptesErreur"></div>
+            <div id="admComptesListe"></div>
+          </div>
+
           <!-- CARTE DE L'ANNUAIRE -->
           <div class="dash-panel" id="adminPanel-annuaire">
             <h2>Carte de l'annuaire</h2>
@@ -4710,6 +4744,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ═══════════════════════════════════════════════
 let currentUser = null;      // session Supabase
 let currentProfile = null;   // ligne dans praticiens
+let compteNonValide = null;  // en_attente, refuse ou indisponible : la session n'ouvre aucun droit
 let formationsDB = [];
 let produitsDB = [];
 // Les categories portent le libelle affiche et la liste des champs de
@@ -4986,6 +5021,8 @@ async function loadCatalogues() {
 // AUTHENTIFICATION
 // ═══════════════════════════════════════════════
 function openAuth(mode) {
+  // Déjà inscrit : les invitations à créer un compte mènent à son message.
+  if (compteNonValide) { showPage('dashboard'); return; }
   document.getElementById('authOverlay').classList.add('open');
   switchAuth(mode || 'signup');
 }
@@ -5098,7 +5135,7 @@ async function doSignup() {
     await refreshAuthUI();
     resetBtn();
 
-    if (!currentProfile) {
+    if (compteNonValide === 'indisponible') {
       // Le compte d'authentification existe : surtout ne pas laisser croire
       // qu'il faut recommencer l'inscription, ce serait un cul-de-sac.
       return showNotice('signupError', "Votre compte est bien créé, mais votre fiche praticien n'a pas pu être enregistrée. Connectez-vous avec " + email + " et complétez-la depuis votre espace, ou écrivez à contact@orthoconnect.fr.");
@@ -5187,16 +5224,43 @@ async function ensureProfile(user) {
   return cree;
 }
 
+// null quand la session ouvre les droits d'un praticien. L'admin passe
+// toujours, quelle que soit la valeur de sa colonne validation.
+function etatValidation(profil) {
+  if (!profil) return 'indisponible';
+  if (profil.role === 'admin' || profil.validation === 'valide') return null;
+  return profil.validation === 'refuse' ? 'refuse' : 'en_attente';
+}
+
+function renderCompteNonValide() {
+  const messages = {
+    en_attente: ['Compte en cours de vérification',
+      "Votre inscription est bien enregistrée. Nous vérifions votre compte avant d'ouvrir l'accès à l'espace praticien."],
+    refuse: ['Compte non validé',
+      "Votre compte n'a pas été validé. L'espace praticien ne vous est pas accessible."],
+    indisponible: ['Vérification impossible pour le moment',
+      "Le statut de votre compte n'a pas pu être lu. Rechargez la page dans quelques instants."]
+  };
+  const [titre, texte] = messages[compteNonValide];
+  document.getElementById('verifTitre').textContent = titre;
+  document.getElementById('verifTexte').textContent = texte;
+}
+
 async function refreshAuthUI() {
   const { data: { session } } = await sb.auth.getSession();
-  currentUser = session ? session.user : null;
+  // Le profil est lu avant de poser currentUser : tant que la validation
+  // n'est pas connue, aucune source réservée ne doit être interrogée. Un
+  // compte non validé reste sans currentUser, donc visiteur partout.
+  const profil = session ? await ensureProfile(session.user) : null;
+  compteNonValide = session ? etatValidation(profil) : null;
+  currentUser = session && !compteNonValide ? session.user : null;
   rechercheRemplie = false;
 
   // La liste est la même dans les deux cas — elle ne transporte aucun
   // montant. Ce qui change, c'est le tarif lisible sur une fiche : on
   // repart de lignes neuves pour qu'aucun montant lu sous l'ancienne
   // session ne survive à la bascule.
-  if (sessionCatalogue !== null && sessionCatalogue !== !!session) {
+  if (sessionCatalogue !== null && sessionCatalogue !== !!currentUser) {
     await loadCatalogues();
   }
 
@@ -5206,7 +5270,7 @@ async function refreshAuthUI() {
   const mobDash = document.getElementById('mobDash');
 
   if (currentUser) {
-    currentProfile = await ensureProfile(currentUser);
+    currentProfile = profil;
 
     const { data: sv } = await sb.from('formations_sauvegardees')
       .select('formation_id').eq('praticien_id', currentUser.id);
@@ -5256,6 +5320,19 @@ async function refreshAuthUI() {
     if (mobDash) mobDash.style.display = 'none';
     majVisibiliteAdmin();
     majReferenceRayon();
+
+    // Visiteur pour les droits, mais connecté : il garde de quoi lire
+    // son message et se déconnecter.
+    if (compteNonValide) {
+      navUser.classList.add('show');
+      if (loginBtn) loginBtn.classList.add('hide');
+      if (mobLogin) mobLogin.style.display = 'none';
+      if (mobDash) mobDash.style.display = 'block';
+      document.getElementById('navAvatar').textContent = ((profil && profil.nom) || '')
+        .split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '--';
+      renderCompteNonValide();
+      if (document.getElementById('page-dashboard').classList.contains('active')) showPage('dashboard');
+    }
   }
 
   // Se connecter depuis une fiche produit change ce que son bouton
@@ -6193,7 +6270,7 @@ function apresConnexion() {
   const id = annonceVoulue;
   annonceVoulue = null;
 
-  if (id != null && jobsDB.some(j => j.id === id && annonceActive(j))) {
+  if (id != null && !compteNonValide && jobsDB.some(j => j.id === id && annonceActive(j))) {
     ouvrirAnnonce(id);
     return;
   }
@@ -8499,6 +8576,7 @@ async function chargerAdmin() {
   renderAdminFournisseurs();
   renderAdminDemandes();
   majPastilleDemandes(nb);
+  chargerComptesAValider();
   remplirSelectsAdmin();
 }
 
@@ -8612,6 +8690,152 @@ function renderRpps(p) {
     onclick="this.classList.toggle('revele')"
     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.classList.toggle('revele')}"
     ><span class="rpps-masque">•••••••••••</span><span class="rpps-clair">${esc(p.rpps)}</span></span>`;
+}
+
+// ─────────── Comptes à valider ───────────
+// annuaire.sante.fr ne répond plus depuis la refonte du site de l'ANS.
+const ANNUAIRE_SANTE_URL = 'https://annuaire.esante.gouv.fr/';
+const TAILLE_LOT_RPPS = 100;
+
+let adminComptes = [];
+let adminFichesRpps = new Map();
+let erreurFichesRpps = null;
+
+function rppsBienForme(rpps) {
+  return /^\d{11}$/.test(rpps || '');
+}
+
+async function lireFichesRpps(comptes) {
+  const numeros = [...new Set(comptes.filter(c => rppsBienForme(c.rpps)).map(c => String(c.rpps)))];
+  const fiches = new Map();
+  erreurFichesRpps = null;
+  for (let i = 0; i < numeros.length; i += TAILLE_LOT_RPPS) {
+    const r = await sb.from('annuaire_praticiens')
+      .select('rpps, nom, prenom, ville')
+      .in('rpps', numeros.slice(i, i + TAILLE_LOT_RPPS));
+    if (r.error) { erreurFichesRpps = r.error.message; return fiches; }
+    (r.data || []).forEach(f => {
+      const cle = String(f.rpps);
+      fiches.set(cle, (fiches.get(cle) || []).concat(f));
+    });
+  }
+  return fiches;
+}
+
+async function chargerComptesAValider() {
+  const r = await sb.from('praticiens')
+    .select('id, nom, email, statut, ville, rpps, created_at')
+    .eq('validation', 'en_attente')
+    .order('created_at');
+
+  const boite = document.getElementById('admComptesErreur');
+  if (r.error) {
+    boite.textContent = 'Chargement impossible : ' + r.error.message;
+    boite.classList.add('show');
+    document.getElementById('admPastilleComptes').hidden = true;
+    return;
+  }
+
+  adminComptes = r.data || [];
+  adminFichesRpps = await lireFichesRpps(adminComptes);
+
+  boite.textContent = erreurFichesRpps ? 'Annuaire indisponible : ' + erreurFichesRpps : '';
+  boite.classList.toggle('show', !!erreurFichesRpps);
+  renderAdminComptes();
+}
+
+function renderRppsCompte(c) {
+  if (c.rpps) return `<span style="font-variant-numeric:tabular-nums">${esc(c.rpps)}</span>`;
+  const texte = c.statut === 'interne' ? 'Non concerné' : 'Non renseigné';
+  return `<span style="color:var(--text-light)">${texte}</span>`;
+}
+
+function renderAnnuaireCompte(c) {
+  if (!c.rpps) {
+    if (c.statut === 'interne') return '<span style="color:var(--text-light)">Interne, sans RPPS</span>';
+    return '<span class="badge badge-brouillon">RPPS manquant</span>';
+  }
+
+  const lien = `<div style="margin-top:6px; font-size:12px">
+      <a href="${ANNUAIRE_SANTE_URL}" target="_blank" rel="noopener noreferrer">Annuaire Santé</a>
+    </div>`;
+
+  if (!rppsBienForme(c.rpps)) return '<span class="badge badge-brouillon">Format RPPS invalide</span>' + lien;
+  if (erreurFichesRpps) return '<span style="color:var(--text-light)">Non vérifié</span>' + lien;
+
+  const fiches = adminFichesRpps.get(String(c.rpps));
+  if (!fiches) return '<span class="badge badge-brouillon">Non trouvé dans l\'annuaire</span>' + lien;
+
+  const identite = [fiches[0].nom, fiches[0].prenom].filter(Boolean).join(' ');
+  const villes = [...new Set(fiches.map(f => f.ville).filter(Boolean))].join(', ');
+  return `<span class="badge badge-publie">RPPS trouvé dans l'annuaire</span>
+    <div style="margin-top:6px; font-size:12px">${esc(identite)}${villes ? ' · ' + esc(villes) : ''}</div>` + lien;
+}
+
+function renderAdminComptes() {
+  const pastille = document.getElementById('admPastilleComptes');
+  pastille.textContent = adminComptes.length;
+  pastille.hidden = adminComptes.length === 0;
+
+  const zone = document.getElementById('admComptesListe');
+  if (!adminComptes.length) {
+    zone.innerHTML = '<div class="admin-empty">Aucun compte en attente.</div>';
+    return;
+  }
+
+  zone.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Nom</th><th>Statut</th><th>Ville</th><th>Inscrit le</th><th>RPPS</th><th>Annuaire</th><th class="col-actions">Décision</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${adminComptes.map(c => `
+            <tr>
+              <td>
+                <div class="admin-nom">${esc(c.nom || 'Non renseigné')}</div>
+                <div style="font-size:12px; color:var(--text-light)">${esc(c.email || '')}</div>
+              </td>
+              <td>${esc(libelleStatut(c.statut))}</td>
+              <td>${esc(c.ville || 'Non renseignée')}</td>
+              <td style="white-space:nowrap">${esc(formatDate(c.created_at))}</td>
+              <td>${renderRppsCompte(c)}</td>
+              <td>${renderAnnuaireCompte(c)}</td>
+              <td class="col-actions">
+                <button class="btn btn-turquoise btn-sm" data-id="${esc(c.id)}" onclick="deciderCompte(this, 'valide')">Valider</button>
+                <button class="btn btn-outline btn-sm" data-id="${esc(c.id)}" onclick="deciderCompte(this, 'refuse')">Refuser</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+async function deciderCompte(btn, validation) {
+  if (!estAdmin()) return;
+  const id = btn.dataset.id;
+  const compte = adminComptes.find(c => String(c.id) === id);
+  if (validation === 'refuse'
+      && !window.confirm('Refuser le compte de « ' + ((compte && compte.nom) || 'cet inscrit') + ' » ?')) return;
+
+  btn.closest('tr').querySelectorAll('button').forEach(b => { b.disabled = true; });
+
+  // Une ligne que la base refuse de modifier revient sans erreur et sans
+  // contenu : seul le retour de la ligne prouve que la décision est prise.
+  const { data, error } = await sb.from('praticiens')
+    .update({ validation })
+    .eq('id', id)
+    .eq('validation', 'en_attente')
+    .select('id');
+
+  if (error) adminMessage('Décision non enregistrée : ' + error.message, true);
+  else if (!data || !data.length) adminMessage("Décision non enregistrée : ce compte n'est plus en attente ou n'a pas pu être modifié.", true);
+  else adminMessage(validation === 'valide' ? 'Compte validé.' : 'Compte refusé.');
+
+  await chargerComptesAValider();
 }
 
 // ─────────── Organismes ───────────
@@ -10056,6 +10280,7 @@ const CHEMINS_PAGE = {
   cgu:             '/cgu',
   confidentialite: '/confidentialite',
   dashboard:       '/mon-espace',
+  verification:    '/mon-espace',
   admin:           '/admin'
 };
 
@@ -10407,6 +10632,9 @@ function showPage(page, chemin) {
   // les policies RLS ne renvoient rien et n'acceptent aucune écriture.
   if (page === 'admin' && !estAdmin()) page = currentUser ? 'dashboard' : 'landing';
 
+  // Un compte non validé lit son message à la place de son espace.
+  if (page === 'dashboard' && compteNonValide) page = 'verification';
+
   setNoindex(page === 'admin' || page === 'introuvable' || page === 'marques');
 
   // Le balisage Product ne vaut que sur une fiche : ailleurs il
@@ -10430,7 +10658,7 @@ function showPage(page, chemin) {
   const adresse = chemin !== undefined ? chemin : CHEMINS_PAGE[page];
   majUrl(adresse, page !== demandee);
 
-  const meta = META_PAGES[page];
+  const meta = META_PAGES[page === 'verification' ? 'dashboard' : page];
   if (meta) majMeta(meta.titre, meta.description, adresse || cheminCourant());
 
   // Leaflet mesure son conteneur : la carte ne peut être construite
