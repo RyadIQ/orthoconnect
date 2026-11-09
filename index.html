@@ -1865,6 +1865,18 @@
 
   .badge-brouillon { background: #FFF3E6; color: #B26A00; }
   .badge-publie    { background: #E8F5E9; color: #2E7D32; }
+  .badge-refuse    { background: #FEF2F2; color: #B91C1C; }
+
+  /* Neuf colonnes : le répertoire défile dans son cadre au lieu
+     d'élargir la page. */
+  #admInscritsListe { width: 0; min-width: 100%; }
+  #admInscritsListe .col-actions {
+    white-space: normal; min-width: 150px;
+    position: sticky; right: 0; background: var(--white);
+    box-shadow: -1px 0 0 var(--grey-border);
+  }
+  #admInscritsListe th.col-actions { background: var(--grey-bg); }
+  #admInscritsListe .col-actions .btn { margin: 2px 0; }
   .badge-archive   { background: var(--grey-bg); color: var(--text-secondary); }
 
   .admin-form {
@@ -3579,6 +3591,11 @@
             <div class="admin-toolbar">
               <input type="text" class="admin-search" id="admRecherche" placeholder="Rechercher un nom, une ville, un email"
                      oninput="rechercherInscrits(this.value)">
+              <span class="filter-label">Validation :</span>
+              <button class="filter-btn active" data-validation-inscrits onclick="filtrerInscritsValidation('tous', this)">Tous</button>
+              <button class="filter-btn" data-validation-inscrits onclick="filtrerInscritsValidation('en_attente', this)">En attente</button>
+              <button class="filter-btn" data-validation-inscrits onclick="filtrerInscritsValidation('valide', this)">Validés</button>
+              <button class="filter-btn" data-validation-inscrits onclick="filtrerInscritsValidation('refuse', this)">Refusés</button>
               <span class="spacer"></span>
               <span style="font-size:13px; color:var(--text-secondary)" id="admInscritsCompte"></span>
             </div>
@@ -8161,6 +8178,9 @@ let filtreStatutDemande = 'tous';
 let filtreStatutCode = 'tous';
 let filtreStatutFormation = 'tous';
 let rechercheInscrits = '';
+let filtreValidationInscrits = 'tous';
+let adminDernieresConnexions = new Map();
+let erreurDernieresConnexions = false;
 let orgEnCours  = null;
 let formEnCours = null;
 let sessEnCours = null;
@@ -8491,7 +8511,7 @@ function renderAnnuaire() {
 let colonneRecherche = true;
 
 async function chargerPraticiensAdmin() {
-  const colonnes = 'id, nom, email, ville, statut, rpps, role, created_at';
+  const colonnes = 'id, nom, email, ville, statut, rpps, role, created_at, validation';
   const lire = (c) => sb.from('praticiens').select(c)
     .order('created_at', { ascending: false });
 
@@ -8511,7 +8531,7 @@ async function chargerPraticiensAdmin() {
 }
 
 async function chargerAdmin() {
-  const [pr, org, fo, se, co, an, de, nb, pd, fr, ct] = await Promise.all([
+  const [pr, org, fo, se, co, an, de, nb, pd, fr, ct, dc] = await Promise.all([
     chargerPraticiensAdmin(),
     sb.from('organismes').select('*').order('nom'),
     sb.from('formations').select('*, organismes(id, nom, logo_url, partenaire)').order('id', { ascending: false }),
@@ -8531,7 +8551,10 @@ async function chargerAdmin() {
     sb.from('fournisseurs').select('*').order('nom'),
     // Jamais de select sur fournisseurs_contacts : la table n'est pas
     // lisible, meme par un admin. La fonction seule.
-    sb.rpc('contacts_admin')
+    sb.rpc('contacts_admin'),
+    // Même un rejet réseau ne doit pas éteindre l'administration : la
+    // colonne dira « Indisponible », le tableau reste affiché.
+    Promise.resolve(sb.rpc('derniere_connexion_comptes')).catch(e => ({ error: e }))
   ]);
 
   // Les demandes sont volontairement hors de ce test : un onglet qui ne
@@ -8547,6 +8570,8 @@ async function chargerAdmin() {
   boite.classList.remove('show');
 
   adminPraticiens = pr.data  || [];
+  erreurDernieresConnexions = !!dc.error;
+  adminDernieresConnexions = new Map((dc.data || []).map(l => [String(l.id), l.derniere_connexion]));
   adminOrganismes = org.data || [];
   adminFormations = fo.data  || [];
   adminSessions   = se.data  || [];
@@ -8635,8 +8660,9 @@ function rechercherInscrits(valeur) {
 
 function renderAdminInscrits() {
   const q = rechercheInscrits.trim().toLowerCase();
-  const lignes = adminPraticiens.filter(p => !q ||
-    [p.nom, p.ville, p.email].some(v => (v || '').toLowerCase().includes(q)));
+  const lignes = adminPraticiens.filter(p =>
+    (filtreValidationInscrits === 'tous' || p.validation === filtreValidationInscrits) && (!q ||
+    [p.nom, p.ville, p.email].some(v => (v || '').toLowerCase().includes(q))));
 
   document.getElementById('admInscritsCompte').textContent =
     lignes.length + ' / ' + adminPraticiens.length + ' inscrit' + (adminPraticiens.length > 1 ? 's' : '');
@@ -8654,7 +8680,7 @@ function renderAdminInscrits() {
       <table class="admin-table">
         <thead>
           <tr>
-            <th>Nom</th><th>Statut</th><th>Ville</th><th>Recherche</th><th>RPPS</th><th>Inscrit le</th>
+            <th>Nom</th><th>Statut</th><th>Ville</th><th>Recherche</th><th>RPPS</th><th>Validation</th><th>Dernière connexion</th><th>Inscrit le</th><th class="col-actions">Décision</th>
           </tr>
         </thead>
         <tbody>
@@ -8670,12 +8696,92 @@ function renderAdminInscrits() {
                 ? '<span class="badge badge-recherche">En recherche</span>'
                 : '<span style="color:var(--text-light)">—</span>'}</td>
               <td>${renderRpps(p)}</td>
+              <td>${renderBadgeValidation(p.validation)}</td>
+              <td>${renderDerniereConnexion(p)}</td>
               <td style="white-space:nowrap">${esc(formatDate(p.created_at))}</td>
+              <td class="col-actions">${renderDecisionsInscrit(p)}</td>
             </tr>
           `).join('')}
         </tbody>
       </table>
     </div>`;
+}
+
+function filtrerInscritsValidation(validation, btn) {
+  filtreValidationInscrits = validation;
+  document.querySelectorAll('#adminPanel-inscrits [data-validation-inscrits]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAdminInscrits();
+}
+
+function renderBadgeValidation(validation) {
+  const connues = {
+    en_attente: ['En attente', 'badge-brouillon'],
+    valide: ['Validé', 'badge-publie'],
+    refuse: ['Refusé', 'badge-refuse']
+  };
+  const [libelle, classe] = Object.prototype.hasOwnProperty.call(connues, validation)
+    ? connues[validation]
+    : [validation || 'Non renseignée', 'badge-archive'];
+  return `<span class="badge ${classe}">${esc(libelle)}</span>`;
+}
+
+function formatDateHeure(d) {
+  const dt = new Date(d);
+  return formatDate(d) + ' à ' + String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+}
+
+function renderDerniereConnexion(p) {
+  if (erreurDernieresConnexions) return '<span style="color:var(--text-light)">Indisponible</span>';
+  const date = adminDernieresConnexions.get(String(p.id));
+  return date ? esc(formatDateHeure(date)) : '<span style="color:var(--text-light)">Jamais</span>';
+}
+
+function renderDecisionsInscrit(p) {
+  if (p.role === 'admin') return '';
+  return [
+    ['valide', 'Valider', 'btn-turquoise'],
+    ['refuse', 'Refuser', 'btn-outline'],
+    ['en_attente', 'Remettre en attente', 'btn-outline']
+  ].filter(([validation]) => validation !== p.validation)
+    .map(([validation, libelle, classe]) =>
+      `<button class="btn ${classe} btn-sm" data-id="${esc(p.id)}" onclick="changerValidationInscrit(this, '${validation}')">${libelle}</button>`)
+    .join(' ');
+}
+
+function majValidationInscrit(id, validation) {
+  const p = adminPraticiens.find(x => String(x.id) === String(id));
+  if (p) p.validation = validation;
+  renderAdminInscrits();
+}
+
+async function changerValidationInscrit(btn, validation) {
+  if (!estAdmin()) return;
+  const id = btn.dataset.id;
+  const p = adminPraticiens.find(x => String(x.id) === id);
+  if (!p || p.role === 'admin') return;
+  if (validation === 'refuse'
+      && !window.confirm('Refuser le compte de « ' + (p.nom || 'cet inscrit') + ' » ?')) return;
+
+  btn.closest('tr').querySelectorAll('button').forEach(b => { b.disabled = true; });
+
+  // Une ligne que la base refuse de modifier revient sans erreur et sans
+  // contenu : seul le retour de la ligne prouve que la décision est prise.
+  const { data, error } = await sb.from('praticiens')
+    .update({ validation })
+    .eq('id', id)
+    .neq('role', 'admin')
+    .select('id');
+
+  if (error || !data || !data.length) {
+    adminMessage('Décision non enregistrée : ' + (error ? error.message : "ce compte n'a pas pu être modifié."), true);
+    renderAdminInscrits();
+    return;
+  }
+
+  adminMessage('Validation mise à jour.');
+  majValidationInscrit(id, validation);
+  await chargerComptesAValider();
 }
 
 function libelleStatut(s) {
@@ -8833,7 +8939,10 @@ async function deciderCompte(btn, validation) {
 
   if (error) adminMessage('Décision non enregistrée : ' + error.message, true);
   else if (!data || !data.length) adminMessage("Décision non enregistrée : ce compte n'est plus en attente ou n'a pas pu être modifié.", true);
-  else adminMessage(validation === 'valide' ? 'Compte validé.' : 'Compte refusé.');
+  else {
+    adminMessage(validation === 'valide' ? 'Compte validé.' : 'Compte refusé.');
+    majValidationInscrit(id, validation);
+  }
 
   await chargerComptesAValider();
 }
