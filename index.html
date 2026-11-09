@@ -4927,7 +4927,7 @@
   <section class="legal">
 
     <h1>Politique de confidentialité</h1>
-    <p class="legal-maj">Dernière mise à jour : 12 septembre 2026</p>
+    <p class="legal-maj">Dernière mise à jour : 9 novembre 2026</p>
 
     <h2>Responsable du traitement</h2>
     <p>OrthoConnect, entreprise individuelle, SIRET 820 100 402 00040, siège à Toulouse, France. Pour toute question relative à vos données : <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a></p>
@@ -4983,8 +4983,15 @@
     </table>
     <p>La suppression d'un compte entraîne l'effacement du profil et le retrait des annonces associées, sous réserve des obligations légales de conservation.</p>
 
+    <h2>Annuaire des orthodontistes</h2>
+    <p>OrthoConnect référence les orthodontistes à partir de l'Annuaire Santé, une source publique. Les données ont été extraites le <span id="confidentialiteDateExtraction"></span>. Nous reprenons uniquement des informations professionnelles : nom, prénom, numéro RPPS, spécialité, nom du cabinet, adresse d'exercice et, lorsqu'ils figurent dans la source, téléphone et adresse de messagerie professionnels.</p>
+    <p>L'objectif est de faire connaître les praticiens et de permettre à chacun de retrouver sa fiche. Cette activité repose sur notre intérêt légitime.</p>
+    <p>Tout visiteur voit le nombre de praticiens par département et peut rechercher un praticien par son nom : seuls le nom, le prénom, la spécialité et la ville s'affichent. Les adresses et les téléphones ne sont visibles que par les comptes de praticiens validés. Les adresses de messagerie et les numéros RPPS ne sont jamais affichés aux visiteurs ni aux praticiens.</p>
+    <p>Les données sont conservées tant que la fiche est référencée et sont mises à jour à chaque nouvelle extraction de l'Annuaire Santé.</p>
+
     <h2>Vos droits</h2>
     <p>Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité sur vos données, ainsi que du droit de définir des directives relatives à leur sort après votre décès.</p>
+    <p>Vous pouvez notamment vous opposer au traitement pour faire retirer votre fiche de l'annuaire.</p>
     <p>Ces droits s'exercent par email à <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>. Une réponse vous est apportée dans un délai d'un mois. En cas de désaccord, vous pouvez introduire une réclamation auprès de la CNIL, 3 place de Fontenoy, 75007 Paris, <a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>.</p>
 
     <h2>Cookies</h2>
@@ -11356,6 +11363,10 @@ function remplirSelectsAdmin() {
 // ═══════════════════════════════════════════════
 const ORIGINE = 'https://orthoconnect.fr';
 
+// Date de l'extraction de l'Annuaire Santé, à mettre à jour à chaque
+// import. Affichée sur la politique de confidentialité.
+const ANNUAIRE_DATE_EXTRACTION = '2026-11-09';
+
 const CHEMINS_PAGE = {
   landing:         '/',
   formations:      '/formations',
@@ -11774,6 +11785,9 @@ function showPage(page, chemin) {
 
   if (page === 'carte') ouvrirPageCarte();
   if (page === 'congres') chargerCongres();
+  if (page === 'confidentialite') {
+    document.getElementById('confidentialiteDateExtraction').textContent = formatPeriodeCongres(ANNUAIRE_DATE_EXTRACTION, null);
+  }
 
   // Passer à autre chose abandonne l'annonce en attente : se connecter
   // une demi-heure plus tard depuis une autre page ne doit pas
