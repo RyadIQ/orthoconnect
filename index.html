@@ -2008,6 +2008,27 @@
   .badge-visible { background: #E8F5E9; color: #2E7D32; }
   .badge-masque  { background: var(--grey-bg); color: var(--text-secondary); }
 
+  /* ===== CONGRÈS ===== */
+  .congres-carte {
+    display: flex; flex-direction: column; gap: 8px;
+    background: var(--white); border: 1px solid var(--grey-border);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .congres-entete { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--text-secondary); }
+  .congres-nom { font-size: 18px; font-weight: 700; color: var(--navy); line-height: 1.3; }
+  .congres-dates { font-size: 14px; font-weight: 600; color: var(--navy); }
+  .congres-lieu { font-size: 14px; color: var(--text-secondary); }
+  .congres-description { font-size: 14px; line-height: 1.6; color: var(--text-main); white-space: pre-line; }
+  .congres-lien { margin-top: auto; padding-top: 6px; font-size: 14px; font-weight: 600; color: #007A86; }
+  #admCongresListe { width: 0; min-width: 100%; }
+  #admCongresListe .col-actions {
+    white-space: normal; min-width: 170px;
+    position: sticky; right: 0; background: var(--white);
+    box-shadow: -1px 0 0 var(--grey-border);
+  }
+  #admCongresListe th.col-actions { background: var(--grey-bg); }
+  #admCongresListe .col-actions .btn { margin: 2px 0; }
+
   /* ===== CARTE DE L'ANNUAIRE (ADMIN) ===== */
   #carteAnnuaire { height: 560px; width: 100%; background: var(--grey-bg); }
   .annuaire-recentrage { margin: 14px 0 22px; }
@@ -2345,6 +2366,7 @@
       <li><a href="/formations" onclick="showPage('formations')" id="nav-formations">Formations</a></li>
       <li><a href="/produits" onclick="showPage('produits')" id="nav-produits">Produits</a></li>
       <li><a href="/emploi" onclick="showPage('emploi')" id="nav-emploi">Emploi</a></li>
+      <li><a href="/congres" onclick="showPage('congres')" id="nav-congres">Congrès</a></li>
       <li><a href="/actualites" onclick="requireAuth('actus')" id="nav-actu">Actualités</a></li>
       <li id="navLoginItem"><a href="#" class="nav-cta btn nav-login-btn" onclick="openAuth('signup')">Espace praticien</a></li>
       <li>
@@ -2373,6 +2395,7 @@
   <a href="/formations" onclick="showPage('formations'); toggleMenu()">Formations</a>
   <a href="/produits" onclick="showPage('produits'); toggleMenu()">Produits</a>
   <a href="/emploi" onclick="showPage('emploi'); toggleMenu()">Emploi</a>
+  <a href="/congres" onclick="showPage('congres'); toggleMenu()">Congrès</a>
   <a href="/actualites" onclick="requireAuth('actus'); toggleMenu()">Actualités</a>
   <div class="mobile-menu-sep"></div>
   <a href="#" id="mobLogin" onclick="openAuth('signup'); toggleMenu()" style="color:var(--turquoise); font-weight:600">Espace praticien</a>
@@ -2568,6 +2591,64 @@
         <h4>Navigation</h4>
         <a href="/" onclick="showPage('landing')">Accueil</a>
         <a href="/produits" onclick="showPage('produits')">Produits</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 OrthoConnect · orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ===================== -->
+<!-- PAGE : CONGRÈS        -->
+<!-- ===================== -->
+<div class="page" id="page-congres">
+  <section class="page-hero">
+    <div class="container">
+      <h1>Congrès et salons</h1>
+      <p>Les rendez-vous de l'orthodontie, avec leurs dates, leurs lieux et leurs sites officiels</p>
+    </div>
+  </section>
+
+  <div class="filters-bar">
+    <div class="filters-inner">
+      <span class="filter-label">Société :</span>
+      <span id="congresSocietes" style="display:contents"></span>
+      <span class="filter-label">Type :</span>
+      <button class="filter-btn active" data-congres-type onclick="filtrerCongresType('tous', this)">Tous</button>
+      <button class="filter-btn" data-congres-type onclick="filtrerCongresType('congres', this)">Congrès</button>
+      <button class="filter-btn" data-congres-type onclick="filtrerCongresType('salon', this)">Salons</button>
+      <button class="filter-btn" id="congresBoutonPasses" onclick="basculerCongresPasses()">Afficher aussi les passés</button>
+    </div>
+  </div>
+
+  <section class="catalogue-section">
+    <div class="container">
+      <div class="formations-grid" id="congresGrille"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, matériel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
@@ -3507,6 +3588,7 @@
           <button onclick="showAdminPanel('organismes', this)">🏢 Organismes</button>
           <button onclick="showAdminPanel('formations', this)">📚 Formations</button>
           <button onclick="showAdminPanel('sessions', this)">🗓 Sessions</button>
+          <button onclick="showAdminPanel('congres', this)">🎤 Congrès</button>
           <button onclick="showAdminPanel('codes', this)">🎟 Codes</button>
           <button onclick="showAdminPanel('annonces', this)">💼 Annonces</button>
           <button onclick="showAdminPanel('produits', this)">📦 Produits</button>
@@ -3600,6 +3682,111 @@
               <span style="font-size:13px; color:var(--text-secondary)" id="admInscritsCompte"></span>
             </div>
             <div id="admInscritsListe"></div>
+          </div>
+
+          <!-- CONGRÈS -->
+          <div class="dash-panel" id="adminPanel-congres">
+            <h2>Congrès</h2>
+            <p class="panel-sub">Seules les fiches publiées apparaissent sur la page publique.</p>
+
+            <div class="admin-toolbar">
+              <button class="btn btn-turquoise btn-sm" onclick="ouvrirFormCongres(null)">+ Nouvelle fiche</button>
+            </div>
+
+            <div class="admin-message ko" id="admCongresErreur"></div>
+
+            <div class="admin-form" id="congresForm" style="display:none">
+              <h3 id="congresFormTitre">Nouvelle fiche</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cgNom">Nom</label>
+                  <input type="text" id="cgNom" oninput="majSlugCongres()">
+                </div>
+                <div class="form-group">
+                  <label for="cgSlug">Slug</label>
+                  <input type="text" id="cgSlug" oninput="congresSlugManuel = true">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cgType">Type</label>
+                  <select id="cgType">
+                    <option value="congres">Congrès</option>
+                    <option value="salon">Salon</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="cgStatut">Statut</label>
+                  <select id="cgStatut">
+                    <option value="brouillon">Brouillon</option>
+                    <option value="publie">Publié</option>
+                    <option value="archive">Archivé</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cgSigle">Sigle</label>
+                  <input type="text" id="cgSigle">
+                </div>
+                <div class="form-group">
+                  <label for="cgOrganisateur">Organisateur</label>
+                  <input type="text" id="cgOrganisateur">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="cgEdition">Édition</label>
+                <input type="text" id="cgEdition">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cgDebut">Date de début</label>
+                  <input type="date" id="cgDebut">
+                </div>
+                <div class="form-group">
+                  <label for="cgFin">Date de fin</label>
+                  <input type="date" id="cgFin">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cgVille">Ville</label>
+                  <input type="text" id="cgVille">
+                </div>
+                <div class="form-group">
+                  <label for="cgPays">Pays</label>
+                  <input type="text" id="cgPays">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="cgLieu">Lieu</label>
+                <input type="text" id="cgLieu">
+              </div>
+              <div class="form-group">
+                <label for="cgDescription">Description</label>
+                <textarea id="cgDescription"></textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cgOfficiel">Site officiel</label>
+                  <input type="url" id="cgOfficiel" placeholder="https://">
+                </div>
+                <div class="form-group">
+                  <label for="cgSource">Source (jamais affichée publiquement)</label>
+                  <input type="url" id="cgSource" placeholder="https://">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="cgVerifie">Vérifié le</label>
+                <input type="date" id="cgVerifie">
+              </div>
+              <div class="admin-form-actions">
+                <button class="btn btn-turquoise btn-sm" onclick="enregistrerCongres()">Enregistrer</button>
+                <button class="btn btn-outline btn-sm" onclick="fermerFormCongres()">Annuler</button>
+              </div>
+            </div>
+
+            <div id="admCongresListe"></div>
           </div>
 
           <!-- ORGANISMES -->
@@ -8602,6 +8789,7 @@ async function chargerAdmin() {
   renderAdminDemandes();
   majPastilleDemandes(nb);
   chargerComptesAValider();
+  chargerCongresAdmin();
   remplirSelectsAdmin();
 }
 
@@ -8945,6 +9133,330 @@ async function deciderCompte(btn, validation) {
   }
 
   await chargerComptesAValider();
+}
+
+// ─────────── Congrès ───────────
+const MOIS_CONGRES = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+// Liste fermée : url_source et organisateur ne quittent pas la base
+// pour la page publique.
+const COLONNES_CONGRES_PUBLIQUES = 'id, nom, type, sigle, edition, date_debut, date_fin, ville, pays, lieu, description, url_officiel';
+
+let congresDB = [];
+let congresErreur = false;
+let congresJeton = 0;
+let congresSigle = null;
+let congresType = 'tous';
+let congresAvecPasses = false;
+
+let adminCongres = [];
+let congresEnCours = null;
+let congresSlugManuel = false;
+let congresEcriture = false;
+
+function dateCourteCongres(d) {
+  return String(d || '').slice(0, 10);
+}
+
+// Lue morceau par morceau : passer par Date décalerait d'un jour une
+// date sans heure selon le fuseau du navigateur.
+function formatPeriodeCongres(debut, fin) {
+  const lire = (v) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(v || '');
+    return m ? { annee: +m[1], mois: +m[2], jour: +m[3] } : null;
+  };
+  const d = lire(debut);
+  if (!d) return 'Date à confirmer';
+  const f = lire(fin);
+  const jour = (x) => (x.jour === 1 ? '1er' : x.jour);
+  const mois = (x) => MOIS_CONGRES[x.mois - 1];
+  const complet = (x) => jour(x) + ' ' + mois(x) + ' ' + x.annee;
+
+  if (!f || dateCourteCongres(fin) <= dateCourteCongres(debut)) return complet(d);
+  if (d.annee !== f.annee) return 'du ' + complet(d) + ' au ' + complet(f);
+  if (d.mois !== f.mois) return 'du ' + jour(d) + ' ' + mois(d) + ' au ' + complet(f);
+  return 'du ' + jour(d) + ' au ' + complet(f);
+}
+
+function urlHttpCongres(valeur) {
+  try {
+    const url = new URL(String(valeur || '').trim());
+    return /^https?:$/.test(url.protocol) ? url.href : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function congresAVenir(c) {
+  const n = new Date();
+  const aujourdhui = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+  const reference = dateCourteCongres(c.date_fin || c.date_debut);
+  return !reference || reference >= aujourdhui;
+}
+
+async function chargerCongres() {
+  const jeton = ++congresJeton;
+  // Le filtre sur le statut reste nécessaire : la policy de l'admin lui
+  // fait aussi remonter brouillons et archives.
+  const r = await sb.from('congres').select(COLONNES_CONGRES_PUBLIQUES)
+    .eq('statut', 'publie').order('date_debut');
+  if (jeton !== congresJeton) return;
+
+  congresErreur = !!r.error;
+  if (r.error) console.warn('Congrès indisponibles :', r.error.message);
+  congresDB = r.data || [];
+  renderSocietesCongres();
+  renderCongres();
+}
+
+function renderSocietesCongres() {
+  const sigles = [...new Set(congresDB.map(c => c.sigle).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'fr'));
+  if (congresSigle && !sigles.includes(congresSigle)) congresSigle = null;
+
+  const bouton = (libelle, sigle) =>
+    `<button class="filter-btn${sigle === congresSigle ? ' active' : ''}"${sigle ? ` data-sigle="${esc(sigle)}"` : ''} onclick="filtrerCongresSigle(this)">${esc(libelle)}</button>`;
+  document.getElementById('congresSocietes').innerHTML =
+    bouton('Toutes', null) + sigles.map(s => bouton(s, s)).join('');
+}
+
+function filtrerCongresSigle(btn) {
+  congresSigle = btn.dataset.sigle || null;
+  renderSocietesCongres();
+  renderCongres();
+}
+
+function filtrerCongresType(type, btn) {
+  congresType = type;
+  document.querySelectorAll('#page-congres [data-congres-type]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderCongres();
+}
+
+function basculerCongresPasses() {
+  congresAvecPasses = !congresAvecPasses;
+  const btn = document.getElementById('congresBoutonPasses');
+  btn.classList.toggle('active', congresAvecPasses);
+  btn.textContent = congresAvecPasses ? 'Masquer les passés' : 'Afficher aussi les passés';
+  renderCongres();
+}
+
+function renderCongres() {
+  const grille = document.getElementById('congresGrille');
+
+  if (congresErreur) {
+    grille.innerHTML = catalogueVide('⚠️', 'Liste indisponible', "La liste des congrès n'a pas pu être chargée. Réessayez dans quelques instants.");
+    return;
+  }
+  if (!congresDB.length) {
+    grille.innerHTML = catalogueVide('🎤', 'Aucun congrès publié', "Les prochains congrès et salons seront annoncés ici.");
+    return;
+  }
+
+  const lignes = congresDB.filter(c =>
+    (congresAvecPasses || congresAVenir(c))
+    && (!congresSigle || c.sigle === congresSigle)
+    && (congresType === 'tous' || c.type === congresType));
+
+  if (!lignes.length) {
+    grille.innerHTML = catalogueVide('🔍', 'Aucun congrès pour ces critères', "Essayez un autre filtre, ou affichez aussi les congrès passés.");
+    return;
+  }
+
+  grille.innerHTML = lignes.map(c => {
+    const lieu = [c.ville, c.pays].filter(Boolean).join(', ');
+    const site = urlHttpCongres(c.url_officiel);
+    return `
+    <article class="congres-carte">
+      ${c.sigle || c.edition ? `<div class="congres-entete">
+        ${c.sigle ? `<span class="badge badge-new">${esc(c.sigle)}</span>` : ''}
+        ${c.edition ? `<span>${esc(c.edition)}</span>` : ''}
+      </div>` : ''}
+      <h3 class="congres-nom">${esc(c.nom)}</h3>
+      <div class="congres-dates">${esc(formatPeriodeCongres(c.date_debut, c.date_fin))}</div>
+      ${lieu ? `<div class="congres-lieu">${esc(lieu)}</div>` : ''}
+      ${c.lieu ? `<div class="congres-lieu">${esc(c.lieu)}</div>` : ''}
+      ${c.description ? `<p class="congres-description">${esc(c.description)}</p>` : ''}
+      ${site ? `<a class="congres-lien" href="${esc(site)}" target="_blank" rel="noopener noreferrer">Site officiel</a>` : ''}
+    </article>`;
+  }).join('');
+}
+
+async function chargerCongresAdmin() {
+  const r = await sb.from('congres').select('*').order('date_debut', { ascending: false });
+  const boite = document.getElementById('admCongresErreur');
+  boite.textContent = r.error ? 'Chargement impossible : ' + r.error.message : '';
+  boite.classList.toggle('show', !!r.error);
+  if (r.error) return;
+  adminCongres = r.data || [];
+  renderAdminCongres();
+}
+
+function renderBadgeStatutCongres(statut) {
+  const connus = new Map([
+    ['publie', ['Publié', 'badge-publie']],
+    ['brouillon', ['Brouillon', 'badge-brouillon']],
+    ['archive', ['Archivé', 'badge-archive']]
+  ]);
+  const [libelle, classe] = connus.get(statut) || [statut || 'Non renseigné', 'badge-archive'];
+  return `<span class="badge ${classe}">${esc(libelle)}</span>`;
+}
+
+function renderAdminCongres() {
+  const zone = document.getElementById('admCongresListe');
+  if (!adminCongres.length) {
+    zone.innerHTML = '<div class="admin-empty">Aucune fiche. Commence par en créer une.</div>';
+    return;
+  }
+
+  const actions = (c) => {
+    const id = `data-id="${esc(c.id)}"`;
+    return [
+      `<button class="btn btn-outline btn-sm" ${id} onclick="ouvrirFormCongres(this.dataset.id)">Éditer</button>`,
+      c.statut !== 'publie' ? `<button class="btn btn-turquoise btn-sm" ${id} onclick="changerStatutCongres(this, 'publie')">Publier</button>` : '',
+      c.statut !== 'brouillon' ? `<button class="btn btn-outline btn-sm" ${id} onclick="changerStatutCongres(this, 'brouillon')">Remettre en brouillon</button>` : '',
+      c.statut !== 'archive' ? `<button class="btn btn-outline btn-sm" ${id} onclick="changerStatutCongres(this, 'archive')">Archiver</button>` : '',
+      `<button class="btn btn-outline btn-sm" ${id} onclick="supprimerCongres(this)">Supprimer</button>`
+    ].filter(Boolean).join(' ');
+  };
+
+  zone.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Nom</th><th>Type</th><th>Dates</th><th>Lieu</th><th>Statut</th><th class="col-actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          ${adminCongres.map(c => `
+            <tr>
+              <td>
+                <div class="admin-nom">${esc(c.nom || 'Sans nom')}</div>
+                <div style="font-size:12px; color:var(--text-light)">${esc([c.sigle, c.edition].filter(Boolean).join(' · '))}</div>
+              </td>
+              <td>${esc(c.type === 'congres' ? 'Congrès' : c.type === 'salon' ? 'Salon' : (c.type || ''))}</td>
+              <td>${esc(formatPeriodeCongres(c.date_debut, c.date_fin))}</td>
+              <td>${esc([c.ville, c.pays].filter(Boolean).join(', '))}</td>
+              <td>${renderBadgeStatutCongres(c.statut)}</td>
+              <td class="col-actions">${actions(c)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function majSlugCongres() {
+  if (!congresSlugManuel) {
+    const nom = document.getElementById('cgNom').value.trim();
+    document.getElementById('cgSlug').value = nom ? slugifier(nom) : '';
+  }
+}
+
+function ouvrirFormCongres(id) {
+  const c = id ? adminCongres.find(x => String(x.id) === String(id)) : null;
+  congresEnCours = c ? c.id : null;
+  // Une fiche existante garde son slug si on la renomme.
+  congresSlugManuel = !!c;
+
+  document.getElementById('congresFormTitre').textContent = c ? 'Éditer ' + (c.nom || 'la fiche') : 'Nouvelle fiche';
+  const champs = {
+    cgNom: c && c.nom, cgSlug: c && c.slug, cgSigle: c && c.sigle, cgOrganisateur: c && c.organisateur,
+    cgEdition: c && c.edition, cgVille: c && c.ville, cgPays: c && c.pays, cgLieu: c && c.lieu,
+    cgDescription: c && c.description, cgOfficiel: c && c.url_officiel, cgSource: c && c.url_source
+  };
+  Object.keys(champs).forEach(k => { document.getElementById(k).value = champs[k] == null || champs[k] === false ? '' : champs[k]; });
+  document.getElementById('cgType').value = c ? c.type : 'congres';
+  document.getElementById('cgStatut').value = c ? c.statut : 'brouillon';
+  document.getElementById('cgDebut').value = c ? dateCourteCongres(c.date_debut) : '';
+  document.getElementById('cgFin').value = c ? dateCourteCongres(c.date_fin) : '';
+  document.getElementById('cgVerifie').value = c ? dateCourteCongres(c.verifie_le) : '';
+
+  const f = document.getElementById('congresForm');
+  f.style.display = 'block';
+  f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function fermerFormCongres() {
+  congresEnCours = null;
+  document.getElementById('congresForm').style.display = 'none';
+}
+
+// Une écriture que la base refuse peut revenir sans erreur et sans
+// contenu : seul le retour de la ligne prouve qu'elle a eu lieu.
+async function ecrireCongres(action, payload, id) {
+  if (!estAdmin() || congresEcriture) return false;
+  congresEcriture = true;
+  try {
+    const table = sb.from('congres');
+    const requete = action === 'insert' ? table.insert(payload)
+      : action === 'update' ? table.update(payload).eq('id', id)
+      : table.delete().eq('id', id);
+    const { data, error } = await requete.select('id');
+
+    if (error) {
+      adminMessage('Enregistrement refusé : ' + error.message, true);
+      return false;
+    }
+    if (!data || !data.length) {
+      adminMessage("Enregistrement refusé : la base n'a modifié aucune fiche.", true);
+      return false;
+    }
+    adminMessage(action === 'insert' ? 'Fiche créée.' : action === 'update' ? 'Modifications enregistrées.' : 'Fiche supprimée.');
+    await chargerCongresAdmin();
+    return true;
+  } finally {
+    congresEcriture = false;
+  }
+}
+
+async function enregistrerCongres() {
+  const texte = (id) => document.getElementById(id).value.trim() || null;
+  const nom = texte('cgNom');
+  const debut = texte('cgDebut');
+  const fin = texte('cgFin');
+  const officiel = texte('cgOfficiel');
+  const source = texte('cgSource');
+
+  if (!nom) return adminMessage('Le nom est obligatoire.', true);
+  if (!debut) return adminMessage('La date de début est obligatoire.', true);
+  if (fin && fin < debut) return adminMessage('La date de fin précède la date de début.', true);
+  if (officiel && !urlHttpCongres(officiel)) return adminMessage('Le site officiel doit être une adresse http ou https complète.', true);
+  if (source && !urlHttpCongres(source)) return adminMessage('La source doit être une adresse http ou https complète.', true);
+
+  const payload = {
+    nom,
+    slug: slugifier(texte('cgSlug') || nom),
+    type: document.getElementById('cgType').value,
+    statut: document.getElementById('cgStatut').value,
+    sigle: texte('cgSigle'),
+    organisateur: texte('cgOrganisateur'),
+    edition: texte('cgEdition'),
+    date_debut: debut,
+    date_fin: fin,
+    ville: texte('cgVille'),
+    pays: texte('cgPays'),
+    lieu: texte('cgLieu'),
+    description: texte('cgDescription'),
+    url_officiel: officiel,
+    url_source: source,
+    verifie_le: texte('cgVerifie')
+  };
+
+  if (await ecrireCongres(congresEnCours ? 'update' : 'insert', payload, congresEnCours)) fermerFormCongres();
+}
+
+async function changerStatutCongres(btn, statut) {
+  const id = btn.dataset.id;
+  if (await ecrireCongres('update', { statut }, id) && String(congresEnCours) === id) {
+    // Un formulaire resté ouvert ne doit pas réécrire l'ancien statut.
+    document.getElementById('cgStatut').value = statut;
+  }
+}
+
+async function supprimerCongres(btn) {
+  const id = btn.dataset.id;
+  const c = adminCongres.find(x => String(x.id) === id);
+  if (!window.confirm('Supprimer « ' + ((c && c.nom) || 'cette fiche') + ' » ? Cette action est définitive.')) return;
+  if (await ecrireCongres('delete', null, id) && String(congresEnCours) === id) fermerFormCongres();
 }
 
 // ─────────── Organismes ───────────
@@ -10384,6 +10896,7 @@ const CHEMINS_PAGE = {
   formations:      '/formations',
   produits:        '/produits',
   emploi:          '/emploi',
+  congres:         '/congres',
   marques:         '/partenaires',
   mentions:        '/mentions-legales',
   cgu:             '/cgu',
@@ -10412,6 +10925,10 @@ const META_PAGES = {
   emploi: {
     titre: "Offres d'emploi en orthodontie | OrthoConnect",
     description: "Collaboration, remplacement, association et cession de cabinet en orthodontie. Annonces déposées par les praticiens, sans intermédiaire."
+  },
+  congres: {
+    titre: "Congrès et salons d'orthodontie | OrthoConnect",
+    description: "Les congrès et salons d'orthodontie à venir : dates, villes, lieux et liens vers les sites officiels."
   },
   marques: {
     titre: 'Espace partenaires | OrthoConnect',
@@ -10610,6 +11127,11 @@ function appliquerRoute(chemin) {
         ouvrirParSlug(jobsDB, seg[1], slugAnnonce, ouvrirAnnonce, 'annonce');
         return;
 
+      case 'congres':
+        if (seg[1]) { pageIntrouvable(); return; }
+        showPage('congres');
+        return;
+
       // L'espace partenaires est hors ligne le temps d'etre reecrit.
       // Son code reste en place, mais son adresse ramene a l'accueil.
       case 'partenaires':
@@ -10774,6 +11296,8 @@ function showPage(page, chemin) {
   // qu'une fois la page affichée, pas avant.
   if (page === 'emploi') initCarte();
   else fermerFicheCarte();
+
+  if (page === 'congres') chargerCongres();
 
   // Passer à autre chose abandonne l'annonce en attente : se connecter
   // une demi-heure plus tard depuis une autre page ne doit pas
