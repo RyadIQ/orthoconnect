@@ -2017,10 +2017,6 @@
   .page-carte-resultats li { padding: 9px 0; border-bottom: 1px solid var(--grey-border); font-size: 14px; color: var(--text-secondary); }
   .page-carte-resultats strong { color: var(--navy); font-weight: 600; }
   .page-carte-note { font-size: 13px; color: var(--text-secondary); margin-top: 10px; }
-  .page-carte-info {
-    margin: 28px 0 56px; padding: 16px 20px; font-size: 14px; line-height: 1.6;
-    color: var(--text-secondary); background: var(--grey-bg); border-radius: var(--radius);
-  }
   @media (max-width: 700px) {
     #carteCabinets { height: 60vh; min-height: 320px; }
   }
@@ -2682,15 +2678,6 @@
   </section>
 
   <div id="coucheEmplois" hidden></div>
-
-  <div class="container">
-    <div class="page-carte-info">
-      Les données de l'annuaire ont été extraites de l'Annuaire Santé, source publique, le
-      <span id="annuaireDateExtraction"></span>. Chaque praticien peut demander
-      la rectification ou le retrait de sa fiche en écrivant à
-      <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>.
-    </div>
-  </div>
 
   <footer>
     <div class="footer-inner">
@@ -9317,8 +9304,6 @@ const CENTROIDES_DEPARTEMENTS = {
   '976': [-12.82, 45.15, 'à Mayotte'], '987': [-17.56, -149.56, 'en Polynésie française'],
   '988': [-21.31, 165.7, 'en Nouvelle-Calédonie']
 };
-// À mettre à jour à chaque import de l'Annuaire Santé.
-const ANNUAIRE_DATE_EXTRACTION = '9 novembre 2026';
 const COLONNES_CABINETS = 'id, nom, prenom, cabinet, adresse, code_postal, ville, latitude, longitude, telephone';
 const CARTE_SOUS_TITRE = "Les cabinets d'orthodontie et les postes à pourvoir, sur la même carte";
 const CABINETS_INDISPONIBLES = 'La carte des cabinets est momentanément indisponible. Réessayez dans quelques instants.';
@@ -9365,7 +9350,6 @@ function pageCarteActive() {
 }
 
 function ouvrirPageCarte() {
-  document.getElementById('annuaireDateExtraction').textContent = ANNUAIRE_DATE_EXTRACTION;
   chargerTotalAnnuaire();
   afficherCoucheCarte();
 }
