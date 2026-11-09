@@ -2008,6 +2008,27 @@
   .badge-visible { background: #E8F5E9; color: #2E7D32; }
   .badge-masque  { background: var(--grey-bg); color: var(--text-secondary); }
 
+  /* ===== PAGE CARTE ===== */
+  #carteCabinets { height: 560px; width: 100%; background: var(--grey-bg); }
+  #cabinetsComplet[hidden] { display: none; }
+  .page-carte-recherche { margin-bottom: 18px; }
+  .page-carte-recherche .admin-search { max-width: 420px; }
+  .page-carte-resultats { list-style: none; margin-top: 12px; }
+  .page-carte-resultats li { padding: 9px 0; border-bottom: 1px solid var(--grey-border); font-size: 14px; color: var(--text-secondary); }
+  .page-carte-resultats strong { color: var(--navy); font-weight: 600; }
+  .page-carte-note { font-size: 13px; color: var(--text-secondary); margin-top: 10px; }
+  .page-carte-info {
+    margin: 28px 0 56px; padding: 16px 20px; font-size: 14px; line-height: 1.6;
+    color: var(--text-secondary); background: var(--grey-bg); border-radius: var(--radius);
+  }
+  @media (max-width: 700px) {
+    #carteCabinets { height: 60vh; min-height: 320px; }
+  }
+  @media (min-width: 769px) and (max-width: 960px) {
+    .nav-links { gap: 0; }
+    .nav-links a { padding: 8px 8px; }
+  }
+
   /* ===== CONGRÈS ===== */
   .congres-carte {
     display: flex; flex-direction: column; gap: 8px;
@@ -2365,6 +2386,7 @@
     <ul class="nav-links">
       <li><a href="/formations" onclick="showPage('formations')" id="nav-formations">Formations</a></li>
       <li><a href="/produits" onclick="showPage('produits')" id="nav-produits">Produits</a></li>
+      <li><a href="/carte" onclick="showPage('carte')" id="nav-carte">Carte</a></li>
       <li><a href="/emploi" onclick="showPage('emploi')" id="nav-emploi">Emploi</a></li>
       <li><a href="/congres" onclick="showPage('congres')" id="nav-congres">Congrès</a></li>
       <li><a href="/actualites" onclick="requireAuth('actus')" id="nav-actu">Actualités</a></li>
@@ -2394,6 +2416,7 @@
   <a href="/" onclick="showPage('landing'); toggleMenu()">Accueil</a>
   <a href="/formations" onclick="showPage('formations'); toggleMenu()">Formations</a>
   <a href="/produits" onclick="showPage('produits'); toggleMenu()">Produits</a>
+  <a href="/carte" onclick="showPage('carte'); toggleMenu()">Carte</a>
   <a href="/emploi" onclick="showPage('emploi'); toggleMenu()">Emploi</a>
   <a href="/congres" onclick="showPage('congres'); toggleMenu()">Congrès</a>
   <a href="/actualites" onclick="requireAuth('actus'); toggleMenu()">Actualités</a>
@@ -2591,6 +2614,101 @@
         <h4>Navigation</h4>
         <a href="/" onclick="showPage('landing')">Accueil</a>
         <a href="/produits" onclick="showPage('produits')">Produits</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 OrthoConnect · orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ===================== -->
+<!-- PAGE : CARTE          -->
+<!-- La couche Emplois n'a pas de balisage ici : le bloc de la page  -->
+<!-- Emploi vient se poser dans #coucheEmplois quand on la choisit.  -->
+<!-- ===================== -->
+<div class="page" id="page-carte">
+  <section class="page-hero">
+    <div class="container">
+      <h1 id="carteTitreTotal">L'annuaire des orthodontistes</h1>
+      <p id="carteSousTitre">Les cabinets d'orthodontie et les postes à pourvoir, sur la même carte</p>
+    </div>
+  </section>
+
+  <section class="carte-section">
+    <div class="container">
+      <div class="carte-filtres">
+        <div class="carte-bascule" id="carteCoucheBascule">
+          <button type="button" class="filter-btn active" onclick="choisirCoucheCarte('cabinets', this)">Cabinets</button>
+          <button type="button" class="filter-btn" onclick="choisirCoucheCarte('emplois', this)">Emplois</button>
+        </div>
+      </div>
+
+      <div id="coucheCabinets">
+        <div class="page-carte-recherche" id="cabinetsVisiteur">
+          <input type="text" class="admin-search" id="annuaireRechercheNom" placeholder="Rechercher un praticien par nom"
+                 aria-label="Rechercher un praticien par nom" oninput="saisirRechercheAnnuaire()">
+          <div id="annuaireResultats" aria-live="polite"></div>
+        </div>
+
+        <div class="admin-toolbar" id="cabinetsComplet" hidden>
+          <input type="text" class="admin-search" id="cabinetsFiltre" placeholder="Filtrer par ville ou par nom"
+                 aria-label="Filtrer par ville ou par nom" oninput="filtrerCabinets()">
+          <span class="spacer"></span>
+          <span style="font-size:13px; color:var(--text-secondary)" id="cabinetsCompte"></span>
+        </div>
+
+        <div class="carte-zone">
+          <div id="carteCabinets"></div>
+          <div class="carte-etat cachee" id="cabinetsEtat" role="status"></div>
+        </div>
+
+        <div class="admin-toolbar annuaire-recentrage">
+          <span class="filter-label">Recentrer :</span>
+          <button class="filter-btn" onclick="recentrerCabinets('metropole')">Métropole</button>
+          <button class="filter-btn" onclick="recentrerCabinets('guadeloupe')">Guadeloupe</button>
+          <button class="filter-btn" onclick="recentrerCabinets('martinique')">Martinique</button>
+          <button class="filter-btn" onclick="recentrerCabinets('guyane')">Guyane</button>
+          <button class="filter-btn" onclick="recentrerCabinets('reunion')">La Réunion</button>
+          <button class="filter-btn" onclick="recentrerCabinets('caledonie')">Nouvelle-Calédonie</button>
+          <button class="filter-btn" onclick="recentrerCabinets('polynesie')">Polynésie</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="coucheEmplois" hidden></div>
+
+  <div class="container">
+    <div class="page-carte-info">
+      Les données de l'annuaire ont été extraites de l'Annuaire Santé, source publique, le
+      <span id="annuaireDateExtraction"></span>. Chaque praticien peut demander
+      la rectification ou le retrait de sa fiche en écrivant à
+      <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>.
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, matériel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
@@ -9135,6 +9253,369 @@ async function deciderCompte(btn, validation) {
   await chargerComptesAValider();
 }
 
+// ═══════════════════════════════════════════════
+// PAGE CARTE (publique)
+// N'interroge l'annuaire que par ses fonctions RPC : jamais la table,
+// jamais la vue, jamais rpps ni email.
+// ═══════════════════════════════════════════════
+
+// Centre de gravité des communes (API Découpage administratif, pondéré
+// par la surface), contrôlé : chaque point tombe dans son département.
+// Quatre points posés à la main sur une commune réelle, le calcul
+// tombant ailleurs : 92 (dans Paris), 971, 975 et 987 (en mer).
+const CENTROIDES_DEPARTEMENTS = {
+  '01': [46.1, 5.35, 'dans l\'Ain'], '02': [49.56, 3.56, 'dans l\'Aisne'],
+  '03': [46.39, 3.19, 'dans l\'Allier'], '04': [44.11, 6.24, 'dans les Alpes-de-Haute-Provence'],
+  '05': [44.66, 6.27, 'dans les Hautes-Alpes'], '06': [43.94, 7.12, 'dans les Alpes-Maritimes'],
+  '07': [44.75, 4.43, 'en Ardèche'], '08': [49.62, 4.64, 'dans les Ardennes'],
+  '09': [42.92, 1.5, 'en Ariège'], '10': [48.3, 4.16, 'dans l\'Aube'],
+  '11': [43.1, 2.41, 'dans l\'Aude'], '12': [44.28, 2.68, 'en Aveyron'],
+  '13': [43.54, 5.08, 'dans les Bouches-du-Rhône'], '14': [49.1, -0.36, 'dans le Calvados'],
+  '15': [45.05, 2.67, 'dans le Cantal'], '16': [45.72, 0.2, 'en Charente'],
+  '17': [45.77, -0.68, 'en Charente-Maritime'], '18': [47.06, 2.49, 'dans le Cher'],
+  '19': [45.36, 1.88, 'en Corrèze'], '20': [42.15, 9.11, 'en Corse'],
+  '21': [47.42, 4.77, 'en Côte-d\'Or'], '22': [48.44, -2.86, 'dans les Côtes-d\'Armor'],
+  '23': [46.09, 2.02, 'dans la Creuse'], '24': [45.1, 0.74, 'en Dordogne'],
+  '25': [47.17, 6.36, 'dans le Doubs'], '26': [44.68, 5.17, 'dans la Drôme'],
+  '27': [49.11, 1.0, 'dans l\'Eure'], '28': [48.39, 1.37, 'en Eure-et-Loir'],
+  '29': [48.26, -4.06, 'dans le Finistère'], '30': [43.99, 4.18, 'dans le Gard'],
+  '31': [43.36, 1.17, 'en Haute-Garonne'], '32': [43.69, 0.45, 'dans le Gers'],
+  '33': [44.84, -0.58, 'en Gironde'], '34': [43.58, 3.37, 'dans l\'Hérault'],
+  '35': [48.15, -1.64, 'en Ille-et-Vilaine'], '36': [46.78, 1.58, 'dans l\'Indre'],
+  '37': [47.26, 0.69, 'en Indre-et-Loire'], '38': [45.26, 5.58, 'en Isère'],
+  '39': [46.73, 5.7, 'dans le Jura'], '40': [43.97, -0.78, 'dans les Landes'],
+  '41': [47.62, 1.43, 'en Loir-et-Cher'], '42': [45.73, 4.16, 'dans la Loire'],
+  '43': [45.13, 3.81, 'en Haute-Loire'], '44': [47.36, -1.68, 'en Loire-Atlantique'],
+  '45': [47.91, 2.34, 'dans le Loiret'], '46': [44.62, 1.61, 'dans le Lot'],
+  '47': [44.37, 0.46, 'en Lot-et-Garonne'], '48': [44.52, 3.5, 'en Lozère'],
+  '49': [47.39, -0.56, 'en Maine-et-Loire'], '50': [49.08, -1.33, 'dans la Manche'],
+  '51': [48.95, 4.24, 'dans la Marne'], '52': [48.11, 5.23, 'en Haute-Marne'],
+  '53': [48.15, -0.66, 'en Mayenne'], '54': [48.79, 6.16, 'en Meurthe-et-Moselle'],
+  '55': [48.99, 5.38, 'dans la Meuse'], '56': [47.84, -2.81, 'dans le Morbihan'],
+  '57': [49.04, 6.66, 'en Moselle'], '58': [47.11, 3.5, 'dans la Nièvre'],
+  '59': [50.45, 3.22, 'dans le Nord'], '60': [49.41, 2.43, 'dans l\'Oise'],
+  '61': [48.62, 0.13, 'dans l\'Orne'], '62': [50.49, 2.29, 'dans le Pas-de-Calais'],
+  '63': [45.73, 3.14, 'dans le Puy-de-Dôme'], '64': [43.26, -0.76, 'dans les Pyrénées-Atlantiques'],
+  '65': [43.05, 0.16, 'dans les Hautes-Pyrénées'], '66': [42.6, 2.52, 'dans les Pyrénées-Orientales'],
+  '67': [48.67, 7.55, 'dans le Bas-Rhin'], '68': [47.86, 7.27, 'dans le Haut-Rhin'],
+  '69': [45.87, 4.64, 'dans le Rhône'], '70': [47.64, 6.09, 'en Haute-Saône'],
+  '71': [46.64, 4.54, 'en Saône-et-Loire'], '72': [47.99, 0.22, 'dans la Sarthe'],
+  '73': [45.48, 6.45, 'en Savoie'], '74': [46.03, 6.43, 'en Haute-Savoie'],
+  '75': [48.86, 2.35, 'à Paris'], '76': [49.65, 1.03, 'en Seine-Maritime'],
+  '77': [48.63, 2.93, 'en Seine-et-Marne'], '78': [48.81, 1.84, 'dans les Yvelines'],
+  '79': [46.56, -0.32, 'dans les Deux-Sèvres'], '80': [49.96, 2.28, 'dans la Somme'],
+  '81': [43.78, 2.17, 'dans le Tarn'], '82': [44.09, 1.28, 'en Tarn-et-Garonne'],
+  '83': [43.44, 6.25, 'dans le Var'], '84': [44.01, 5.18, 'dans le Vaucluse'],
+  '85': [46.67, -1.3, 'en Vendée'], '86': [46.56, 0.46, 'dans la Vienne'],
+  '87': [45.89, 1.23, 'en Haute-Vienne'], '88': [48.2, 6.38, 'dans les Vosges'],
+  '89': [47.84, 3.56, 'dans l\'Yonne'], '90': [47.63, 6.93, 'dans le Territoire de Belfort'],
+  '91': [48.52, 2.24, 'dans l\'Essonne'], '92': [48.84, 2.24, 'dans les Hauts-de-Seine'],
+  '93': [48.92, 2.48, 'en Seine-Saint-Denis'], '94': [48.78, 2.47, 'dans le Val-de-Marne'],
+  '95': [49.08, 2.13, 'dans le Val-d\'Oise'], '971': [16.26, -61.58, 'en Guadeloupe'],
+  '972': [14.66, -61.02, 'en Martinique'], '973': [3.94, -53.24, 'en Guyane'],
+  '974': [-21.13, 55.53, 'à La Réunion'], '975': [46.79, -56.18, 'à Saint-Pierre-et-Miquelon'],
+  '976': [-12.82, 45.15, 'à Mayotte'], '987': [-17.56, -149.56, 'en Polynésie française'],
+  '988': [-21.31, 165.7, 'en Nouvelle-Calédonie']
+};
+// À mettre à jour à chaque import de l'Annuaire Santé.
+const ANNUAIRE_DATE_EXTRACTION = '9 novembre 2026';
+const COLONNES_CABINETS = 'id, nom, prenom, cabinet, adresse, code_postal, ville, latitude, longitude, telephone';
+const CARTE_SOUS_TITRE = "Les cabinets d'orthodontie et les postes à pourvoir, sur la même carte";
+const CABINETS_INDISPONIBLES = 'La carte des cabinets est momentanément indisponible. Réessayez dans quelques instants.';
+
+let coucheCarte = 'cabinets';
+let carteCabinets = null;
+let cabinetsCercles = null;
+let cabinetsCluster = null;
+let cabinetsStats = null;
+let cabinetsLignes = null;
+let cabinetsProprietaire = null;
+let cabinetsJeton = 0;
+let cabinetsMinuteur = null;
+let annuaireRechercheJeton = 0;
+let annuaireRechercheMinuteur = null;
+let sectionEmploi = null;
+let repereSectionEmploi = null;
+
+function etatCabinets(texte) {
+  const el = document.getElementById('cabinetsEtat');
+  el.textContent = texte;
+  el.classList.toggle('cachee', !texte);
+}
+
+// Le bloc carte de la page Emploi est affiché tel quel dans la couche
+// Emplois : mêmes sources, mêmes filtres, mêmes fiches, même floutage,
+// parce que c'est le même code. Il retourne à sa place avant que la
+// page Emploi ne s'affiche.
+function deplacerCarteEmploi() {
+  if (!sectionEmploi) {
+    sectionEmploi = document.querySelector('#page-emploi .carte-section');
+    repereSectionEmploi = document.createComment('carte-emploi');
+    sectionEmploi.before(repereSectionEmploi);
+  }
+  document.getElementById('coucheEmplois').appendChild(sectionEmploi);
+}
+
+function ramenerCarteEmploi() {
+  if (repereSectionEmploi) repereSectionEmploi.after(sectionEmploi);
+}
+
+function pageCarteActive() {
+  return document.getElementById('page-carte').classList.contains('active');
+}
+
+function ouvrirPageCarte() {
+  document.getElementById('annuaireDateExtraction').textContent = ANNUAIRE_DATE_EXTRACTION;
+  chargerTotalAnnuaire();
+  afficherCoucheCarte();
+}
+
+function choisirCoucheCarte(couche, btn) {
+  coucheCarte = couche;
+  document.querySelectorAll('#carteCoucheBascule .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  afficherCoucheCarte();
+}
+
+async function afficherCoucheCarte() {
+  const emplois = coucheCarte === 'emplois';
+  document.getElementById('coucheCabinets').hidden = emplois;
+  document.getElementById('coucheEmplois').hidden = !emplois;
+  if (!emplois) { afficherCabinets(); return; }
+
+  deplacerCarteEmploi();
+  // Attendu d'abord : initCarte s'arrête si un chargement est en cours,
+  // et ses propres messages couvrent l'échec du CDN.
+  try { await chargerLeafletAnnuaire(); } catch (e) { console.warn('Leaflet :', e.message); }
+  if (pageCarteActive() && coucheCarte === 'emplois') initCarte();
+}
+
+// Compté par la base : additionner les départements compterait deux
+// fois un praticien qui exerce dans deux départements.
+async function chargerTotalAnnuaire() {
+  const r = await sb.rpc('annuaire_total');
+  const titre = document.getElementById('carteTitreTotal');
+  const sousTitre = document.getElementById('carteSousTitre');
+  const total = r.error || r.data === null ? NaN : Number(r.data);
+
+  if (!Number.isFinite(total)) {
+    if (r.error) console.warn('annuaire_total :', r.error.message);
+    titre.textContent = "L'annuaire des orthodontistes";
+    sousTitre.textContent = 'Le nombre de praticiens référencés est momentanément indisponible.';
+    return;
+  }
+  titre.textContent = total.toLocaleString('fr-FR') + (total > 1 ? ' orthodontistes référencés' : ' orthodontiste référencé');
+  sousTitre.textContent = CARTE_SOUS_TITRE;
+}
+
+async function afficherCabinets() {
+  const jeton = ++cabinetsJeton;
+  const complet = !!currentUser;
+  const toujoursValable = () => jeton === cabinetsJeton && pageCarteActive()
+    && coucheCarte === 'cabinets' && !!currentUser === complet;
+
+  // Rien de la carte complète ne survit à une déconnexion ou à un
+  // changement de compte.
+  if (!complet || (cabinetsProprietaire && cabinetsProprietaire !== currentUser.id)) oublierCabinets();
+
+  document.getElementById('cabinetsVisiteur').hidden = complet;
+  document.getElementById('cabinetsComplet').hidden = !complet;
+  etatCabinets('Chargement de la carte…');
+
+  try {
+    await chargerLeafletAnnuaire();
+  } catch (e) {
+    if (toujoursValable()) etatCabinets("La carte n'a pas pu être chargée.");
+    return;
+  }
+  if (!toujoursValable()) return;
+
+  construireCarteCabinets();
+  setTimeout(() => { carteCabinets.invalidateSize(); }, 60);
+
+  try {
+    if (complet) {
+      if (!cabinetsLignes) {
+        const lignes = await lireCabinets();
+        if (!toujoursValable()) return;
+        cabinetsLignes = lignes.map(preparerLigneAnnuaire);
+        cabinetsProprietaire = currentUser.id;
+      }
+      carteCabinets.removeLayer(cabinetsCercles);
+      carteCabinets.addLayer(cabinetsCluster);
+      renderCabinets();
+      etatCabinets(cabinetsLignes.length ? '' : 'Aucun cabinet à afficher pour le moment.');
+    } else {
+      if (!cabinetsStats) {
+        const r = await sb.rpc('annuaire_stats_departements');
+        if (!toujoursValable()) return;
+        if (r.error) throw new Error(r.error.message);
+        cabinetsStats = r.data || [];
+      }
+      carteCabinets.removeLayer(cabinetsCluster);
+      carteCabinets.addLayer(cabinetsCercles);
+      renderDepartements();
+      etatCabinets(cabinetsStats.length ? '' : 'Aucun chiffre à afficher pour le moment.');
+    }
+  } catch (e) {
+    console.warn('Carte des cabinets :', e.message);
+    if (toujoursValable()) etatCabinets(CABINETS_INDISPONIBLES);
+  }
+}
+
+function oublierCabinets() {
+  cabinetsLignes = null;
+  cabinetsProprietaire = null;
+  if (cabinetsCluster) cabinetsCluster.clearLayers();
+  if (carteCabinets) carteCabinets.closePopup();
+}
+
+function construireCarteCabinets() {
+  if (carteCabinets) return;
+
+  carteCabinets = L.map('carteCabinets', { center: CARTE_CENTRE, zoom: CARTE_ZOOM, scrollWheelZoom: false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(carteCabinets);
+
+  cabinetsCercles = L.layerGroup();
+  cabinetsCluster = L.markerClusterGroup({ showCoverageOnHover: false });
+  carteCabinets.on('click', () => { carteCabinets.scrollWheelZoom.enable(); });
+
+  setTimeout(() => {
+    carteCabinets.invalidateSize();
+    recentrerCabinets('metropole');
+  }, 0);
+}
+
+function recentrerCabinets(zone) {
+  if (carteCabinets) carteCabinets.fitBounds(ANNUAIRE_ZONES[zone], { padding: [24, 24] });
+}
+
+// La fonction dépasse les 1000 lignes par requête. Le tri sur id rend
+// les pages stables.
+async function lireCabinets() {
+  const lignes = [];
+  for (let debut = 0; ; debut += ANNUAIRE_TAILLE_PAGE) {
+    const r = await sb.rpc('annuaire_carte_complete')
+      .select(COLONNES_CABINETS)
+      .order('id')
+      .range(debut, debut + ANNUAIRE_TAILLE_PAGE - 1);
+    if (r.error) throw new Error(r.error.message);
+    const page = r.data || [];
+    lignes.push(...page);
+    if (page.length < ANNUAIRE_TAILLE_PAGE) return lignes;
+  }
+}
+
+function renderDepartements() {
+  cabinetsCercles.clearLayers();
+
+  const lignes = cabinetsStats
+    .map(d => ({
+      code: String(d.departement == null ? '' : d.departement).padStart(2, '0'),
+      praticiens: Number(d.praticiens)
+    }))
+    .filter(d => {
+      if (!Object.prototype.hasOwnProperty.call(CENTROIDES_DEPARTEMENTS, d.code)) {
+        console.warn('Département sans centroïde, non dessiné :', d.code);
+        return false;
+      }
+      return d.praticiens > 0;
+    })
+    // Les plus grands d'abord : en Île-de-France, les petits cercles
+    // restent au-dessus, donc cliquables.
+    .sort((a, b) => b.praticiens - a.praticiens);
+
+  const max = lignes.length ? lignes[0].praticiens : 1;
+  lignes.forEach(d => {
+    const [lat, lng, lieu] = CENTROIDES_DEPARTEMENTS[d.code];
+    // La surface suit le nombre : le rayon en suit la racine.
+    L.circleMarker([lat, lng], {
+      radius: 5 + 27 * Math.sqrt(d.praticiens / max),
+      color: '#0F2B4D', weight: 1.5, fillColor: COULEUR_OFFRE, fillOpacity: 0.55
+    }).bindPopup(() => ficheDepartement(d.praticiens, lieu)).addTo(cabinetsCercles);
+  });
+}
+
+function ficheDepartement(praticiens, lieu) {
+  return '<div class="annuaire-fiche">'
+    + '<div class="annuaire-fiche-nom">' + esc(praticiens.toLocaleString('fr-FR'))
+    + (praticiens > 1 ? ' orthodontistes référencés ' : ' orthodontiste référencé ') + esc(lieu) + '</div>'
+    + '<div class="annuaire-fiche-ligne">Connectez-vous avec un compte praticien validé pour voir les cabinets.</div>'
+    + '<button class="btn btn-turquoise btn-sm" style="margin-top:10px" onclick="openAuth(\'login\')">Se connecter</button>'
+    + '</div>';
+}
+
+function ficheCabinet(l) {
+  const identite = [l.nom, l.prenom].filter(Boolean).join(' ') || 'Praticien';
+  const commune = [l.code_postal, l.ville].filter(Boolean).join(' ');
+  const adresse = [l.adresse, commune].filter(Boolean).join(', ');
+  return '<div class="annuaire-fiche">'
+    + '<div class="annuaire-fiche-nom">' + esc(identite) + '</div>'
+    + (l.cabinet ? '<div>' + esc(l.cabinet) + '</div>' : '')
+    + (adresse ? '<div class="annuaire-fiche-ligne">' + esc(adresse) + '</div>' : '')
+    + (l.telephone ? '<div class="annuaire-fiche-ligne">' + esc(l.telephone) + '</div>' : '')
+    + '</div>';
+}
+
+function marqueurCabinet(l) {
+  const nouveau = !l.marqueur;
+  const m = marqueurAnnuaire(l);
+  if (nouveau) m.setPopupContent(() => ficheCabinet(l));
+  return m;
+}
+
+function filtrerCabinets() {
+  clearTimeout(cabinetsMinuteur);
+  cabinetsMinuteur = setTimeout(renderCabinets, 200);
+}
+
+function renderCabinets() {
+  if (!cabinetsLignes || !cabinetsCluster) return;
+  const termes = normaliserAnnuaire(document.getElementById('cabinetsFiltre').value).split(/\s+/).filter(Boolean);
+  const points = cabinetsLignes.filter(l => l.lat !== null && termes.every(t => l.texteRecherche.includes(t)));
+
+  cabinetsCluster.clearLayers();
+  cabinetsCluster.addLayers(points.map(marqueurCabinet));
+  document.getElementById('cabinetsCompte').textContent =
+    points.length.toLocaleString('fr-FR') + (points.length > 1 ? ' cabinets affichés' : ' cabinet affiché');
+}
+
+function saisirRechercheAnnuaire() {
+  clearTimeout(annuaireRechercheMinuteur);
+  const jeton = ++annuaireRechercheJeton;
+  const terme = document.getElementById('annuaireRechercheNom').value.trim();
+  if (terme.length < 3) {
+    document.getElementById('annuaireResultats').innerHTML = '';
+    return;
+  }
+  annuaireRechercheMinuteur = setTimeout(() => lancerRechercheAnnuaire(terme, jeton), 400);
+}
+
+async function lancerRechercheAnnuaire(terme, jeton) {
+  const r = await sb.rpc('annuaire_recherche', { terme });
+  if (jeton !== annuaireRechercheJeton) return;
+
+  const zone = document.getElementById('annuaireResultats');
+  if (r.error) {
+    console.warn('annuaire_recherche :', r.error.message);
+    zone.innerHTML = '<p class="page-carte-note">La recherche est momentanément indisponible. Réessayez dans quelques instants.</p>';
+    return;
+  }
+  const lignes = r.data || [];
+  if (!lignes.length) {
+    zone.innerHTML = '<p class="page-carte-note">Aucun praticien ne correspond à cette recherche.</p>';
+    return;
+  }
+  zone.innerHTML = '<ul class="page-carte-resultats">'
+    + lignes.map(l => '<li><strong>' + esc([l.nom, l.prenom].filter(Boolean).join(' ')) + '</strong>'
+      + (l.specialite ? ' · ' + esc(l.specialite) : '')
+      + (l.ville ? ' · ' + esc(l.ville) : '') + '</li>').join('')
+    + '</ul><p class="page-carte-note">La revendication des fiches ouvrira prochainement.</p>';
+}
+
 // ─────────── Congrès ───────────
 const MOIS_CONGRES = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 // Liste fermée : url_source et organisateur ne quittent pas la base
@@ -10896,6 +11377,7 @@ const CHEMINS_PAGE = {
   formations:      '/formations',
   produits:        '/produits',
   emploi:          '/emploi',
+  carte:           '/carte',
   congres:         '/congres',
   marques:         '/partenaires',
   mentions:        '/mentions-legales',
@@ -10925,6 +11407,10 @@ const META_PAGES = {
   emploi: {
     titre: "Offres d'emploi en orthodontie | OrthoConnect",
     description: "Collaboration, remplacement, association et cession de cabinet en orthodontie. Annonces déposées par les praticiens, sans intermédiaire."
+  },
+  carte: {
+    titre: 'Carte des orthodontistes en France | OrthoConnect',
+    description: "Les orthodontistes référencés par département, à partir de l'Annuaire Santé, et les postes à pourvoir en orthodontie sur la même carte."
   },
   congres: {
     titre: "Congrès et salons d'orthodontie | OrthoConnect",
@@ -11127,6 +11613,11 @@ function appliquerRoute(chemin) {
         ouvrirParSlug(jobsDB, seg[1], slugAnnonce, ouvrirAnnonce, 'annonce');
         return;
 
+      case 'carte':
+        if (seg[1]) { pageIntrouvable(); return; }
+        showPage('carte');
+        return;
+
       case 'congres':
         if (seg[1]) { pageIntrouvable(); return; }
         showPage('congres');
@@ -11294,9 +11785,10 @@ function showPage(page, chemin) {
 
   // Leaflet mesure son conteneur : la carte ne peut être construite
   // qu'une fois la page affichée, pas avant.
-  if (page === 'emploi') initCarte();
+  if (page === 'emploi') { ramenerCarteEmploi(); initCarte(); }
   else fermerFicheCarte();
 
+  if (page === 'carte') ouvrirPageCarte();
   if (page === 'congres') chargerCongres();
 
   // Passer à autre chose abandonne l'annonce en attente : se connecter
