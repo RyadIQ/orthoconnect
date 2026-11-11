@@ -2038,6 +2038,11 @@
   .mafiche-bloc textarea.mafiche-court { min-height: 70px; }
   .mafiche-masquer { display: flex; align-items: center; gap: 8px; font-weight: 500; }
   .mafiche-masquer input { width: auto; }
+  .mafiche-section { margin-top: 8px; }
+  .mafiche-section + .mafiche-section { margin-top: 36px; }
+  .profile-form input.champ-suggere { border-color: var(--turquoise); background: #F0FBFC; }
+  .annuaire-fiche-horaires { white-space: pre-line; }
+  .annuaire-fiche-texte { margin-top: 8px; color: var(--text-secondary); white-space: pre-line; }
   @media (max-width: 700px) {
     #carteCabinets { height: 60vh; min-height: 320px; }
   }
@@ -3355,7 +3360,7 @@
       <div class="dash-hello" id="dashHello">Bonjour</div>
       <div class="dash-sub" id="dashSub">Votre espace praticien OrthoConnect</div>
       <div class="dash-profile-alert" id="dashAlert">
-        <span>Votre fiche cabinet n'est pas encore complète.</span>
+        <span>La partie « Mon cabinet » de votre fiche n'est pas encore complète.</span>
         <button class="btn btn-turquoise btn-sm" onclick="showDashPanel('cabinet')">Compléter ma fiche</button>
       </div>
     </div>
@@ -3368,8 +3373,7 @@
         <!-- SIDEBAR -->
         <div class="dash-nav">
           <button class="active" onclick="showDashPanel('accueil', this)">🏠 Tableau de bord</button>
-          <button onclick="showDashPanel('cabinet', this)">🏥 Ma fiche cabinet</button>
-          <button id="navMaFiche" style="display:none" onclick="showDashPanel('mafiche', this)">📍 Ma fiche</button>
+          <button onclick="showDashPanel('cabinet', this)">📍 Ma fiche</button>
           <button onclick="showDashPanel('formations', this)">📚 Mes formations</button>
           <button onclick="showDashPanel('codes', this)">🎟 Mes codes</button>
           <button onclick="showDashPanel('annonces', this)">💼 Mes annonces</button>
@@ -3401,7 +3405,7 @@
               </div>
               <div class="stat-card">
                 <div class="stat-val" id="statProfil">0%</div>
-                <div class="stat-lbl">Fiche cabinet complétée</div>
+                <div class="stat-lbl">Partie cabinet complétée</div>
               </div>
             </div>
 
@@ -3414,8 +3418,17 @@
 
           <!-- FICHE CABINET -->
           <div class="dash-panel" id="panel-cabinet">
-            <h2>Ma fiche cabinet</h2>
-            <p class="panel-sub">Ces informations restent privées.</p>
+            <h2>Ma fiche</h2>
+
+            <!-- Lieux de l'annuaire : seulement si ma_fiche() en renvoie -->
+            <div class="mafiche-section" id="maFicheCarte" style="display:none">
+              <div class="dash-section-title">Visible sur la carte</div>
+              <p class="panel-sub">Les praticiens validés voient ces informations sur la carte.</p>
+              <div id="maFicheListe"></div>
+            </div>
+
+            <div class="mafiche-section">
+            <div class="dash-section-title">Mon cabinet</div>
 
             <div class="profile-saved" id="profileSaved">✓ Votre fiche a bien été enregistrée.</div>
             <div class="admin-message" id="profileMessage"></div>
@@ -3428,6 +3441,7 @@
                 <div class="form-group">
                   <label for="cabNom">Nom du cabinet</label>
                   <input type="text" id="cabNom" placeholder="Cabinet Dupont Orthodontie">
+                  <div class="form-note">Privé. Sert à préremplir vos annonces.</div>
                 </div>
                 <div class="form-group champ-commune">
                   <label for="cabVille">Ville</label>
@@ -3444,7 +3458,7 @@
               <div class="form-group">
                 <label for="cabTelephone">Téléphone</label>
                 <input type="tel" id="cabTelephone" placeholder="+33 6 00 00 00 00" autocomplete="tel">
-                <div class="form-note">Sert à vous joindre au sujet de vos démarches auprès des organismes.</div>
+                <div class="form-note">Privé. Sert à vous joindre au sujet de vos démarches auprès des organismes.</div>
               </div>
 
               <div class="form-row">
@@ -3458,6 +3472,7 @@
                     <option>Exercice hospitalier</option>
                     <option>Remplaçant</option>
                   </select>
+                  <div class="form-note">Privé.</div>
                 </div>
                 <div class="form-group">
                   <label for="cabAnnees">Années d'exercice</label>
@@ -3468,6 +3483,7 @@
                     <option>10 à 20 ans</option>
                     <option>Plus de 20 ans</option>
                   </select>
+                  <div class="form-note">Privé.</div>
                 </div>
               </div>
 
@@ -3480,6 +3496,7 @@
                   <option>300 à 600</option>
                   <option>Plus de 600</option>
                 </select>
+                <div class="form-note">Privé.</div>
               </div>
 
               <div class="form-group">
@@ -3501,6 +3518,7 @@
                     <input type="checkbox" value="Orthopédie" style="width:auto"> Orthopédie DF
                   </label>
                 </div>
+                <div class="form-note">Visibles sur la carte de l'emploi si vous êtes en recherche de poste.</div>
               </div>
 
               <div class="form-group">
@@ -3513,14 +3531,18 @@
                   <option>Primescan</option>
                   <option>Aucun pour l'instant</option>
                 </select>
+                <div class="form-note">Privé.</div>
               </div>
 
               <div class="form-group">
                 <label for="cabObjectifs">Vos objectifs cette année (optionnel)</label>
                 <textarea id="cabObjectifs" placeholder="Ex : me former aux aligneurs, recruter un assistant, passer au flux numérique complet..."></textarea>
+                <div class="form-note">Privé.</div>
               </div>
 
+              <div class="form-note" id="cabSuggestion" style="display:none; margin-bottom:12px"></div>
               <button class="btn btn-turquoise" onclick="saveProfile()">Enregistrer ma fiche</button>
+            </div>
             </div>
           </div>
 
@@ -3743,13 +3765,6 @@
 
               <button class="btn btn-turquoise" onclick="enregistrerRecherche(false)">Enregistrer mes critères</button>
             </div>
-          </div>
-
-          <!-- MA FICHE (annuaire) -->
-          <div class="dash-panel" id="panel-mafiche">
-            <h2>Ma fiche</h2>
-            <p class="panel-sub">Les praticiens validés voient ces informations sur la carte.</p>
-            <div id="maFicheListe"></div>
           </div>
 
           <!-- ACTUS -->
@@ -5895,6 +5910,7 @@ function renderDashboard() {
   document.querySelectorAll('#cabTechniques input').forEach(cb => {
     cb.checked = (p.techniques || []).includes(cb.value);
   });
+  suggererDepuisMaFiche(p);
 
   // Les trois dernieres entrees du catalogue, pas les trois premieres
   // arrivees. Le catalogue public ne rapporte aucune date de creation
@@ -7381,7 +7397,7 @@ function majNoteRayon() {
   } else if (currentUser) {
     el.innerHTML = 'Distances mesurées depuis le centre de la carte, qui se déplace avec elle. '
       + 'Renseignez la ville de votre cabinet dans '
-      + '<a href="/mon-espace" onclick="event.preventDefault(); ouvrirFicheCabinet()">votre fiche cabinet</a>'
+      + '<a href="/mon-espace" onclick="event.preventDefault(); ouvrirFicheCabinet()">votre fiche</a>'
       + ' pour les mesurer depuis chez vous.';
   } else {
     el.textContent = 'Distances mesurées depuis le centre de la carte, qui se déplace avec elle. '
@@ -9004,8 +9020,45 @@ async function chargerMaFiche() {
 }
 
 function majNavMaFiche() {
-  const b = document.getElementById('navMaFiche');
-  if (b) b.style.display = mesFiches.length ? '' : 'none';
+  const bloc = document.getElementById('maFicheCarte');
+  if (bloc) bloc.style.display = mesFiches.length ? '' : 'none';
+}
+
+// Champs vides de « Mon cabinet » complétés depuis le premier lieu de
+// l'annuaire. Rien n'est écrit : seul Enregistrer le fait, et la ville
+// passe alors par le géocodage habituel. cabinet_lat et cabinet_lng ne
+// sont jamais touchées ici.
+function suggererDepuisMaFiche(p) {
+  const f = mesFiches[0];
+  const note = document.getElementById('cabSuggestion');
+  const champs = [
+    ['cabNom', p.cabinet_nom, f && f.cabinet, 'nom du cabinet'],
+    ['cabVille', p.cabinet_ville, f && f.ville, 'ville'],
+    ['cabTelephone', p.telephone, f && f.telephone, 'téléphone']
+  ];
+  const repris = [];
+  champs.forEach(([id, enregistre, suggestion, libelle]) => {
+    const el = document.getElementById(id);
+    el.classList.remove('champ-suggere');
+    if (enregistre || !suggestion) return;
+    el.value = String(suggestion);
+    if (id === 'cabVille') { delete el.dataset.ville; delete el.dataset.lat; delete el.dataset.lng; }
+    el.classList.add('champ-suggere');
+    repris.push(libelle);
+  });
+  note.textContent = repris.length
+    ? 'Repris de votre fiche annuaire : ' + repris.join(', ') + '. Vérifiez, puis enregistrez pour les garder.'
+    : '';
+  note.style.display = repris.length ? '' : 'none';
+}
+
+// Recopie les cases cochées de « Mon cabinet » dans le champ d'un lieu,
+// sans enregistrer.
+function reprendreTechniquesCabinet(i) {
+  const cochees = Array.from(document.querySelectorAll('#cabTechniques input:checked')).map(cb => cb.value);
+  if (!cochees.length) return messageMaFiche(i, 'Aucune technique cochée dans « Mon cabinet ».', true);
+  document.getElementById('mfTech' + i).value = cochees.join(', ');
+  messageMaFiche(i, 'Techniques reprises. Enregistrez ce lieu pour les garder.', false);
 }
 
 function texteChamp(v) {
@@ -9050,6 +9103,7 @@ function renderMaFiche() {
         <label for="mfTech${i}">Techniques</label>
         <input type="text" id="mfTech${i}" value="${esc(techniques)}">
         <div class="form-note">Séparées par des virgules, ${MAX_TECHNIQUES} au maximum.</div>
+        <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px" onclick="reprendreTechniquesCabinet(${i})">Reprendre mes techniques du cabinet</button>
       </div>
       <div class="form-group">
         <label class="mafiche-masquer"><input type="checkbox" id="mfMasq${i}" ${f.masquee ? 'checked' : ''}> Masquer ce lieu sur la carte</label>
@@ -10228,7 +10282,8 @@ const CENTROIDES_DEPARTEMENTS = {
   '976': [-12.82, 45.15, 'à Mayotte'], '987': [-17.56, -149.56, 'en Polynésie française'],
   '988': [-21.31, 165.7, 'en Nouvelle-Calédonie']
 };
-const COLONNES_CABINETS = 'id, nom, prenom, cabinet, adresse, code_postal, ville, latitude, longitude, telephone';
+const COLONNES_CABINETS = 'id, nom, prenom, cabinet, adresse, code_postal, ville, latitude, longitude, telephone, site_web, horaires, presentation, techniques';
+const EXTRAIT_PRESENTATION = 300;
 const CARTE_SOUS_TITRE = "Les cabinets d'orthodontie et les postes à pourvoir, sur la même carte";
 const CABINETS_INDISPONIBLES = 'La carte des cabinets est momentanément indisponible. Réessayez dans quelques instants.';
 
@@ -10465,7 +10520,44 @@ function ficheCabinet(l) {
     + (l.cabinet ? '<div>' + esc(l.cabinet) + '</div>' : '')
     + (adresse ? '<div class="annuaire-fiche-ligne">' + esc(adresse) + '</div>' : '')
     + (l.telephone ? '<div class="annuaire-fiche-ligne">' + esc(l.telephone) + '</div>' : '')
+    + lienSiteCabinet(l.site_web)
+    + (texteRempli(l.horaires) ? '<div class="annuaire-fiche-ligne annuaire-fiche-horaires">' + esc(String(l.horaires).trim()) + '</div>' : '')
+    + presentationCabinet(l.presentation)
+    + etiquettesCarte(Array.isArray(l.techniques) ? l.techniques : [])
     + '</div>';
+}
+
+function texteRempli(v) {
+  return v !== null && v !== undefined && String(v).trim() !== '';
+}
+
+// Un lien seulement pour une adresse en http ou https ; toute autre
+// valeur n'affiche rien plutôt qu'un lien douteux.
+function lienSiteCabinet(v) {
+  if (!texteRempli(v)) return '';
+  let u;
+  try { u = new URL(String(v).trim()); } catch (e) { return ''; }
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') return '';
+  return '<div class="annuaire-fiche-ligne"><a href="' + esc(u.href) + '" target="_blank" rel="noopener noreferrer">'
+    + esc(u.hostname.replace(/^www\./, '')) + '</a></div>';
+}
+
+function presentationCabinet(v) {
+  if (!texteRempli(v)) return '';
+  const texte = String(v).trim();
+  if (texte.length <= EXTRAIT_PRESENTATION) return '<div class="annuaire-fiche-texte">' + esc(texte) + '</div>';
+  return '<div class="annuaire-fiche-texte">'
+    + '<span>' + esc(extraitTexte(texte, EXTRAIT_PRESENTATION)) + '</span>'
+    + '<span hidden>' + esc(texte) + '</span> '
+    + '<a href="#" onclick="event.preventDefault(); lireSuitePresentation(this)">Lire la suite</a>'
+    + '</div>';
+}
+
+function lireSuitePresentation(lien) {
+  const [court, complet] = lien.parentNode.querySelectorAll('span');
+  court.hidden = true;
+  complet.hidden = false;
+  lien.remove();
 }
 
 function marqueurCabinet(l) {
