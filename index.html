@@ -2064,6 +2064,33 @@
   .lieu-choix { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top: 8px; }
   .lieu-choix strong { color: var(--navy); font-weight: 600; }
   .lieu-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Volet mobile de la fiche d'un cabinet, à la place de la popup
+     Leaflet sous 700 px. Dans .carte-zone (relative, overflow hidden) :
+     il recouvre le bas de la carte sans rien décaler dans la page. */
+  .volet-cabinet {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 1001;
+    max-height: 55%; display: flex; flex-direction: column;
+    background: var(--white); border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 18px rgba(15,43,77,0.18);
+    animation: carteFicheMonte 0.18s ease-out;
+  }
+  .volet-cabinet[hidden] { display: none; }
+  .volet-cabinet-contenu { overflow-y: auto; overscroll-behavior: contain; padding: 16px 16px 18px; }
+  .volet-cabinet-fermer {
+    position: absolute; top: 4px; right: 4px; z-index: 1;
+    width: 44px; height: 44px; border: 0; background: none; border-radius: 50%;
+    font-size: 28px; line-height: 1; color: var(--text-secondary); cursor: pointer;
+  }
+  .volet-cabinet-fermer:focus-visible { outline: 2px solid var(--turquoise); }
+  .volet-cabinet .fiche-cabinet { width: auto; max-width: none; font-size: 15px; }
+  .volet-cabinet .annuaire-fiche-nom { font-size: 17px; padding-right: 40px; }
+  .volet-cabinet .fiche-cabinet-ligne svg { margin-top: 3px; }
+  .volet-cabinet .fiche-cabinet-ligne:has(> span > a) { align-items: center; }
+  .volet-cabinet .fiche-cabinet-ligne:has(> span > a) svg { margin-top: 0; }
+  .volet-cabinet .fiche-cabinet-ligne a { display: inline-flex; align-items: center; min-height: 44px; }
+  .volet-cabinet .carte-etiquette { font-size: 15px; font-weight: 500; }
+  @media (prefers-reduced-motion: reduce) { .volet-cabinet { animation: none; } }
   @media (max-width: 700px) {
     #carteCabinets { height: 60vh; min-height: 320px; }
   }
@@ -2780,6 +2807,10 @@
         <div class="carte-zone">
           <div id="carteCabinets"></div>
           <div class="carte-etat cachee" id="cabinetsEtat" role="status"></div>
+          <div class="volet-cabinet" id="voletCabinet" role="dialog" aria-label="Fiche du cabinet" hidden>
+            <button type="button" class="volet-cabinet-fermer" aria-label="Fermer" onclick="fermerVoletCabinet()">&times;</button>
+            <div class="volet-cabinet-contenu" id="voletCabinetContenu"></div>
+          </div>
         </div>
 
         <div class="admin-toolbar annuaire-recentrage">
@@ -10718,6 +10749,7 @@ function oublierCabinets() {
   cabinetsProprietaire = null;
   if (cabinetsCluster) cabinetsCluster.clearLayers();
   if (carteCabinets) carteCabinets.closePopup();
+  fermerVoletCabinet();
 }
 
 function construireCarteCabinets() {
@@ -10732,6 +10764,22 @@ function construireCarteCabinets() {
   cabinetsCercles = L.layerGroup();
   cabinetsCluster = L.markerClusterGroup({ showCoverageOnHover: false });
   carteCabinets.on('click', () => { carteCabinets.scrollWheelZoom.enable(); });
+  // Un clic sur le fond de la carte ferme le volet (les marqueurs ne
+  // propagent pas leur clic à la carte).
+  carteCabinets.on('click', fermerVoletCabinet);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && voletCabinetOuvert()) fermerVoletCabinet();
+  });
+  // Rotation ou redimensionnement : seule la largeur compte. Sur
+  // téléphone, la barre d'adresse qui apparaît au défilement change la
+  // hauteur à chaque instant et ne doit pas fermer le volet.
+  let largeurFenetre = window.innerWidth;
+  window.addEventListener('resize', () => {
+    if (window.innerWidth === largeurFenetre) return;
+    largeurFenetre = window.innerWidth;
+    fermerVoletCabinet();
+    carteCabinets.closePopup();
+  });
 
   setTimeout(() => {
     carteCabinets.invalidateSize();
@@ -10887,11 +10935,68 @@ function lireSuitePresentation(lien) {
   lien.remove();
 }
 
+// La popup liée par marqueurAnnuaire est remplacée, pour les seuls
+// marqueurs de cette carte, par un clic qui choisit : popup Leaflet
+// au-dessus de 700 px, volet en dessous. Le contenu reste ficheCabinet.
+const VOLET_CABINET_MAX = window.matchMedia('(max-width: 700px)');
+
 function marqueurCabinet(l) {
   const nouveau = !l.marqueur;
   const m = marqueurAnnuaire(l);
-  if (nouveau) m.setPopupContent(() => ficheCabinet(l));
+  if (nouveau) {
+    m.unbindPopup();
+    m.on('click', () => afficherFicheCabinet(l));
+  }
   return m;
+}
+
+function afficherFicheCabinet(l) {
+  if (!carteCabinets || !l.marqueur) return;
+  if (VOLET_CABINET_MAX.matches) { ouvrirVoletCabinet(l); return; }
+
+  // Même rendu qu'une popup liée au marqueur, et comme elle, fermée
+  // quand le marqueur quitte la carte (regroupement au dézoom).
+  const popup = L.popup().setLatLng(l.marqueur.getLatLng()).setContent(() => ficheCabinet(l));
+  popup.openOn(carteCabinets);
+  l.marqueur.once('remove', () => carteCabinets.closePopup(popup));
+}
+
+function voletCabinetOuvert() {
+  const v = document.getElementById('voletCabinet');
+  return !!v && !v.hidden;
+}
+
+function ouvrirVoletCabinet(l) {
+  const volet = document.getElementById('voletCabinet');
+  const contenu = document.getElementById('voletCabinetContenu');
+  // Passage d'un cabinet à un autre : seul le contenu change, le volet
+  // ouvert ne rejoue pas son animation.
+  contenu.innerHTML = ficheCabinet(l);
+  contenu.scrollTop = 0;
+  volet.hidden = false;
+  volet.querySelector('.volet-cabinet-fermer').focus({ preventScroll: true });
+  recentrerSurMarqueur(l.marqueur.getLatLng(), volet.offsetHeight);
+}
+
+function fermerVoletCabinet() {
+  const volet = document.getElementById('voletCabinet');
+  if (!volet || volet.hidden) return;
+  volet.hidden = true;
+  document.getElementById('voletCabinetContenu').innerHTML = '';
+}
+
+// Le marqueur doit rester visible dans la moitié haute de la zone que
+// le volet laisse libre. Un simple déplacement, sans changer le zoom,
+// et seulement s'il est hors de cette zone.
+function recentrerSurMarqueur(latlng, hauteurVolet) {
+  const taille = carteCabinets.getSize();
+  const libre = Math.max(taille.y - hauteurVolet, 0);
+  const p = carteCabinets.latLngToContainerPoint(latlng);
+  const marge = 24;
+  const dedans = p.x >= marge && p.x <= taille.x - marge && p.y >= marge && p.y <= libre / 2;
+  if (dedans) return;
+  const cible = L.point(taille.x / 2, Math.max(libre / 3, marge));
+  carteCabinets.panBy(p.subtract(cible), { animate: true, duration: 0.25 });
 }
 
 function filtrerCabinets() {
