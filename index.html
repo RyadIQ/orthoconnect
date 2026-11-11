@@ -2257,6 +2257,33 @@
   }
 
   .page.active .hero-content { animation: fadeInUp 0.5s ease both; }
+
+  /* ===== ÇA M'INTÉRESSE ===== */
+  .interet { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+  .interet-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 999px;
+    border: 1px solid var(--grey-border); background: var(--white);
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--navy); cursor: pointer; white-space: nowrap;
+    transition: border-color var(--transition), color var(--transition);
+  }
+  .interet-btn:hover:not(:disabled) { border-color: var(--turquoise); }
+  .interet-btn.actif { border-color: var(--turquoise); color: var(--turquoise); }
+  .interet-btn:disabled { opacity: 0.6; cursor: default; }
+  .interet-coeur { font-size: 15px; line-height: 1; color: var(--turquoise); }
+  .interet-total { font-size: 12px; color: var(--text-light); }
+  .interet-erreur { flex-basis: 100%; font-size: 12px; color: #C0392B; }
+  .interet-erreur:empty { display: none; }
+  .produit-header .interet { flex-direction: column; align-items: flex-end; flex-shrink: 0; margin-left: 12px; }
+  .formation-footer { gap: 10px; flex-wrap: wrap; }
+  .detail-hero .interet { display: flex; margin: 4px 0 20px; }
+  .detail-hero .interet-btn {
+    background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.35); color: var(--white);
+  }
+  .detail-hero .interet-btn.actif { border-color: var(--turquoise); color: var(--turquoise); }
+  .detail-hero .interet-total { color: rgba(255,255,255,0.8); }
+  .detail-hero .interet-erreur { color: #FFB3A7; }
 </style>
 </head>
 <body>
@@ -3699,6 +3726,7 @@
           <button onclick="showAdminPanel('produits', this)">📦 Produits</button>
           <button onclick="showAdminPanel('fournisseurs', this)">🏭 Fournisseurs</button>
           <button onclick="showAdminPanel('demandes', this)">📨 Demandes<span class="admin-pastille" id="admPastilleDemandes" hidden>0</span></button>
+          <button onclick="showAdminPanel('interets', this); chargerInteretsAdmin()">❤️ Intérêts</button>
           <button onclick="showAdminPanel('annuaire', this); ouvrirCarteAnnuaire()">🗺 Carte de l'annuaire</button>
           <button onclick="showPage('dashboard')" style="margin-top:12px; color:var(--text-light)">↩ Mon espace</button>
         </div>
@@ -4480,6 +4508,13 @@
             <div id="admDemandesListe"></div>
           </div>
 
+          <!-- INTÉRÊTS -->
+          <div class="dash-panel" id="adminPanel-interets">
+            <h2>Intérêts</h2>
+            <p class="panel-sub">Produits et formations ayant reçu au moins un « Ça m'intéresse », du plus au moins suivi. Totaux seuls, sans praticien nommé.</p>
+            <div id="admInteretsListe"></div>
+          </div>
+
           <!-- COMPTES À VALIDER -->
           <div class="dash-panel" id="adminPanel-comptes">
             <h2>Comptes à valider</h2>
@@ -5075,6 +5110,13 @@ let contactsPartenaires = {};
 // Les demandes en cours du praticien connecte, par produit : seules
 // celles qui sont nouvelle ou transmise empechent d'en refaire une.
 let mesDemandesProduits = [];
+// « Ça m'intéresse » : clés « type:id » des lignes du praticien connecté,
+// et totaux lus d'un seul appel à interets_totaux(), jamais calculés
+// côté navigateur. Le jeton écarte une réponse arrivée après une plus récente.
+let mesInterets = new Set();
+let erreurMesInterets = null;
+const totauxInterets = new Map();
+let jetonTotauxInterets = 0;
 let jobsDB = [];
 let annonceEnCours = null;
 let actusDB = [];
@@ -5609,6 +5651,9 @@ async function refreshAuthUI() {
     if (dp.error) console.warn('Demandes produits indisponibles :', dp.error.message);
     mesDemandesProduits = dp.data || [];
 
+    await chargerMesInterets();
+    await chargerTotauxInterets();
+
     await chargerMesAnnonces();
 
     navUser.classList.add('show');
@@ -5629,6 +5674,10 @@ async function refreshAuthUI() {
     savedIds = [];
     codesPraticien = [];
     mesDemandesProduits = [];
+    mesInterets = new Set();
+    erreurMesInterets = null;
+    jetonTotauxInterets++;
+    totauxInterets.clear();
     mesAnnonces = [];
     navUser.classList.remove('show');
     if (loginBtn) loginBtn.classList.remove('hide');
@@ -5654,6 +5703,8 @@ async function refreshAuthUI() {
   // Se connecter depuis une fiche produit change ce que son bouton
   // propose : il suit, sans qu'il faille quitter la fiche.
   if (produitOuvert) renderActionProduit(produitOuvert);
+  // Même chose pour les cœurs déjà affichés : état et totaux suivent la session.
+  majCoeursInterets();
 }
 
 // ═══════════════════════════════════════════════
@@ -7501,6 +7552,7 @@ function renderFormationsDB(data) {
         ${aTarifPrefere(f)
           ? '<span class="formation-tarif-oc">Tarif préférentiel OrthoConnect</span>'
           : ''}
+        ${renderCoeurInteret('formation', f.id)}
         <button class="btn ${savedIds.includes(f.id) ? 'btn-outline' : 'btn-turquoise'} btn-sm"
                 onclick="event.stopPropagation(); saveFormation(${f.id})">
           ${savedIds.includes(f.id) ? '✓ Enregistrée' : 'Enregistrer'}
@@ -7627,6 +7679,7 @@ function renderDetailProduit(p) {
     <h1>${esc(p.nom || '')}</h1>
     ${f && f.nom ? `<div class="detail-orga">${esc(f.nom)}</div>` : ''}
     ${p.accroche ? `<p class="detail-accroche">${esc(p.accroche)}</p>` : ''}
+    ${renderCoeurInteret('produit', p.id)}
     ${meta ? `<div class="detail-meta">${meta}</div>` : ''}`;
 
   // ── Corps ──
@@ -7876,6 +7929,7 @@ function renderProduitsDB(data) {
             ${f && f.partenaire ? '<span class="badge badge-pro">Partenaire</span>' : ''}
           </div>
         </div>
+        ${renderCoeurInteret('produit', p.id)}
       </div>
       <div class="produit-body">
         <div class="produit-desc">${esc(p.presentation || '')}</div>
@@ -8112,6 +8166,7 @@ function renderDetailFormation(f, sections, sessions) {
     <div class="detail-badges">${badges}</div>
     <h1>${esc(f.titre)}</h1>
     ${nomOrganisme(f) ? `<div class="detail-orga">${esc(nomOrganisme(f))}</div>` : ''}
+    ${renderCoeurInteret('formation', f.id)}
     ${meta ? `<div class="detail-meta">${meta}</div>` : ''}
     ${renderBandeauTarif(f)}`;
 
@@ -8442,6 +8497,227 @@ async function enregistrerDepuisFiche(id) {
     btn.textContent = '✓ Enregistrée dans mon espace';
     btn.className = 'btn btn-outline';
   }
+}
+
+// ═══════════════════════════════════════════════
+// ÇA M'INTÉRESSE
+//
+// Une ligne de interets par praticien et par fiche. Le navigateur ne lit
+// que les lignes du praticien connecté. Les totaux viennent tous d'un
+// seul appel à interets_totaux(), après la connexion puis après chaque
+// clic ; une ligne illisible est écartée et un échec vide la mémoire :
+// pas de chiffre plutôt qu'un faux.
+// Visiteur ou compte non validé : le cœur reste visible, sans total, et
+// renvoie à la connexion.
+// ═══════════════════════════════════════════════
+function cleInteret(type, id) { return type + ':' + String(id); }
+
+async function chargerMesInterets() {
+  mesInterets = new Set();
+  erreurMesInterets = null;
+  const { data, error } = await sb.from('interets')
+    .select('cible_type, cible_id').eq('praticien_id', currentUser.id);
+  if (error) {
+    // État inconnu : les cœurs sont désactivés plutôt que d'afficher
+    // « non coché » et de laisser créer un doublon.
+    console.warn('Intérêts indisponibles :', error.message);
+    erreurMesInterets = error.message;
+    return;
+  }
+  (data || []).forEach(r => mesInterets.add(cleInteret(r.cible_type, r.cible_id)));
+}
+
+function libelleTotalInteret(n) {
+  return n + (n > 1 ? ' praticiens intéressés' : ' praticien intéressé');
+}
+
+// Le conteneur porte la fiche visée ; son contenu est recalculé sur
+// place quand l'état ou le total change, sans relancer le rendu de la page.
+function renderCoeurInteret(type, id) {
+  return `<span class="interet" data-interet-type="${esc(type)}" data-interet-id="${esc(id)}"
+      onclick="event.stopPropagation()">${contenuCoeurInteret(type, String(id))}</span>`;
+}
+
+function contenuCoeurInteret(type, id) {
+  const cle = cleInteret(type, id);
+  const actif = !!currentUser && mesInterets.has(cle);
+  const indispo = !!currentUser && !!erreurMesInterets;
+  const total = currentUser ? totauxInterets.get(cle) : undefined;
+  return `<button type="button" class="interet-btn${actif ? ' actif' : ''}" aria-pressed="${actif}"
+        ${indispo ? `disabled title="${esc('Intérêts indisponibles : ' + erreurMesInterets)}"` : ''}
+        onclick="basculerInteret(this)"><span class="interet-coeur" aria-hidden="true">${actif ? '♥' : '♡'}</span>Ça m'intéresse</button>
+      ${Number.isInteger(total) && total >= 1
+        ? `<span class="interet-total">${esc(libelleTotalInteret(total))}</span>` : ''}
+      <span class="interet-erreur" role="alert"></span>`;
+}
+
+function coeursAffiches(cle) {
+  return Array.from(document.querySelectorAll('.interet[data-interet-type]'))
+    .filter(el => !cle || cleInteret(el.dataset.interetType, el.dataset.interetId) === cle);
+}
+
+function majCoeursInterets(cle) {
+  coeursAffiches(cle).forEach(el => {
+    el.innerHTML = contenuCoeurInteret(el.dataset.interetType, el.dataset.interetId);
+  });
+}
+
+// Un seul appel pour toutes les fiches. Rend { lignes, ecartees } ou
+// { erreur }. Seules les lignes au total entier, zéro ou plus, sont gardées.
+async function lireTotauxInterets() {
+  try {
+    const { data, error } = await sb.rpc('interets_totaux');
+    if (error) return { erreur: error.message || String(error) };
+    if (!Array.isArray(data)) return { erreur: 'réponse inattendue de interets_totaux()' };
+    const lignes = [];
+    let ecartees = 0;
+    data.forEach(r => {
+      const n = r && (typeof r.total === 'number' || typeof r.total === 'string') ? Number(r.total) : NaN;
+      if (!r || !r.cible_type || r.cible_id === null || r.cible_id === undefined
+          || !Number.isInteger(n) || n < 0) { ecartees++; return; }
+      lignes.push({ type: String(r.cible_type), id: String(r.cible_id), total: n });
+    });
+    if (ecartees) console.warn(ecartees + ' ligne(s) illisible(s) écartée(s) de interets_totaux()');
+    return { lignes, ecartees };
+  } catch (e) {
+    return { erreur: e && e.message ? e.message : String(e) };
+  }
+}
+
+async function chargerTotauxInterets() {
+  const jeton = ++jetonTotauxInterets;
+  if (!currentUser) { totauxInterets.clear(); return; }
+  const res = await lireTotauxInterets();
+  if (jeton !== jetonTotauxInterets) return;
+  totauxInterets.clear();
+  if (res.erreur) { console.warn('Totaux des intérêts indisponibles :', res.erreur); return; }
+  res.lignes.forEach(l => totauxInterets.set(cleInteret(l.type, l.id), l.total));
+}
+
+async function basculerInteret(btn) {
+  const conteneur = btn.closest('.interet');
+  if (!conteneur) return;
+  const type = conteneur.dataset.interetType;
+  const id = conteneur.dataset.interetId;
+  const cle = cleInteret(type, id);
+
+  if (!currentUser) {
+    openAuth('login');
+    // openAuth envoie un compte non validé vers son propre message :
+    // le formulaire de connexion n'est alors pas ouvert.
+    if (!compteNonValide) showNotice('loginError', 'Réservé aux praticiens validés.');
+    return;
+  }
+
+  const actif = mesInterets.has(cle);
+  const praticienId = currentUser.id;
+  coeursAffiches(cle).forEach(el => {
+    const b = el.querySelector('.interet-btn');
+    if (b) b.disabled = true;
+    const e = el.querySelector('.interet-erreur');
+    if (e) e.textContent = '';
+  });
+
+  let res;
+  try {
+    res = actif
+      ? await sb.from('interets').delete()
+          .eq('praticien_id', praticienId).eq('cible_type', type).eq('cible_id', id).select()
+      : await sb.from('interets')
+          .insert({ praticien_id: praticienId, cible_type: type, cible_id: id }).select();
+  } catch (e) {
+    res = { error: e };
+  }
+
+  // Une policy qui refuse un delete ne lève pas d'erreur : elle ne
+  // touche aucune ligne. Seule la ligne rendue prouve l'écriture.
+  const lignes = res && Array.isArray(res.data) ? res.data : [];
+  let refus = null;
+  if (res && res.error) refus = res.error.message || String(res.error);
+  else if (!lignes.some(l => String(l.praticien_id) === String(praticienId)
+                          && cleInteret(l.cible_type, l.cible_id) === cle)) {
+    refus = actif ? "aucune ligne supprimée." : "aucune ligne enregistrée.";
+  }
+
+  if (refus) {
+    console.error('Écriture refusée sur interets :', res);
+    majCoeursInterets(cle);
+    coeursAffiches(cle).forEach(el => {
+      const e = el.querySelector('.interet-erreur');
+      if (e) e.textContent = 'Action refusée : ' + refus;
+    });
+    return;
+  }
+
+  if (actif) mesInterets.delete(cle); else mesInterets.add(cle);
+  // L'ancien total de cette fiche est faux dès maintenant : il disparaît
+  // jusqu'à la relecture, qui remplace tous les totaux d'un coup.
+  totauxInterets.delete(cle);
+  majCoeursInterets(cle);
+  await chargerTotauxInterets();
+  majCoeursInterets();
+}
+
+// ─────────── Intérêts (admin) ───────────
+//
+// Le même appel unique à interets_totaux(), rapproché des produits et
+// formations déjà chargés par chargerAdmin. Aucune lecture de la table :
+// le panneau ne voit que des totaux, jamais qui les a posés.
+let chargementInteretsAdmin = 0;
+
+async function chargerInteretsAdmin() {
+  const zone = document.getElementById('admInteretsListe');
+  if (!zone || !estAdmin()) return;
+  const jeton = ++chargementInteretsAdmin;
+  zone.innerHTML = '<div class="admin-empty">Chargement des totaux…</div>';
+
+  const res = await lireTotauxInterets();
+  if (jeton !== chargementInteretsAdmin) return;
+
+  if (res.erreur) {
+    zone.innerHTML = '<div class="admin-message ko show">Totaux non chargés : ' + esc(res.erreur)
+      + " — vérifie que la fonction interets_totaux() existe et que ton compte est en role = 'admin'.</div>";
+    return;
+  }
+
+  const titres = new Map([
+    ...adminProduits.map(p => [cleInteret('produit', p.id), p.nom]),
+    ...adminFormations.map(f => [cleInteret('formation', f.id), f.titre])
+  ]);
+
+  const lignes = res.lignes.filter(l => l.total >= 1).map(l => {
+    const cle = cleInteret(l.type, l.id);
+    return { ...l, trouvee: titres.has(cle), titre: titres.get(cle) };
+  });
+  lignes.sort((a, b) => b.total - a.total
+    || String(a.titre || '').localeCompare(String(b.titre || ''), 'fr'));
+
+  const alerte = res.ecartees
+    ? `<div class="admin-message ko show">${esc(res.ecartees)} ligne(s) illisible(s) écartée(s) de interets_totaux().</div>`
+    : '';
+
+  if (!lignes.length) {
+    zone.innerHTML = alerte + '<div class="admin-empty">Aucun intérêt pour le moment.</div>';
+    return;
+  }
+
+  const libellesType = { produit: 'Produit', formation: 'Formation' };
+  zone.innerHTML = alerte + `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Type</th><th>Fiche</th><th>Praticiens intéressés</th></tr></thead>
+        <tbody>
+          ${lignes.map(l => `
+            <tr>
+              <td>${esc(libellesType[l.type] || l.type)}</td>
+              <td>${l.trouvee
+                ? `<div class="admin-nom">${esc(l.titre || '(sans titre)')}</div>`
+                : `<span class="dem-produit-absent">fiche introuvable</span> (id ${esc(l.id)})`}</td>
+              <td>${esc(l.total)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
 }
 
 // ═══════════════════════════════════════════════
