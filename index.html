@@ -23,6 +23,8 @@
 <meta property="og:image" content="https://orthoconnect.fr/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://uiotjxqpitikkkiihupu.supabase.co" crossorigin>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"OrthoConnect","url":"https://orthoconnect.fr","logo":"https://orthoconnect.fr/favicon-512.png","email":"contact@orthoconnect.fr"}</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Raleway:wght@900&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -2168,6 +2170,135 @@
   .ecran-fiche .fiche-cabinet-ligne a { display: inline-flex; align-items: center; min-height: 44px; }
   .ecran-fiche .carte-etiquette { font-size: 15px; font-weight: 500; }
 
+  /* ===== LANDING ===== */
+  .landing-connecte { display: none !important; }
+  body.oc-session .landing-connecte { display: inline-flex !important; }
+  body.oc-session .landing-visiteur { display: none !important; }
+  .lp-section { padding: 72px 0; }
+  /* Cibles de « Découvrir » et « Retrouvez votre fiche » : sous la barre fixe. */
+  #lpRangees, #lpRecherche { scroll-margin-top: 76px; }
+  .lp-section + .lp-section { padding-top: 0; }
+  .lp-titre { font-size: 26px; font-weight: 800; color: var(--navy); letter-spacing: -0.3px; margin-bottom: 8px; }
+  .lp-intro { font-size: 15px; color: var(--text-secondary); line-height: 1.6; max-width: 640px; margin-bottom: 28px; }
+  .lp-icone { width: 44px; height: 44px; border-radius: 12px; background: var(--turquoise-light); color: var(--navy);
+    display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .lp-icone svg { width: 22px; height: 22px; }
+
+  .lp-hero { background: linear-gradient(135deg, var(--navy) 0%, #1A3F70 100%); color: var(--white); padding: 64px 0 72px; }
+  .lp-hero-grille { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 56px; align-items: center; }
+  .lp-hero h1 { font-size: 46px; font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: 16px; }
+  .lp-hero-sous { font-size: 18px; line-height: 1.55; color: rgba(255,255,255,0.86); max-width: 560px; margin-bottom: 28px; }
+  .lp-recherche { background: var(--white); color: var(--text-main); border-radius: 16px; padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18); max-width: 560px; }
+  .lp-recherche-label { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 10px; display: block; }
+  .lp-recherche-champ { position: relative; }
+  .lp-recherche-champ svg { position: absolute; left: 14px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; }
+  .lp-recherche-champ input { font-size: 16px; min-height: 48px; padding-left: 42px; }
+  .lp-appui { font-size: 13px; color: var(--text-secondary); margin-top: 10px; line-height: 1.5; }
+  .lp-resultats:empty { display: none; }
+  .lp-hero-liens { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+  .lp-hero-liens .btn { min-height: 44px; }
+  .lp-hero-apercu { display: flex; flex-direction: column; gap: 14px; }
+  .lp-mini { background: var(--white); color: var(--text-main); border-radius: 16px; padding: 16px 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18); min-height: 92px; }
+  .lp-mini:nth-child(2) { margin-left: 28px; }
+  .lp-mini[hidden] { display: none; }
+  .lp-mini-type { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: #007C87; }
+  .lp-mini-titre { font-size: 15px; font-weight: 700; color: var(--navy); margin-top: 4px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .lp-mini-ligne { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+  .lp-squelette { display: block; border-radius: 8px; background: linear-gradient(90deg, #EEF2F6 0%, #F7F9FB 50%, #EEF2F6 100%);
+    background-size: 200% 100%; animation: lpSquelette 1.2s ease-in-out infinite; }
+  @keyframes lpSquelette { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+  .lp-chiffres { border-bottom: 1px solid var(--grey-border); }
+  .lp-chiffres-liste { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 28px 0; }
+  .lp-chiffres-liste li { display: flex; flex-direction: column; gap: 2px; }
+  .lp-chiffres-liste li[hidden] { display: none; }
+  .lp-chiffre { font-size: 30px; font-weight: 800; color: var(--navy); line-height: 1.15; min-height: 35px; }
+  .lp-chiffre .lp-squelette { width: 72px; height: 30px; margin-top: 3px; }
+  .lp-chiffre-libelle { font-size: 14px; color: var(--text-secondary); }
+
+  .lp-rangee + .lp-rangee { margin-top: 48px; }
+  .lp-rangee[hidden] { display: none; }
+  .lp-rangee-tete { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .lp-rangee-tete h2 { font-size: 22px; font-weight: 800; color: var(--navy); margin-right: auto; }
+  .lp-voir-tout { font-size: 14px; font-weight: 600; color: #007C87; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+  .lp-voir-tout:hover { text-decoration: underline; }
+  .lp-fleches { display: none; gap: 8px; }
+  .lp-fleche { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--grey-border); background: var(--white);
+    color: var(--navy); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  .lp-fleche svg { width: 18px; height: 18px; }
+  .lp-fleche:hover:not(:disabled) { border-color: var(--turquoise); }
+  .lp-fleche:disabled { opacity: 0.35; cursor: default; }
+  .lp-piste { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+    padding: 4px 4px 14px; margin: -4px -4px 0; scroll-padding-inline: 4px; min-height: 214px; scrollbar-width: thin; scroll-behavior: smooth; }
+  .lp-piste:focus-visible, .lp-carte:focus-visible, .lp-fleche:focus-visible { outline: 3px solid var(--turquoise); outline-offset: 2px; }
+  .lp-carte { flex: 0 0 280px; scroll-snap-align: start; min-height: 196px; display: flex; flex-direction: column; gap: 6px;
+    background: var(--white); border: 1px solid var(--grey-border); border-radius: 16px; padding: 18px 20px;
+    box-shadow: 0 2px 10px rgba(15,43,77,0.06); text-decoration: none; color: var(--text-main);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+  .lp-carte:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(15,43,77,0.12); border-color: var(--turquoise); }
+  .lp-carte.lp-squelette { border: 0; box-shadow: none; }
+  .lp-carte-sur { font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #007C87; }
+  .lp-carte-titre { font-size: 16px; font-weight: 700; color: var(--navy); line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .lp-carte-ligne { font-size: 14px; color: var(--text-secondary); }
+  .lp-carte-accroche { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-top: 2px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .lp-carte-bas { margin-top: auto; font-size: 13px; font-weight: 600; color: var(--navy); }
+
+  .lp-etapes, .lp-profils { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .lp-etape, .lp-profil { background: var(--white); border: 1px solid var(--grey-border); border-radius: 16px; padding: 22px;
+    box-shadow: 0 2px 10px rgba(15,43,77,0.05); }
+  .lp-etape-num { font-size: 13px; font-weight: 700; color: #007C87; margin: 14px 0 4px; }
+  .lp-etape h3, .lp-profil h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .lp-etape p, .lp-profil p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+  .lp-coeur { display: flex; gap: 20px; align-items: flex-start; background: var(--grey-bg); border-radius: 16px; padding: 28px; }
+  .lp-coeur h2 { font-size: 22px; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
+  .lp-coeur p { font-size: 15px; color: var(--text-secondary); line-height: 1.65; max-width: 680px; }
+  .lp-marques { display: flex; gap: 8px 16px; flex-wrap: wrap; align-items: center; justify-content: center;
+    font-size: 14px; color: var(--text-secondary); border: 1px solid var(--grey-border); border-radius: 16px; padding: 14px 20px; }
+  .lp-marques a { color: #007C87; font-weight: 600; min-height: 44px; display: inline-flex; align-items: center; }
+  .lp-final { text-align: center; background: var(--navy); color: var(--white); border-radius: 16px; padding: 44px 24px; }
+  .lp-final h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+  .lp-final p { color: rgba(255,255,255,0.82); font-size: 15px; margin-bottom: 22px; }
+  .lp-final-boutons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .lp-final-boutons .btn { min-height: 44px; }
+
+  /* Contrastes AA sur l'accueil : texte navy sur turquoise (5,9:1) plutôt
+     que blanc (2,4:1), et bas de pied de page éclairci. */
+  #page-landing .btn-turquoise { color: var(--navy); }
+  #page-landing .btn-turquoise:hover { color: var(--navy); }
+  #page-landing .footer-bottom span { color: rgba(255,255,255,0.72); }
+
+  html.lp-anim .lp-apparait { opacity: 0; transform: translateY(8px); transition: opacity 0.3s ease, transform 0.3s ease; }
+  html.lp-anim .lp-apparait.visible { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    html.lp-anim .lp-apparait { opacity: 1; transform: none; transition: none; }
+    .lp-squelette { animation: none; }
+    .lp-piste { scroll-behavior: auto; }
+    .lp-carte, .lp-carte:hover { transition: none; transform: none; }
+  }
+  @media (hover: hover) and (min-width: 961px) { .lp-fleches { display: flex; } }
+  @media (max-width: 960px) {
+    .lp-hero-grille { grid-template-columns: minmax(0, 1fr); }
+    .lp-chiffres-liste { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 899px) { .lp-hero-apercu { display: none; } }
+  @media (max-width: 700px) {
+    .lp-section { padding: 48px 0; }
+    .lp-hero { padding: 40px 0 48px; }
+    .lp-hero h1 { font-size: 34px; }
+    .lp-hero-sous { font-size: 16px; }
+    .lp-recherche { padding: 16px; }
+    .lp-etapes, .lp-profils { grid-template-columns: minmax(0, 1fr); }
+    .lp-carte { flex-basis: 85%; }
+    .lp-coeur { flex-direction: column; padding: 22px; }
+    .lp-titre { font-size: 23px; }
+  }
+
   /* Page derrière un écran plein : immobile. */
   html.ecran-bloque, html.ecran-bloque body { overflow: hidden; overscroll-behavior: contain; }
 
@@ -2679,94 +2810,135 @@
 <!-- ==================== -->
 <div class="page active" id="page-landing">
 
-  <section class="hero">
-    <div class="hero-inner">
-      <div class="hero-content">
-        <div class="hero-eyebrow">
-          Libéral, collaborateur, interne
-        </div>
+  <section class="lp-hero">
+    <div class="container lp-hero-grille">
+      <div>
         <h1>Se former, s'équiper, recruter.</h1>
-        <p>Formations, produits et postes en orthodontie, au même endroit.</p>
-        <div class="hero-ctas">
-          <a class="btn btn-turquoise" onclick="openAuth('signup')">
-            Créer mon compte
-          </a>
-          <a href="/formations" class="btn btn-outline-white" onclick="showPage('formations')">
-            Découvrir
-          </a>
+        <p class="lp-hero-sous">Les formations, les produits, les congrès et les postes de l'orthodontie, réunis pour les praticiens.</p>
+        <div class="lp-recherche landing-visiteur" id="lpRecherche">
+          <label class="lp-recherche-label" for="lpRechercheNom">Orthodontiste ? Retrouvez votre fiche</label>
+          <div class="lp-recherche-champ">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" id="lpRechercheNom" placeholder="Votre nom" autocomplete="off"
+                   oninput="saisirRechercheAnnuaire('lpRechercheNom', 'lpResultats')">
+          </div>
+          <p class="lp-appui" id="lpAppui">Votre fiche existe peut-être déjà dans l'annuaire des orthodontistes.</p>
+          <div class="lp-resultats" id="lpResultats" aria-live="polite"></div>
         </div>
-        <div style="margin-top:14px; font-size:13px; color:rgba(255,255,255,0.5)">
-          Inscription gratuite. Réservé aux praticiens et internes en ODF.
+        <div class="lp-hero-liens">
+          <a class="btn btn-turquoise landing-visiteur" href="/" onclick="event.preventDefault(); openAuth('signup')">Créer un compte</a>
+          <a class="btn btn-turquoise landing-connecte" href="/mon-espace" onclick="return lienInterne(event, () => showPage('dashboard'))">Aller à mon espace</a>
+          <a class="btn btn-outline-white" href="#lpRangees" onclick="event.preventDefault(); decouvrirLanding()">Découvrir</a>
+        </div>
+      </div>
+      <div class="lp-hero-apercu" id="lpApercu" aria-hidden="true">
+        <div class="lp-mini" id="lpMiniCongres"><span class="lp-squelette" style="height:60px"></span></div>
+        <div class="lp-mini" id="lpMiniFormation"><span class="lp-squelette" style="height:60px"></span></div>
+        <div class="lp-mini" id="lpMiniProduit"><span class="lp-squelette" style="height:60px"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-chiffres" aria-label="OrthoConnect en chiffres" id="lpChiffres">
+    <div class="container">
+      <ul class="lp-chiffres-liste">
+        <li data-chiffre="annuaire" data-un="orthodontiste référencé"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">orthodontistes référencés</span></li>
+        <li data-chiffre="formations" data-un="formation publiée"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">formations publiées</span></li>
+        <li data-chiffre="produits" data-un="produit comparable"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">produits comparables</span></li>
+        <li data-chiffre="congres" data-un="congrès à venir"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">congrès à venir</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="lp-section" id="lpRangees">
+    <div class="container">
+      <div class="lp-rangee" id="lpRangeeCongres" data-rangee="congres">
+        <div class="lp-rangee-tete">
+          <h2>Prochains congrès</h2>
+          <a class="lp-voir-tout" href="/congres" onclick="return lienInterne(event, () => showPage('congres'))">Voir tout</a>
+          <div class="lp-fleches">
+            <button type="button" class="lp-fleche" data-sens="-1" aria-label="Prochains congrès : précédent" onclick="defilerRangee(this, -1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+            <button type="button" class="lp-fleche" data-sens="1" aria-label="Prochains congrès : suivant" onclick="defilerRangee(this, 1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+          </div>
+        </div>
+        <div class="lp-piste" tabindex="0" role="region" aria-label="Prochains congrès" onkeydown="toucheRangee(event, this)"><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div></div>
+      </div>
+      <div class="lp-rangee" id="lpRangeeFormations" data-rangee="formations">
+        <div class="lp-rangee-tete">
+          <h2>Formations à venir</h2>
+          <a class="lp-voir-tout" href="/formations" onclick="return lienInterne(event, () => showPage('formations'))">Voir tout</a>
+          <div class="lp-fleches">
+            <button type="button" class="lp-fleche" data-sens="-1" aria-label="Formations à venir : précédent" onclick="defilerRangee(this, -1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+            <button type="button" class="lp-fleche" data-sens="1" aria-label="Formations à venir : suivant" onclick="defilerRangee(this, 1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+          </div>
+        </div>
+        <div class="lp-piste" tabindex="0" role="region" aria-label="Formations à venir" onkeydown="toucheRangee(event, this)"><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div></div>
+      </div>
+      <div class="lp-rangee" id="lpRangeeProduits" data-rangee="produits">
+        <div class="lp-rangee-tete">
+          <h2>Produits à comparer</h2>
+          <a class="lp-voir-tout" href="/produits" onclick="return lienInterne(event, () => showPage('produits'))">Voir tout</a>
+          <div class="lp-fleches">
+            <button type="button" class="lp-fleche" data-sens="-1" aria-label="Produits à comparer : précédent" onclick="defilerRangee(this, -1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+            <button type="button" class="lp-fleche" data-sens="1" aria-label="Produits à comparer : suivant" onclick="defilerRangee(this, 1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+          </div>
+        </div>
+        <div class="lp-piste" tabindex="0" role="region" aria-label="Produits à comparer" onkeydown="toucheRangee(event, this)"><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section lp-apparait">
+    <div class="container">
+      <h2 class="lp-titre" style="margin-bottom:24px">Trois étapes pour commencer.</h2>
+      <ol class="lp-etapes">
+        <li class="lp-etape"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><div class="lp-etape-num">Étape 1</div><h3>Retrouvez votre fiche</h3><p>Cherchez votre nom dans l'annuaire et signalez que c'est vous.</p></li>
+        <li class="lp-etape"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6l-7-3z"/><path d="m9 12 2 2 4-4"/></svg></span><div class="lp-etape-num">Étape 2</div><h3>Nous vérifions votre identité</h3><p>Un appel au cabinet, puis un e-mail dès que c'est validé.</p></li>
+        <li class="lp-etape"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></span><div class="lp-etape-num">Étape 3</div><h3>Accédez à tout</h3><p>Carte des cabinets, comparatifs, tarifs préférentiels, annonces.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="lp-section lp-apparait">
+    <div class="container">
+      <h2 class="lp-titre">Selon où vous en êtes</h2>
+      <ul class="lp-profils">
+        <li class="lp-profil"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-4 9 4-9 4-9-4z"/><path d="M7 11v4c0 1.2 2.2 2.5 5 2.5s5-1.3 5-2.5v-4"/></svg></span><h3 style="margin-top:14px">Vous êtes interne</h3><p>Repérez les formations qui comptent. Trouvez un premier remplacement ou un poste d'adjoint.</p></li>
+        <li class="lp-profil"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 19c.6-3.2 3-5 6-5s5.4 1.8 6 5"/><path d="M15.5 14.2c2.6.2 4.5 1.9 5 4.8"/></svg></span><h3 style="margin-top:14px">Vous êtes collaborateur</h3><p>Comparez les conditions pratiquées ailleurs. Préparez une association.</p></li>
+        <li class="lp-profil"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M12 8v3M10.5 9.5h3"/></svg></span><h3 style="margin-top:14px">Vous exercez en libéral</h3><p>Choisissez votre équipement sur des fiches comparables. Publiez vos annonces de recrutement.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="lp-section lp-apparait">
+    <div class="container">
+      <div class="lp-coeur">
+        <span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span>
+        <div>
+          <h2>Dites ce qui vous intéresse</h2>
+          <p>Un cœur sur une formation ou un produit signale votre intérêt. Les demandes sont regroupées : nous pouvons ainsi négocier de meilleures conditions auprès des fournisseurs et des organismes.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="audience-section">
+  <section class="lp-section lp-apparait">
     <div class="container">
-      <div class="section-header">
-        <h2>Quatre rubriques, un seul compte</h2>
-        <div class="section-divider"></div>
-      </div>
-      <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:20px;" class="features-4grid">
-        <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="showPage('formations')">
-          <div style="font-size:36px; margin-bottom:14px">📚</div>
-          <h3 style="font-size:16px; margin-bottom:8px">Formations</h3>
-          <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Organismes Qualiopi, actions DPC, congrès et cursus longs. Format, durée, tarif affichés.</p>
-          <div style="margin-top:14px; color:var(--turquoise); font-size:13px; font-weight:600">Voir le catalogue</div>
-        </div>
-        <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="showPage('produits')">
-          <div style="font-size:36px; margin-bottom:14px">🔬</div>
-          <h3 style="font-size:16px; margin-bottom:8px">Produits</h3>
-          <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Aligneurs, brackets, caméras intra-orales, logiciels. Les fiches techniques de chaque système, mises côte à côte sur les mêmes critères.</p>
-          <div style="margin-top:14px; color:var(--turquoise); font-size:13px; font-weight:600">Comparer</div>
-        </div>
-        <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="showPage('emploi')">
-          <div style="font-size:36px; margin-bottom:14px">💼</div>
-          <h3 style="font-size:16px; margin-bottom:8px">Postes</h3>
-          <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Collaboration libérale ou salariée, remplacement, association, cession de cabinet.</p>
-          <div style="margin-top:14px; color:var(--turquoise); font-size:13px; font-weight:600">Consulter les offres</div>
-        </div>
-        <div class="card" style="text-align:center; padding:32px 20px; cursor:pointer" onclick="requireAuth('actus')">
-          <div style="font-size:36px; margin-bottom:14px">📰</div>
-          <h3 style="font-size:16px; margin-bottom:8px">Actualités</h3>
-          <p style="font-size:13px; color:var(--text-secondary); line-height:1.6">Nomenclature, conventionnement, publications scientifiques, dates de congrès.</p>
-          <div style="margin-top:14px; color:var(--turquoise); font-size:13px; font-weight:600">Lire les brèves</div>
-          <div style="margin-top:4px; color:var(--text-secondary); font-size:12px">Réservé aux inscrits</div>
-        </div>
-      </div>
+      <p class="lp-marques">Vous êtes une marque ou un organisme de formation ?
+        <a href="mailto:contact@orthoconnect.fr?subject=Partenariat%20OrthoConnect">Écrivez-nous</a></p>
     </div>
   </section>
 
-  <section class="how-section">
+  <section class="lp-section lp-apparait">
     <div class="container">
-      <div class="section-header">
-        <h2>Selon où vous en êtes</h2>
-        <div class="section-divider"></div>
-      </div>
-      <div class="steps-grid">
-        <div class="step">
-          <h3>Vous êtes interne</h3>
-          <p>Repérez les organismes qui forment vraiment, trouvez un premier poste de remplaçant ou d'adjoint, et voyez quels systèmes équipent les cabinets où vous postulez.</p>
+      <div class="lp-final">
+        <h2>L'orthodontie, ensemble.</h2>
+        <p class="landing-visiteur">Gratuit pour les praticiens et les internes en ODF.</p>
+        <div class="lp-final-boutons">
+          <a class="btn btn-turquoise landing-visiteur" href="#lpRecherche" onclick="event.preventDefault(); allerRechercheLanding()">Retrouvez votre fiche</a>
+          <a class="btn btn-outline-white landing-visiteur" href="/" onclick="event.preventDefault(); openAuth('signup')">Créer un compte</a>
+          <a class="btn btn-turquoise landing-connecte" href="/mon-espace" onclick="return lienInterne(event, () => showPage('dashboard'))">Aller à mon espace</a>
         </div>
-        <div class="step">
-          <h3>Vous êtes collaborateur</h3>
-          <p>Comparez les conditions pratiquées ailleurs, montez en compétence sur une technique que le cabinet n'utilise pas encore, et gardez un œil sur les opportunités d'association.</p>
-        </div>
-        <div class="step">
-          <h3>Vous exercez en libéral</h3>
-          <p>Décidez d'un investissement sur des fiches techniques détaillées, comparables d'un système à l'autre, et diffusez vos annonces de recrutement.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="cta-band">
-    <div class="container">
-      <h2>Créez votre compte en une minute</h2>
-      <p>Inscription gratuite, réservée aux praticiens et internes en ODF.</p>
-      <div class="cta-band-buttons">
-        <a class="btn btn-turquoise" onclick="openAuth('signup')">Créer mon compte</a>
       </div>
     </div>
   </section>
@@ -5995,6 +6167,9 @@ async function refreshAuthUI() {
   if (produitOuvert) renderActionProduit(produitOuvert);
   // Même chose pour les cœurs déjà affichés : état et totaux suivent la session.
   majCoeursInterets();
+  // L'accueil : recherche et inscription pour un visiteur, « Aller à mon
+  // espace » dès qu'une session est ouverte.
+  document.body.classList.toggle('oc-session', !!sessionUtilisateur);
 }
 
 // ═══════════════════════════════════════════════
@@ -10658,6 +10833,262 @@ async function deciderRevendication(btn, action) {
 }
 
 // ═══════════════════════════════════════════════
+// ACCUEIL
+//
+// Rien n'est inventé : chaque chiffre est un compte lu en base, absent
+// s'il vaut 0 ou si la lecture échoue. Les rangées reprennent les
+// catalogues déjà chargés (formationsDB, produitsDB) et la liste des
+// congrès publiés ; elles ne se remplissent qu'en entrant dans l'écran,
+// et disparaissent si elles n'ont rien à montrer. Aucun tarif.
+// ═══════════════════════════════════════════════
+const LP_PAR_RANGEE = 8;
+const LP_MOUVEMENT_REDUIT = window.matchMedia('(prefers-reduced-motion: reduce)');
+let lpPrete = false;
+let lpCongresPromesse = null;
+let lpSessionsPromesse = null;
+
+// Un vrai lien : le navigateur garde Ctrl/Cmd-clic et le clic milieu,
+// le clic simple navigue dans la page sans la recharger.
+function lienInterne(e, aller) {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button > 0) return true;
+  e.preventDefault();
+  aller();
+  return false;
+}
+
+function aujourdhuiIso() {
+  const n = new Date();
+  return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+}
+
+function lpCongres() {
+  if (!lpCongresPromesse) {
+    lpCongresPromesse = chargerCongres()
+      .then(() => (congresErreur ? [] : congresDB.filter(congresAVenir).slice(0, LP_PAR_RANGEE)))
+      .catch(() => []);
+  }
+  return lpCongresPromesse;
+}
+
+// Prochaine session de chaque formation publiée, en une lecture.
+function lpSessions() {
+  if (!lpSessionsPromesse) {
+    const ids = formationsDB.map(f => f.id);
+    lpSessionsPromesse = (ids.length
+      ? sb.from('sessions_formation').select('formation_id, date_debut, ville')
+          .in('formation_id', ids).eq('actif', true).gte('date_debut', aujourdhuiIso()).order('date_debut')
+      : Promise.resolve({ data: [] }))
+      .then(r => {
+        if (r.error) console.warn('Sessions indisponibles :', r.error.message);
+        const prochaine = new Map();
+        (r.data || []).forEach(s => { if (!prochaine.has(s.formation_id)) prochaine.set(s.formation_id, s); });
+        return prochaine;
+      })
+      .catch(() => new Map());
+  }
+  return lpSessionsPromesse;
+}
+
+// Les formations qui ont une session à venir d'abord, par date ; les
+// autres ensuite, dans l'ordre du catalogue.
+async function lpFormations() {
+  const prochaine = await lpSessions();
+  return formationsDB
+    .map((f, i) => ({ f, s: prochaine.get(f.id) || null, i }))
+    .sort((a, b) => (a.s && b.s) ? a.s.date_debut.localeCompare(b.s.date_debut)
+      : (a.s ? -1 : b.s ? 1 : a.i - b.i))
+    .slice(0, LP_PAR_RANGEE);
+}
+
+function lpProduits() {
+  return produitsDB.slice()
+    .sort((a, b) => (Number.isFinite(a.ordre) ? a.ordre : Infinity) - (Number.isFinite(b.ordre) ? b.ordre : Infinity)
+      || String(a.nom || '').localeCompare(String(b.nom || ''), 'fr'))
+    .slice(0, LP_PAR_RANGEE);
+}
+
+const LP_FORMATS = { presentiel: 'Présentiel', distanciel: 'Distanciel', hybride: 'Hybride' };
+
+function lpCarteCongres(c) {
+  const lieu = [c.ville, c.pays].filter(Boolean).join(', ');
+  return `<a class="lp-carte" href="/congres" onclick="return lienInterne(event, () => showPage('congres'))">
+      ${c.sigle ? `<span class="lp-carte-sur">${esc(c.sigle)}</span>` : ''}
+      <span class="lp-carte-titre">${esc(c.nom)}</span>
+      <span class="lp-carte-ligne">${esc(formatPeriodeCongres(c.date_debut, c.date_fin))}</span>
+      ${lieu ? `<span class="lp-carte-ligne">${esc(lieu)}</span>` : ''}
+    </a>`;
+}
+
+function lpCarteFormation({ f, s }) {
+  const format = [LP_FORMATS[f.format] || '', f.duree || ''].filter(Boolean).join(' · ');
+  return `<a class="lp-carte" href="${esc(cheminFormation(f))}" onclick="return lienInterne(event, () => ouvrirFormation(${Number(f.id)}))">
+      ${nomOrganisme(f) ? `<span class="lp-carte-sur">${esc(nomOrganisme(f))}</span>` : ''}
+      <span class="lp-carte-titre">${esc(f.titre)}</span>
+      ${format ? `<span class="lp-carte-ligne">${esc(format)}</span>` : ''}
+      ${s ? `<span class="lp-carte-bas">Prochaine session : ${esc(formatDate(s.date_debut))}${s.ville ? ' · ' + esc(s.ville) : ''}</span>` : ''}
+    </a>`;
+}
+
+function lpCarteProduit(p) {
+  const cat = categorieProduit(p.categorie);
+  const fournisseur = p.fournisseurs && p.fournisseurs.nom;
+  return `<a class="lp-carte" href="${esc(cheminProduit(p))}" onclick="return lienInterne(event, () => ouvrirProduit(${esc(JSON.stringify(String(p.id)))}))">
+      ${cat || p.categorie ? `<span class="lp-carte-sur">${esc(cat ? cat.libelle : p.categorie)}</span>` : ''}
+      <span class="lp-carte-titre">${esc(p.nom || '')}</span>
+      ${fournisseur ? `<span class="lp-carte-ligne">${esc(fournisseur)}</span>` : ''}
+      ${p.accroche ? `<span class="lp-carte-accroche">${esc(p.accroche)}</span>` : ''}
+    </a>`;
+}
+
+async function remplirRangee(nom) {
+  const rangee = document.querySelector('.lp-rangee[data-rangee="' + nom + '"]');
+  if (!rangee || rangee.dataset.remplie) return;
+  rangee.dataset.remplie = '1';
+  let cartes = [];
+  try {
+    if (nom === 'congres') cartes = (await lpCongres()).map(lpCarteCongres);
+    else if (nom === 'formations') cartes = (await lpFormations()).map(lpCarteFormation);
+    else if (nom === 'produits') cartes = lpProduits().map(lpCarteProduit);
+  } catch (e) {
+    console.warn('Accueil, rangée ' + nom + ' :', e);
+    cartes = [];
+  }
+  // Vide ou en erreur : la rangée disparaît, sans message.
+  if (!cartes.length) { rangee.hidden = true; return; }
+  const piste = rangee.querySelector('.lp-piste');
+  piste.innerHTML = cartes.join('');
+  piste.scrollLeft = 0;
+  majFlechesRangee(piste);
+}
+
+function majFlechesRangee(piste) {
+  const rangee = piste.closest('.lp-rangee');
+  const [prec, suiv] = rangee.querySelectorAll('.lp-fleche');
+  // Quelques pixels de tolérance : l'alignement des cartes laisse
+  // parfois la piste à 1 ou 4 px de son bord.
+  prec.disabled = piste.scrollLeft <= 6;
+  suiv.disabled = piste.scrollLeft + piste.clientWidth >= piste.scrollWidth - 6;
+}
+
+function defilerRangee(bouton, sens) {
+  const piste = bouton.closest('.lp-rangee').querySelector('.lp-piste');
+  const carte = piste.querySelector('.lp-carte');
+  const pas = carte ? carte.getBoundingClientRect().width + 16 : piste.clientWidth * 0.8;
+  piste.scrollBy({ left: sens * pas, behavior: LP_MOUVEMENT_REDUIT.matches ? 'auto' : 'smooth' });
+}
+
+// Au clavier, sur la piste : flèches gauche et droite, Début et Fin.
+function toucheRangee(e, piste) {
+  if (e.target !== piste) return;
+  const carte = piste.querySelector('.lp-carte');
+  const pas = carte ? carte.getBoundingClientRect().width + 16 : 300;
+  const comportement = LP_MOUVEMENT_REDUIT.matches ? 'auto' : 'smooth';
+  if (e.key === 'ArrowRight') piste.scrollBy({ left: pas, behavior: comportement });
+  else if (e.key === 'ArrowLeft') piste.scrollBy({ left: -pas, behavior: comportement });
+  else if (e.key === 'Home') piste.scrollTo({ left: 0, behavior: comportement });
+  else if (e.key === 'End') piste.scrollTo({ left: piste.scrollWidth, behavior: comportement });
+  else return;
+  e.preventDefault();
+}
+
+// Les quatre chiffres, comptés en base. Le total de l'annuaire s'affiche
+// dès qu'il est lu ; formations, produits et congrès à partir de 3
+// seulement. Moins de deux chiffres : la ligne entière disparaît.
+async function remplirChiffresLanding() {
+  const today = aujourdhuiIso();
+  const compter = (requete) => Promise.resolve(requete).then(r => (r.error ? null : r.count)).catch(() => null);
+  const [annuaire, formations, produits, congres] = await Promise.all([
+    Promise.resolve(sb.rpc('annuaire_total')).then(r => (r.error || r.data === null ? null : Number(r.data))).catch(() => null),
+    compter(sb.from('formations_publiques').select('id', { count: 'exact', head: true }).eq('statut', 'publie')),
+    compter(sb.from('produits').select('id', { count: 'exact', head: true }).eq('visible', true)),
+    compter(sb.from('congres').select('id', { count: 'exact', head: true }).eq('statut', 'publie')
+      .or(`date_fin.gte.${today},and(date_fin.is.null,date_debut.gte.${today}),and(date_fin.is.null,date_debut.is.null)`))
+  ]);
+  const valeurs = { annuaire, formations, produits, congres };
+  let affiches = 0;
+  document.querySelectorAll('#lpChiffres li[data-chiffre]').forEach(li => {
+    const n = valeurs[li.dataset.chiffre];
+    const minimum = li.dataset.chiffre === 'annuaire' ? 1 : 3;
+    if (!Number.isFinite(n) || n < minimum) { li.hidden = true; return; }
+    li.querySelector('.lp-chiffre').textContent = n.toLocaleString('fr-FR');
+    if (n === 1) li.querySelector('.lp-chiffre-libelle').textContent = li.dataset.un;
+    affiches++;
+  });
+  document.getElementById('lpChiffres').hidden = affiches < 2;
+
+  // La phrase d'appui du champ de recherche reprend le total, s'il est lu.
+  if (Number.isFinite(annuaire) && annuaire > 0) {
+    document.getElementById('lpAppui').textContent = "Votre fiche existe peut-être déjà : l'annuaire référence "
+      + annuaire.toLocaleString('fr-FR') + (annuaire > 1 ? ' orthodontistes.' : ' orthodontiste.');
+  }
+}
+
+// Les trois mini-cartes du hero, sur grand écran seulement : le premier
+// congrès à venir, la première formation, le premier produit.
+async function remplirApercuLanding() {
+  const mini = (id, type, titre, ligne) => {
+    const el = document.getElementById(id);
+    if (!titre) { el.hidden = true; return false; }
+    el.innerHTML = `<div class="lp-mini-type">${esc(type)}</div><div class="lp-mini-titre">${esc(titre)}</div>`
+      + (ligne ? `<div class="lp-mini-ligne">${esc(ligne)}</div>` : '');
+    return true;
+  };
+  const [congres, formations] = await Promise.all([lpCongres(), lpFormations()]);
+  const c = congres[0], f = formations[0], p = lpProduits()[0];
+  const montres = [
+    mini('lpMiniCongres', 'Congrès', c && c.nom, c && [formatPeriodeCongres(c.date_debut, c.date_fin), c.ville].filter(Boolean).join(' · ')),
+    mini('lpMiniFormation', 'Formation', f && f.f.titre, f && (f.s ? 'Prochaine session : ' + formatDate(f.s.date_debut) : nomOrganisme(f.f))),
+    mini('lpMiniProduit', 'Produit', p && p.nom, p && p.fournisseurs && p.fournisseurs.nom)
+  ];
+  if (!montres.some(Boolean)) document.getElementById('lpApercu').hidden = true;
+}
+
+function decouvrirLanding() {
+  document.getElementById('lpRangees').scrollIntoView({ behavior: LP_MOUVEMENT_REDUIT.matches ? 'auto' : 'smooth', block: 'start' });
+}
+
+function allerRechercheLanding() {
+  const bloc = document.getElementById('lpRecherche');
+  bloc.scrollIntoView({ behavior: LP_MOUVEMENT_REDUIT.matches ? 'auto' : 'smooth', block: 'center' });
+  document.getElementById('lpRechercheNom').focus({ preventScroll: true });
+}
+
+// Une seule mise en place par chargement de la page.
+function ouvrirLanding() {
+  if (lpPrete) return;
+  lpPrete = true;
+  remplirChiffresLanding();
+  if (window.matchMedia('(min-width: 900px)').matches) remplirApercuLanding();
+
+  const rangees = document.querySelectorAll('.lp-rangee');
+  const sections = document.querySelectorAll('#page-landing .lp-apparait');
+  rangees.forEach(r => {
+    const piste = r.querySelector('.lp-piste');
+    piste.addEventListener('scroll', () => majFlechesRangee(piste), { passive: true });
+  });
+  if (!('IntersectionObserver' in window)) {
+    rangees.forEach(r => remplirRangee(r.dataset.rangee));
+    return;
+  }
+  const obsRangees = new IntersectionObserver((entrees) => entrees.forEach(e => {
+    if (!e.isIntersecting) return;
+    obsRangees.unobserve(e.target);
+    remplirRangee(e.target.dataset.rangee);
+  }), { rootMargin: '200px 0px' });
+  rangees.forEach(r => obsRangees.observe(r));
+
+  // Apparition douce, jamais avec un mouvement réduit.
+  if (LP_MOUVEMENT_REDUIT.matches) return;
+  document.documentElement.classList.add('lp-anim');
+  const obsSections = new IntersectionObserver((entrees) => entrees.forEach(e => {
+    if (!e.isIntersecting) return;
+    obsSections.unobserve(e.target);
+    e.target.classList.add('visible');
+  }), { rootMargin: '0px 0px -40px 0px' });
+  sections.forEach(sec => obsSections.observe(sec));
+}
+
+// ═══════════════════════════════════════════════
 // PAGE CARTE (publique)
 // N'interroge l'annuaire que par ses fonctions RPC : jamais la table,
 // jamais la vue, jamais rpps ni email.
@@ -11399,22 +11830,24 @@ function ouvrirFicheEcran(l) {
   ecran.querySelector('.ecran-fiche-fermer').focus({ preventScroll: true });
 }
 
-function saisirRechercheAnnuaire() {
+// Le même champ sert à /carte et à l'accueil : seuls les identifiants
+// du champ et de la zone de résultats changent.
+function saisirRechercheAnnuaire(idChamp = 'annuaireRechercheNom', idZone = 'annuaireResultats') {
   clearTimeout(annuaireRechercheMinuteur);
   const jeton = ++annuaireRechercheJeton;
-  const terme = document.getElementById('annuaireRechercheNom').value.trim();
+  const terme = document.getElementById(idChamp).value.trim();
   if (terme.length < 3) {
-    document.getElementById('annuaireResultats').innerHTML = '';
+    document.getElementById(idZone).innerHTML = '';
     return;
   }
-  annuaireRechercheMinuteur = setTimeout(() => lancerRechercheAnnuaire(terme, jeton), 400);
+  annuaireRechercheMinuteur = setTimeout(() => lancerRechercheAnnuaire(terme, jeton, idZone), 400);
 }
 
-async function lancerRechercheAnnuaire(terme, jeton) {
+async function lancerRechercheAnnuaire(terme, jeton, idZone = 'annuaireResultats') {
   const r = await sb.rpc('annuaire_recherche', { terme });
   if (jeton !== annuaireRechercheJeton) return;
 
-  const zone = document.getElementById('annuaireResultats');
+  const zone = document.getElementById(idZone);
   if (r.error) {
     console.warn('annuaire_recherche :', r.error.message);
     zone.innerHTML = '<p class="page-carte-note">La recherche est momentanément indisponible. Réessayez dans quelques instants.</p>';
@@ -13620,6 +14053,7 @@ function showPage(page, chemin) {
   else fermerFicheCarte();
 
   if (page === 'carte') ouvrirPageCarte();
+  if (page === 'landing') ouvrirLanding();
   if (page === 'congres') chargerCongres();
   if (page === 'confidentialite') {
     document.getElementById('confidentialiteDateExtraction').textContent = formatPeriodeCongres(ANNUAIRE_DATE_EXTRACTION, null);
