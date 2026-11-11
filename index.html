@@ -2041,8 +2041,20 @@
   .mafiche-section { margin-top: 8px; }
   .mafiche-section + .mafiche-section { margin-top: 36px; }
   .profile-form input.champ-suggere { border-color: var(--turquoise); background: #F0FBFC; }
-  .annuaire-fiche-horaires { white-space: pre-line; }
   .annuaire-fiche-texte { margin-top: 8px; color: var(--text-secondary); white-space: pre-line; }
+  /* Fiche d'un cabinet sur la carte complète. Large au plus de l'écran
+     moins les marges de la popup, pour tenir sur 320 px. */
+  .fiche-cabinet { min-width: 0; width: 260px; max-width: calc(100vw - 96px); overflow-wrap: anywhere; }
+  .fiche-cabinet-cabinet { color: var(--text-secondary); }
+  .fiche-cabinet-lignes { list-style: none; margin: 10px 0 0; padding: 0; }
+  .fiche-cabinet-ligne { display: flex; align-items: flex-start; gap: 8px; margin-top: 7px; }
+  .fiche-cabinet-ligne svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 1px; color: var(--turquoise); }
+  .fiche-cabinet-ligne > span { min-width: 0; }
+  .fiche-cabinet-ligne a { color: var(--navy); font-weight: 600; text-decoration: none; }
+  .fiche-cabinet-ligne a:hover { color: var(--turquoise); }
+  .fiche-cabinet-horaires { white-space: pre-line; color: var(--text-secondary); }
+  .fiche-cabinet-filet { border: 0; border-top: 1px solid var(--grey-border); margin: 12px 0 0; }
+  .fiche-cabinet .annuaire-fiche-texte { margin-top: 10px; }
   @media (max-width: 700px) {
     #carteCabinets { height: 60vh; min-height: 320px; }
   }
@@ -8814,7 +8826,7 @@ const MESSAGES_BASE = [
   [['horaires trop longs'], 'Les horaires sont trop longs. Raccourcissez-les.'],
   [['telephone trop long'], 'Le numéro de téléphone est trop long.'],
   [['trop de techniques'], '15 techniques au maximum.'],
-  [['adresse du site invalide'], "L'adresse du site doit commencer par http:// ou https://."],
+  [['adresse du site invalide'], 'Adresse du site invalide, par exemple www.mon-cabinet.fr'],
   [['demande introuvable ou deja traitee', 'reserve a l administration'], 'Action impossible, rechargez la page.']
 ];
 
@@ -9088,11 +9100,11 @@ function renderMaFiche() {
       </div>
       <div class="form-group">
         <label for="mfSite${i}">Site web</label>
-        <input type="url" id="mfSite${i}" placeholder="https://" value="${esc(texteChamp(f.site_web))}">
+        <input type="url" id="mfSite${i}" placeholder="www.mon-cabinet.fr" value="${esc(texteChamp(f.site_web))}">
       </div>
       <div class="form-group">
         <label for="mfHoraires${i}">Horaires</label>
-        <textarea class="mafiche-court" id="mfHoraires${i}">${esc(texteChamp(f.horaires))}</textarea>
+        <textarea class="mafiche-court" id="mfHoraires${i}" placeholder="Lundi au vendredi : 9h à 18h">${esc(texteChamp(f.horaires))}</textarea>
       </div>
       <div class="form-group">
         <label for="mfPres${i}">Présentation</label>
@@ -9136,13 +9148,13 @@ async function enregistrerMaFiche(i) {
   const techniques = [...new Set(val('mfTech').split(',').map(t => t.trim()).filter(Boolean))];
   const masquee = document.getElementById('mfMasq' + i).checked;
 
-  if (site) {
-    let ok = false;
-    try {
-      const u = new URL(site);
-      ok = (u.protocol === 'http:' || u.protocol === 'https:') && u.hostname.includes('.');
-    } catch (e) { ok = false; }
-    if (!ok) return messageMaFiche(i, "L'adresse du site doit commencer par http:// ou https://, par exemple https://www.cabinet-ortho.fr.", true);
+  // Une adresse saisie sans protocole reçoit https:// ; ce qui n'a pas
+  // la forme d'une adresse est refusé avant tout appel.
+  let siteWeb = site;
+  if (site && !/^https?:\/\//i.test(site)) {
+    if (/\s/.test(site) || !site.includes('.'))
+      return messageMaFiche(i, 'Adresse du site invalide, par exemple www.mon-cabinet.fr', true);
+    siteWeb = 'https://' + site;
   }
   if (presentation.length > MAX_PRESENTATION)
     return messageMaFiche(i, 'La présentation dépasse ' + MAX_PRESENTATION + ' caractères.', true);
@@ -9154,7 +9166,7 @@ async function enregistrerMaFiche(i) {
   const { data, error } = await sb.rpc('maj_ma_fiche', {
     p_id: f.id,
     p_telephone: telephone || null,
-    p_site_web: site || null,
+    p_site_web: siteWeb || null,
     p_horaires: horaires || null,
     p_presentation: presentation || null,
     p_techniques: techniques,
@@ -9168,8 +9180,9 @@ async function enregistrerMaFiche(i) {
   }
   if (data !== true) return messageMaFiche(i, "Enregistrement non appliqué : aucune ligne n'a été modifiée.", true);
 
+  document.getElementById('mfSite' + i).value = siteWeb;
   Object.assign(f, {
-    telephone: telephone || null, site_web: site || null, horaires: horaires || null,
+    telephone: telephone || null, site_web: siteWeb || null, horaires: horaires || null,
     presentation: presentation || null, techniques, masquee
   });
   messageMaFiche(i, 'Fiche enregistrée.', false);
@@ -10511,19 +10524,59 @@ function ficheDepartement(praticiens, lieu) {
     + '</div>';
 }
 
+// Icônes dessinées ici plutôt que des emoji, dont le rendu change
+// d'un appareil à l'autre. Trait fin, couleur héritée (turquoise).
+const ICONES_FICHE = {
+  adresse: '<path d="M8 14.5s4.5-4.2 4.5-8a4.5 4.5 0 0 0-9 0c0 3.8 4.5 8 4.5 8z"/><circle cx="8" cy="6.5" r="1.6"/>',
+  telephone: '<path d="M5.6 2H3.4C2.6 2 2 2.6 2.1 3.4 2.6 9 7 13.4 12.6 13.9c.8.1 1.4-.5 1.4-1.3v-2.2c0-.5-.3-.9-.8-1l-2.2-.6c-.4-.1-.8 0-1.1.3l-.9.9a8.4 8.4 0 0 1-3.6-3.6l.9-.9c.3-.3.4-.7.3-1.1L6.6 2.8C6.5 2.3 6.1 2 5.6 2z"/>',
+  site: '<circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2c1.7 1.7 2.5 3.7 2.5 6S9.7 12.3 8 14M8 2C6.3 3.7 5.5 5.7 5.5 8s.8 4.3 2.5 6"/>',
+  horaires: '<circle cx="8" cy="8" r="6"/><path d="M8 4.8V8l2.2 1.4"/>'
+};
+
+function iconeFiche(nom) {
+  return '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONES_FICHE[nom] + '</svg>';
+}
+
+function ligneFiche(icone, contenu) {
+  return '<li class="fiche-cabinet-ligne">' + iconeFiche(icone) + '<span>' + contenu + '</span></li>';
+}
+
+// Lien tel: en chiffres seuls (le + d'un numéro international est
+// gardé) ; affichage par paires pour un numéro à dix chiffres.
+function telephoneFiche(v) {
+  if (!texteRempli(v)) return '';
+  const brut = String(v).trim();
+  const chiffres = brut.replace(/\D/g, '');
+  if (!chiffres) return esc(brut);
+  const lien = (brut.startsWith('+') ? '+' : '') + chiffres;
+  const affiche = chiffres.length === 10 ? chiffres.match(/\d{2}/g).join(' ') : brut;
+  return '<a href="tel:' + esc(lien) + '">' + esc(affiche) + '</a>';
+}
+
 function ficheCabinet(l) {
   const identite = [l.nom, l.prenom].filter(Boolean).join(' ') || 'Praticien';
   const commune = [l.code_postal, l.ville].filter(Boolean).join(' ');
   const adresse = [l.adresse, commune].filter(Boolean).join(', ');
-  return '<div class="annuaire-fiche">'
+  const site = lienSiteCabinet(l.site_web);
+  const tel = telephoneFiche(l.telephone);
+
+  const lignes = [
+    adresse ? ligneFiche('adresse', esc(adresse)) : '',
+    tel ? ligneFiche('telephone', tel) : '',
+    site ? ligneFiche('site', site) : '',
+    texteRempli(l.horaires)
+      ? ligneFiche('horaires', '<span class="fiche-cabinet-horaires">' + esc(String(l.horaires).trim()) + '</span>') : ''
+  ].join('');
+
+  const suite = presentationCabinet(l.presentation)
+    + etiquettesCarte(Array.isArray(l.techniques) ? l.techniques : []);
+
+  return '<div class="annuaire-fiche fiche-cabinet">'
     + '<div class="annuaire-fiche-nom">' + esc(identite) + '</div>'
-    + (l.cabinet ? '<div>' + esc(l.cabinet) + '</div>' : '')
-    + (adresse ? '<div class="annuaire-fiche-ligne">' + esc(adresse) + '</div>' : '')
-    + (l.telephone ? '<div class="annuaire-fiche-ligne">' + esc(l.telephone) + '</div>' : '')
-    + lienSiteCabinet(l.site_web)
-    + (texteRempli(l.horaires) ? '<div class="annuaire-fiche-ligne annuaire-fiche-horaires">' + esc(String(l.horaires).trim()) + '</div>' : '')
-    + presentationCabinet(l.presentation)
-    + etiquettesCarte(Array.isArray(l.techniques) ? l.techniques : [])
+    + (l.cabinet ? '<div class="fiche-cabinet-cabinet">' + esc(l.cabinet) + '</div>' : '')
+    + (lignes ? '<ul class="fiche-cabinet-lignes">' + lignes + '</ul>' : '')
+    + (suite ? '<hr class="fiche-cabinet-filet">' + suite : '')
     + '</div>';
 }
 
@@ -10538,8 +10591,8 @@ function lienSiteCabinet(v) {
   let u;
   try { u = new URL(String(v).trim()); } catch (e) { return ''; }
   if (u.protocol !== 'http:' && u.protocol !== 'https:') return '';
-  return '<div class="annuaire-fiche-ligne"><a href="' + esc(u.href) + '" target="_blank" rel="noopener noreferrer">'
-    + esc(u.hostname.replace(/^www\./, '')) + '</a></div>';
+  const affiche = (u.host.replace(/^www\./i, '') + u.pathname + u.search).replace(/\/$/, '');
+  return '<a href="' + esc(u.href) + '" target="_blank" rel="noopener noreferrer">' + esc(affiche) + '</a>';
 }
 
 function presentationCabinet(v) {
