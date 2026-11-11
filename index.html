@@ -2065,32 +2065,112 @@
   .lieu-choix strong { color: var(--navy); font-weight: 600; }
   .lieu-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  /* Volet mobile de la fiche d'un cabinet, à la place de la popup
-     Leaflet sous 700 px. Dans .carte-zone (relative, overflow hidden) :
-     il recouvre le bas de la carte sans rien décaler dans la page. */
-  .volet-cabinet {
-    position: absolute; left: 0; right: 0; bottom: 0; z-index: 1001;
-    max-height: 55%; display: flex; flex-direction: column;
-    background: var(--white); border-radius: 16px 16px 0 0;
-    box-shadow: 0 -4px 18px rgba(15,43,77,0.18);
-    animation: carteFicheMonte 0.18s ease-out;
+
+  /* ===== CABINETS : LISTE, CARTE, PLEIN ÉCRAN (comptes validés) =====
+     961 px et plus : liste à gauche, carte à droite. 960 et moins
+     (téléphone et tablette) : liste seule, carte en plein écran. */
+  .cabinets-liste[hidden], #boutonCarteCabinets[hidden] { display: none; }
+  .cabinets-liste-compte { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; }
+  .cabinet-carte { padding: 16px; margin-bottom: 10px; }
+  .cabinet-carte:focus-visible { outline: 2px solid var(--turquoise); outline-offset: 2px; }
+  .cabinet-carte .job-title { font-size: 15px; }
+  .cabinet-carte-ligne { font-size: 13px; color: var(--text-secondary); margin-top: 3px; overflow-wrap: anywhere; }
+  .cabinet-carte-ligne a, .cabinet-carte-tel a { color: var(--navy); font-weight: 600; text-decoration: none; }
+  .cabinet-carte-tel a { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; }
+  .cabinet-carte .carte-etiquettes { margin-top: 6px; }
+  .cabinet-carte-voir { margin-top: 12px; min-height: 44px; }
+  .cabinets-plus { width: 100%; justify-content: center; min-height: 44px; margin: 4px 0 12px; }
+  /* Fiche dépliée en place : ce que la carte de liste affiche déjà
+     au-dessus n'est pas répété. */
+  .cabinet-carte-fiche { border-top: 1px solid var(--grey-border); margin-top: 12px; padding-top: 4px; }
+  .cabinet-carte-fiche .fiche-cabinet { width: auto; max-width: none; min-width: 0; }
+  .cabinet-carte-fiche .annuaire-fiche-nom,
+  .cabinet-carte-fiche .fiche-cabinet-cabinet,
+  .cabinet-carte-fiche .fiche-cabinet-ligne:has(a[href^="tel:"]),
+  .cabinet-carte-fiche .carte-etiquettes { display: none; }
+
+  .carte-plein-barre, .carte-mini, #boutonCarteCabinets, #boutonCarteVisiteur { display: none; }
+  @media (min-width: 961px) {
+    .cabinets-disposition.complet { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 16px; align-items: start; }
+    .cabinets-disposition.complet .cabinets-liste { height: 562px; overflow-y: auto; overscroll-behavior: contain; padding-right: 6px; }
   }
-  .volet-cabinet[hidden] { display: none; }
-  .volet-cabinet-contenu { overflow-y: auto; overscroll-behavior: contain; padding: 16px 16px 18px; }
-  .volet-cabinet-fermer {
-    position: absolute; top: 4px; right: 4px; z-index: 1;
-    width: 44px; height: 44px; border: 0; background: none; border-radius: 50%;
-    font-size: 28px; line-height: 1; color: var(--text-secondary); cursor: pointer;
+  @media (max-width: 960px) {
+    /* 16 px : en dessous, Safari iOS zoome la page au toucher du champ
+       et ne revient pas, ce qui la rend plus large que l'écran. Vaut
+       aussi pour la couche Emplois de /carte (le bloc de la page Emploi,
+       une fois déplacé ici). */
+    #page-carte .admin-search { font-size: 16px; max-width: none; }
+    #coucheEmplois select, #coucheEmplois input, #coucheEmplois textarea { font-size: 16px; }
+    #carteCoucheBascule .filter-btn { min-height: 44px; }
+    #zoneCabinets:not(.plein-ecran), #page-carte .annuaire-recentrage { display: none; }
+    .cabinets-disposition.complet .cabinets-liste { padding-bottom: 150px; }
+    #boutonCarteCabinets:not([hidden]) {
+      display: inline-flex; position: fixed; left: 50%; transform: translateX(-50%); z-index: 900;
+      bottom: calc(88px + env(safe-area-inset-bottom)); min-height: 48px; padding: 0 28px;
+      border-radius: 24px; box-shadow: var(--shadow-hover);
+    }
+    #boutonCarteVisiteur { display: flex; width: 100%; justify-content: center; min-height: 48px; margin-top: 4px; }
   }
-  .volet-cabinet-fermer:focus-visible { outline: 2px solid var(--turquoise); }
-  .volet-cabinet .fiche-cabinet { width: auto; max-width: none; font-size: 15px; }
-  .volet-cabinet .annuaire-fiche-nom { font-size: 17px; padding-right: 40px; }
-  .volet-cabinet .fiche-cabinet-ligne svg { margin-top: 3px; }
-  .volet-cabinet .fiche-cabinet-ligne:has(> span > a) { align-items: center; }
-  .volet-cabinet .fiche-cabinet-ligne:has(> span > a) svg { margin-top: 0; }
-  .volet-cabinet .fiche-cabinet-ligne a { display: inline-flex; align-items: center; min-height: 44px; }
-  .volet-cabinet .carte-etiquette { font-size: 15px; font-weight: 500; }
-  @media (prefers-reduced-motion: reduce) { .volet-cabinet { animation: none; } }
+
+  /* La carte en plein écran : le conteneur de la carte lui-même passe
+     en position fixe, au-dessus du menu. */
+  #zoneCabinets.plein-ecran {
+    position: fixed; inset: 0; height: 100vh; height: 100dvh; z-index: 1200;
+    margin: 0; border: 0; border-radius: 0; display: flex; flex-direction: column; background: var(--white);
+  }
+  #zoneCabinets.plein-ecran #carteCabinets { flex: 1; height: auto; min-height: 0; }
+  #zoneCabinets.plein-ecran .carte-plein-barre {
+    display: flex; align-items: center; gap: 12px; flex: none;
+    min-height: 56px; padding: env(safe-area-inset-top) 12px 0 4px;
+    background: var(--white); border-bottom: 1px solid var(--grey-border);
+  }
+  .carte-plein-retour {
+    min-height: 44px; min-width: 44px; padding: 0 10px; border: 0; background: none; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; color: var(--navy);
+  }
+  .carte-plein-compte { margin-left: auto; font-size: 14px; color: var(--text-secondary); }
+  #zoneCabinets.plein-ecran .carte-mini:not([hidden]) {
+    display: block; position: fixed; z-index: 1250;
+    left: 12px; right: 12px; bottom: calc(88px + env(safe-area-inset-bottom));
+    background: var(--white); border-radius: 14px; box-shadow: var(--shadow-hover);
+    padding: 14px 16px; font-size: 15px;
+  }
+  .carte-mini-nom { font-size: 16px; font-weight: 700; color: var(--navy); }
+  .carte-mini-ligne { color: var(--text-secondary); margin-top: 2px; overflow-wrap: anywhere; }
+  .carte-mini-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .carte-mini-actions .btn { flex: 1; min-height: 48px; justify-content: center; }
+  .carte-mini .annuaire-fiche .btn { min-height: 48px; width: 100%; justify-content: center; }
+
+  /* La fiche plein écran, hors du conteneur Leaflet : aucun geste dans
+     la fiche n'atteint la carte. */
+  .ecran-fiche {
+    position: fixed; inset: 0; height: 100vh; height: 100dvh; z-index: 1300;
+    display: flex; flex-direction: column; background: var(--white);
+  }
+  .ecran-fiche[hidden] { display: none; }
+  .ecran-fiche-barre {
+    flex: none; display: flex; align-items: center; justify-content: space-between;
+    min-height: 56px; padding: env(safe-area-inset-top) 4px 0; border-bottom: 1px solid var(--grey-border);
+  }
+  .ecran-fiche-fermer {
+    width: 44px; height: 44px; border: 0; background: none; border-radius: 50%; cursor: pointer;
+    font-size: 28px; line-height: 1; color: var(--text-secondary);
+  }
+  .ecran-fiche-contenu {
+    flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y;
+    -webkit-overflow-scrolling: touch; padding: 16px 16px 96px;
+  }
+  .ecran-fiche .fiche-cabinet { width: auto; max-width: none; min-width: 0; font-size: 15px; }
+  .ecran-fiche .annuaire-fiche-nom { font-size: 18px; }
+  .ecran-fiche .fiche-cabinet-ligne svg { margin-top: 3px; }
+  .ecran-fiche .fiche-cabinet-ligne:has(> span > a) { align-items: center; }
+  .ecran-fiche .fiche-cabinet-ligne:has(> span > a) svg { margin-top: 0; }
+  .ecran-fiche .fiche-cabinet-ligne a { display: inline-flex; align-items: center; min-height: 44px; }
+  .ecran-fiche .carte-etiquette { font-size: 15px; font-weight: 500; }
+
+  /* Page derrière un écran plein : immobile. */
+  html.ecran-bloque, html.ecran-bloque body { overflow: hidden; overscroll-behavior: contain; }
+
   @media (max-width: 700px) {
     #carteCabinets { height: 60vh; min-height: 320px; }
   }
@@ -2795,23 +2875,28 @@
                  aria-label="Rechercher un praticien par nom" oninput="saisirRechercheAnnuaire()">
           <p class="page-carte-note">Orthodontiste ? Cherchez votre nom pour revendiquer votre fiche.</p>
           <div id="annuaireResultats" aria-live="polite"></div>
+          <button type="button" class="btn btn-turquoise" id="boutonCarteVisiteur" onclick="ouvrirCartePleinEcran()">Voir la carte</button>
         </div>
 
         <div class="admin-toolbar" id="cabinetsComplet" hidden>
           <input type="text" class="admin-search" id="cabinetsFiltre" placeholder="Filtrer par ville ou par nom"
                  aria-label="Filtrer par ville ou par nom" oninput="filtrerCabinets()">
-          <span class="spacer"></span>
-          <span style="font-size:13px; color:var(--text-secondary)" id="cabinetsCompte"></span>
         </div>
 
-        <div class="carte-zone">
+        <div class="cabinets-disposition" id="cabinetsDisposition">
+        <div class="cabinets-liste" id="cabinetsListe" aria-live="polite" hidden></div>
+        <div class="carte-zone" id="zoneCabinets">
+          <div class="carte-plein-barre">
+            <button type="button" class="carte-plein-retour" id="cartePleinRetour" onclick="fermerEcranDuDessus()">&larr; Liste</button>
+            <span class="carte-plein-compte" id="cartePleinCompte"></span>
+          </div>
           <div id="carteCabinets"></div>
           <div class="carte-etat cachee" id="cabinetsEtat" role="status"></div>
-          <div class="volet-cabinet" id="voletCabinet" role="dialog" aria-label="Fiche du cabinet" hidden>
-            <button type="button" class="volet-cabinet-fermer" aria-label="Fermer" onclick="fermerVoletCabinet()">&times;</button>
-            <div class="volet-cabinet-contenu" id="voletCabinetContenu"></div>
-          </div>
+          <div class="carte-mini" id="carteMini" role="dialog" aria-label="Sélection sur la carte" hidden></div>
         </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="boutonCarteCabinets" hidden onclick="ouvrirCartePleinEcran()">Carte</button>
 
         <div class="admin-toolbar annuaire-recentrage">
           <span class="filter-label">Recentrer :</span>
@@ -2828,6 +2913,15 @@
   </section>
 
   <div id="coucheEmplois" hidden></div>
+
+  <!-- Fiche d'un cabinet en plein écran (mobile), hors du conteneur de la carte -->
+  <div class="ecran-fiche" id="ecranFiche" role="dialog" aria-modal="true" aria-label="Fiche du cabinet" hidden>
+    <div class="ecran-fiche-barre">
+      <button type="button" class="carte-plein-retour" onclick="fermerEcranDuDessus()">&larr; Retour</button>
+      <button type="button" class="ecran-fiche-fermer" aria-label="Fermer" onclick="fermerEcranDuDessus()">&times;</button>
+    </div>
+    <div class="ecran-fiche-contenu" id="ecranFicheContenu"></div>
+  </div>
 
   <footer>
     <div class="footer-inner">
@@ -10701,6 +10795,7 @@ async function afficherCabinets() {
 
   document.getElementById('cabinetsVisiteur').hidden = complet;
   document.getElementById('cabinetsComplet').hidden = !complet;
+  majDispositionCabinets(complet);
   etatCabinets('Chargement de la carte…');
 
   try {
@@ -10749,7 +10844,8 @@ function oublierCabinets() {
   cabinetsProprietaire = null;
   if (cabinetsCluster) cabinetsCluster.clearLayers();
   if (carteCabinets) carteCabinets.closePopup();
-  fermerVoletCabinet();
+  fermerTousLesEcrans();
+  cabinetsFiltres = [];
 }
 
 function construireCarteCabinets() {
@@ -10764,22 +10860,9 @@ function construireCarteCabinets() {
   cabinetsCercles = L.layerGroup();
   cabinetsCluster = L.markerClusterGroup({ showCoverageOnHover: false });
   carteCabinets.on('click', () => { carteCabinets.scrollWheelZoom.enable(); });
-  // Un clic sur le fond de la carte ferme le volet (les marqueurs ne
-  // propagent pas leur clic à la carte).
-  carteCabinets.on('click', fermerVoletCabinet);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && voletCabinetOuvert()) fermerVoletCabinet();
-  });
-  // Rotation ou redimensionnement : seule la largeur compte. Sur
-  // téléphone, la barre d'adresse qui apparaît au défilement change la
-  // hauteur à chaque instant et ne doit pas fermer le volet.
-  let largeurFenetre = window.innerWidth;
-  window.addEventListener('resize', () => {
-    if (window.innerWidth === largeurFenetre) return;
-    largeurFenetre = window.innerWidth;
-    fermerVoletCabinet();
-    carteCabinets.closePopup();
-  });
+  // Un tap sur le fond de la carte ferme la petite carte du bas (les
+  // marqueurs et les cercles ne propagent pas leur clic à la carte).
+  carteCabinets.on('click', fermerMiniCarte);
 
   setTimeout(() => {
     carteCabinets.invalidateSize();
@@ -10833,7 +10916,7 @@ function renderDepartements() {
     L.circleMarker([lat, lng], {
       radius: 5 + 27 * Math.sqrt(d.praticiens / max),
       color: '#0F2B4D', weight: 1.5, fillColor: COULEUR_OFFRE, fillOpacity: 0.55
-    }).bindPopup(() => ficheDepartement(d.praticiens, lieu)).addTo(cabinetsCercles);
+    }).on('click', (e) => afficherDepartement(e, d.praticiens, lieu)).addTo(cabinetsCercles);
   });
 }
 
@@ -10937,8 +11020,8 @@ function lireSuitePresentation(lien) {
 
 // La popup liée par marqueurAnnuaire est remplacée, pour les seuls
 // marqueurs de cette carte, par un clic qui choisit : popup Leaflet
-// au-dessus de 700 px, volet en dessous. Le contenu reste ficheCabinet.
-const VOLET_CABINET_MAX = window.matchMedia('(max-width: 700px)');
+// au-dessus de 960 px, petite carte du bas en plein écran en dessous.
+const ECRAN_MOBILE = window.matchMedia('(max-width: 960px)');
 
 function marqueurCabinet(l) {
   const nouveau = !l.marqueur;
@@ -10952,7 +11035,7 @@ function marqueurCabinet(l) {
 
 function afficherFicheCabinet(l) {
   if (!carteCabinets || !l.marqueur) return;
-  if (VOLET_CABINET_MAX.matches) { ouvrirVoletCabinet(l); return; }
+  if (ECRAN_MOBILE.matches) { afficherMiniCabinet(l); return; }
 
   // Même rendu qu'une popup liée au marqueur, et comme elle, fermée
   // quand le marqueur quitte la carte (regroupement au dézoom).
@@ -10961,42 +11044,13 @@ function afficherFicheCabinet(l) {
   l.marqueur.once('remove', () => carteCabinets.closePopup(popup));
 }
 
-function voletCabinetOuvert() {
-  const v = document.getElementById('voletCabinet');
-  return !!v && !v.hidden;
-}
-
-function ouvrirVoletCabinet(l) {
-  const volet = document.getElementById('voletCabinet');
-  const contenu = document.getElementById('voletCabinetContenu');
-  // Passage d'un cabinet à un autre : seul le contenu change, le volet
-  // ouvert ne rejoue pas son animation.
-  contenu.innerHTML = ficheCabinet(l);
-  contenu.scrollTop = 0;
-  volet.hidden = false;
-  volet.querySelector('.volet-cabinet-fermer').focus({ preventScroll: true });
-  recentrerSurMarqueur(l.marqueur.getLatLng(), volet.offsetHeight);
-}
-
-function fermerVoletCabinet() {
-  const volet = document.getElementById('voletCabinet');
-  if (!volet || volet.hidden) return;
-  volet.hidden = true;
-  document.getElementById('voletCabinetContenu').innerHTML = '';
-}
-
-// Le marqueur doit rester visible dans la moitié haute de la zone que
-// le volet laisse libre. Un simple déplacement, sans changer le zoom,
-// et seulement s'il est hors de cette zone.
-function recentrerSurMarqueur(latlng, hauteurVolet) {
-  const taille = carteCabinets.getSize();
-  const libre = Math.max(taille.y - hauteurVolet, 0);
-  const p = carteCabinets.latLngToContainerPoint(latlng);
-  const marge = 24;
-  const dedans = p.x >= marge && p.x <= taille.x - marge && p.y >= marge && p.y <= libre / 2;
-  if (dedans) return;
-  const cible = L.point(taille.x / 2, Math.max(libre / 3, marge));
-  carteCabinets.panBy(p.subtract(cible), { animate: true, duration: 0.25 });
+// Un cercle de département : popup sur ordinateur, comme avant ; petite
+// carte du bas sur mobile. Le clic est arrêté ici, sinon il atteindrait
+// la carte, qui refermerait aussitôt l'une ou l'autre.
+function afficherDepartement(e, praticiens, lieu) {
+  L.DomEvent.stopPropagation(e);
+  if (ECRAN_MOBILE.matches) { afficherMiniCarte(ficheDepartement(praticiens, lieu)); return; }
+  L.popup().setLatLng(e.latlng).setContent(ficheDepartement(praticiens, lieu)).openOn(carteCabinets);
 }
 
 function filtrerCabinets() {
@@ -11007,12 +11061,315 @@ function filtrerCabinets() {
 function renderCabinets() {
   if (!cabinetsLignes || !cabinetsCluster) return;
   const termes = normaliserAnnuaire(document.getElementById('cabinetsFiltre').value).split(/\s+/).filter(Boolean);
-  const points = cabinetsLignes.filter(l => l.lat !== null && termes.every(t => l.texteRecherche.includes(t)));
+  cabinetsFiltres = cabinetsLignes.filter(l => cabinetCorrespond(l, termes)).sort(comparerCabinets);
+  const points = cabinetsFiltres.filter(l => l.lat !== null);
 
   cabinetsCluster.clearLayers();
   cabinetsCluster.addLayers(points.map(marqueurCabinet));
-  document.getElementById('cabinetsCompte').textContent =
-    points.length.toLocaleString('fr-FR') + (points.length > 1 ? ' cabinets affichés' : ' cabinet affiché');
+  cabinetsSurCarte = points.length;
+  majComptePleinEcran();
+  renderListeCabinets();
+}
+
+// ─────────── Liste des cabinets (comptes validés) ───────────
+//
+// Les lignes sont celles de la carte complète, déjà en mémoire : aucune
+// requête de plus. Le texte de recherche est propre à cette liste, la
+// carte admin garde le sien (texteRecherche).
+const VUE_DOUBLE = window.matchMedia('(min-width: 961px)');
+const CABINETS_PAR_LOT = 25;
+const COLLATEUR_CABINETS = new Intl.Collator('fr', { sensitivity: 'base' });
+let cabinetsFiltres = [];
+let cabinetsAffiches = 0;
+let cabinetsSurCarte = 0;
+
+// Passer d'une disposition à l'autre change la taille de la carte.
+[VUE_DOUBLE, ECRAN_MOBILE].forEach(m => m.addEventListener('change', () => {
+  if (carteCabinets) setTimeout(() => carteCabinets.invalidateSize(), 0);
+}));
+
+// Deux chiffres : un département (début du code postal). Cinq : un code
+// postal. Sinon le texte, sans accents ni casse, sur nom, prénom,
+// cabinet, ville et code postal. Tous les termes doivent correspondre.
+function cabinetCorrespond(l, termes) {
+  if (l.texteCabinet === undefined) {
+    l.texteCabinet = normaliserAnnuaire([l.nom, l.prenom, l.cabinet, l.ville, l.code_postal].join(' '));
+  }
+  const cp = String(l.code_postal || '').trim();
+  return termes.every(t => /^\d{2}$/.test(t) ? cp.startsWith(t)
+    : /^\d{5}$/.test(t) ? cp === t
+    : l.texteCabinet.includes(t));
+}
+
+// Par ville puis par nom ; une ligne sans ville passe à la fin.
+function comparerCabinets(a, b) {
+  if (!a.ville !== !b.ville) return a.ville ? -1 : 1;
+  return COLLATEUR_CABINETS.compare(a.ville || '', b.ville || '')
+    || COLLATEUR_CABINETS.compare(a.nom || '', b.nom || '')
+    || COLLATEUR_CABINETS.compare(a.prenom || '', b.prenom || '');
+}
+
+function majDispositionCabinets(complet) {
+  const liste = document.getElementById('cabinetsListe');
+  document.getElementById('cabinetsDisposition').classList.toggle('complet', complet);
+  document.getElementById('boutonCarteCabinets').hidden = !complet;
+  liste.hidden = !complet;
+  if (!complet) liste.innerHTML = '';
+}
+
+// Un filtre qui change remet la liste au début.
+function renderListeCabinets() {
+  const zone = document.getElementById('cabinetsListe');
+  if (!zone) return;
+  const n = cabinetsFiltres.length;
+  cabinetsAffiches = 0;
+  zone.scrollTop = 0;
+  zone.innerHTML = '<div class="cabinets-liste-compte">' + esc(n.toLocaleString('fr-FR')) + (n > 1 ? ' cabinets' : ' cabinet')
+    + (cabinetsSurCarte < n ? ' (' + esc(cabinetsSurCarte.toLocaleString('fr-FR')) + ' sur la carte)' : '') + '</div>'
+    + (n
+      ? '<div id="cabinetsListeCartes"></div>'
+        + '<button type="button" class="btn btn-outline btn-sm cabinets-plus" id="cabinetsPlus" onclick="afficherPlusCabinets()"></button>'
+      : '<div class="admin-empty">Aucun cabinet ne correspond. Essayez un autre nom, une ville ou un département.</div>');
+  if (n) afficherPlusCabinets();
+}
+
+// 25 cartes à la fois, ajoutées à la suite : rien de plus n'entre
+// dans la page tant qu'on ne le demande pas.
+function afficherPlusCabinets() {
+  const lot = cabinetsFiltres.slice(cabinetsAffiches, cabinetsAffiches + CABINETS_PAR_LOT);
+  document.getElementById('cabinetsListeCartes')
+    .insertAdjacentHTML('beforeend', lot.map((l, k) => carteListeCabinet(l, cabinetsAffiches + k)).join(''));
+  cabinetsAffiches += lot.length;
+  const reste = cabinetsFiltres.length - cabinetsAffiches;
+  const btn = document.getElementById('cabinetsPlus');
+  btn.hidden = reste <= 0;
+  btn.textContent = 'Voir ' + Math.min(CABINETS_PAR_LOT, reste) + ' de plus';
+}
+
+function domaineSiteCabinet(v) {
+  if (!texteRempli(v)) return '';
+  let u;
+  try { u = new URL(String(v).trim()); } catch (e) { return ''; }
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') return '';
+  return '<a href="' + esc(u.href) + '" target="_blank" rel="noopener noreferrer">'
+    + esc(u.hostname.replace(/^www\./i, '')) + '</a>';
+}
+
+function carteListeCabinet(l, i) {
+  const identite = [l.nom, l.prenom].filter(Boolean).join(' ') || 'Praticien';
+  const commune = [l.code_postal, l.ville].filter(Boolean).join(' ');
+  const tel = telephoneFiche(l.telephone);
+  const domaine = domaineSiteCabinet(l.site_web);
+  return `<article class="job-card cabinet-carte" data-i="${i}" tabindex="0" aria-expanded="false"
+      onclick="basculerCarteCabinet(event, this)"
+      onkeydown="if ((event.key === 'Enter' || event.key === ' ') && event.target === this) { event.preventDefault(); basculerCarteCabinet(event, this); }">
+      <div class="job-title">${esc(identite)}</div>
+      ${l.cabinet ? `<div class="job-cab">${esc(l.cabinet)}</div>` : ''}
+      ${commune ? `<div class="cabinet-carte-ligne">${esc(commune)}</div>` : ''}
+      ${tel ? `<div class="cabinet-carte-tel">${tel}</div>` : ''}
+      ${domaine ? `<div class="cabinet-carte-ligne">${domaine}</div>` : ''}
+      ${etiquettesCarte(Array.isArray(l.techniques) ? l.techniques.slice(0, 3) : [])}
+      <div class="cabinet-carte-fiche" hidden></div>
+      ${l.lat !== null
+        ? `<button type="button" class="btn btn-outline btn-sm cabinet-carte-voir" onclick="voirCabinetSurCarte(${i})">Voir sur la carte</button>`
+        : ''}
+    </article>`;
+}
+
+// Mobile : un tap ouvre l'écran de fiche. Ordinateur : un clic déplie la
+// fiche en place, un second la replie. Liens et boutons gardent leur rôle.
+function basculerCarteCabinet(ev, carte) {
+  if (ev.target.closest('a, button')) return;
+  const l = cabinetsFiltres[Number(carte.dataset.i)];
+  if (!l) return;
+  if (ECRAN_MOBILE.matches) { ouvrirFicheEcran(l); return; }
+  const fiche = carte.querySelector('.cabinet-carte-fiche');
+  const ouvrir = fiche.hidden;
+  fiche.innerHTML = ouvrir ? ficheCabinet(l) : '';
+  fiche.hidden = !ouvrir;
+  carte.setAttribute('aria-expanded', String(ouvrir));
+}
+
+// Recentre sur le cabinet au zoom 15 et ouvre sa fiche comme un clic
+// sur son marqueur : plein écran et petite carte sur mobile, popup
+// ailleurs. Le regroupement des marqueurs se recalcule après le
+// changement de zoom : la popup attend 350 ms, pour ne pas être
+// refermée par lui.
+function voirCabinetSurCarte(i) {
+  const l = cabinetsFiltres[i];
+  if (!l || l.lat === null || !carteCabinets) return;
+  if (ECRAN_MOBILE.matches) ouvrirCartePleinEcran();
+  carteCabinets.invalidateSize();
+  carteCabinets.setView([l.lat, l.lng], 15, { animate: false });
+  carteCabinetsCadree = true;
+  if (!l.marqueur) marqueurCabinet(l);
+  setTimeout(() => afficherFicheCabinet(l), 350);
+}
+
+// ─────────── Écrans plein écran (mobile) ───────────
+//
+// Deux écrans peuvent s'empiler : la carte, puis la fiche. Chacun ajoute
+// une entrée d'historique : le bouton retour du navigateur, Échap et les
+// boutons de l'écran ferment celui du dessus, sans quitter /carte. Le
+// popstate est intercepté en capture, avant le routage de la page.
+let ecransPile = [];
+let popsAIgnorer = 0;
+let apresFermeture = null;
+let retourEnCours = false;
+let defilementSauve = 0;
+let carteCabinetsCadree = false;
+let cabinetMini = null;
+
+function bloquerPage() {
+  const html = document.documentElement;
+  if (html.classList.contains('ecran-bloque')) return;
+  defilementSauve = window.scrollY;
+  html.classList.add('ecran-bloque');
+}
+
+function debloquerPage() {
+  const html = document.documentElement;
+  if (!html.classList.contains('ecran-bloque')) return;
+  html.classList.remove('ecran-bloque');
+  window.scrollTo(0, defilementSauve);
+}
+
+function ouvrirEcran(nom) {
+  bloquerPage();
+  ecransPile.push(nom);
+  history.pushState({ chemin: cheminCourant(), ocEcran: nom }, '', location.pathname + location.search);
+}
+
+function masquerEcran(nom) {
+  if (nom === 'fiche') {
+    document.getElementById('ecranFiche').hidden = true;
+    document.getElementById('ecranFicheContenu').innerHTML = '';
+  } else if (nom === 'carte') {
+    fermerMiniCarte();
+    document.getElementById('zoneCabinets').classList.remove('plein-ecran');
+    if (carteCabinets) setTimeout(() => carteCabinets.invalidateSize(), 0);
+  }
+  if (!ecransPile.length) debloquerPage();
+}
+
+function fermerEcranDuDessus() {
+  if (!ecransPile.length || retourEnCours) return;
+  retourEnCours = true;
+  history.back();
+}
+
+// Fermeture sans geste de retour (déconnexion, changement de largeur,
+// « Se connecter ») : les entrées d'historique ajoutées sont retirées
+// d'un coup, et ce retour-là n'est pas rejoué par le routage. Une suite
+// qui navigue (ouvrir la connexion) attend que ce retour soit arrivé,
+// sinon il défairait sa navigation.
+function fermerTousLesEcrans(suite) {
+  if (!ecransPile.length) { if (suite) suite(); return; }
+  const n = ecransPile.length;
+  while (ecransPile.length) masquerEcran(ecransPile.pop());
+  popsAIgnorer++;
+  apresFermeture = suite || null;
+  history.go(-n);
+}
+
+window.addEventListener('popstate', (e) => {
+  retourEnCours = false;
+  if (popsAIgnorer) {
+    popsAIgnorer--;
+    e.stopImmediatePropagation();
+    const suite = apresFermeture;
+    apresFermeture = null;
+    if (suite) suite();
+    return;
+  }
+  if (!ecransPile.length) return;
+  e.stopImmediatePropagation();
+  masquerEcran(ecransPile.pop());
+}, true);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && ecransPile.length) { e.preventDefault(); fermerEcranDuDessus(); }
+});
+
+// Rotation ou redimensionnement : seule la largeur compte. La barre
+// d'adresse qui apparaît au défilement ne change que la hauteur.
+let largeurEcrans = window.innerWidth;
+window.addEventListener('resize', () => {
+  if (window.innerWidth === largeurEcrans) return;
+  largeurEcrans = window.innerWidth;
+  fermerTousLesEcrans();
+  if (carteCabinets) carteCabinets.closePopup();
+});
+
+function majComptePleinEcran() {
+  const el = document.getElementById('cartePleinCompte');
+  if (!el) return;
+  el.textContent = currentUser
+    ? cabinetsSurCarte.toLocaleString('fr-FR') + (cabinetsSurCarte > 1 ? ' cabinets sur la carte' : ' cabinet sur la carte')
+    : 'Orthodontistes par département';
+}
+
+function ouvrirCartePleinEcran() {
+  const zone = document.getElementById('zoneCabinets');
+  if (zone.classList.contains('plein-ecran')) return;
+  document.getElementById('cartePleinRetour').textContent = currentUser ? '\u2190 Liste' : '\u2190 Retour';
+  majComptePleinEcran();
+  zone.classList.add('plein-ecran');
+  ouvrirEcran('carte');
+  if (!carteCabinets) return;
+  carteCabinets.invalidateSize();
+  // La carte est née masquée sur mobile : elle n'avait pas de taille
+  // pour se cadrer. Elle le fait à sa première ouverture.
+  if (!carteCabinetsCadree) { recentrerCabinets('metropole'); carteCabinetsCadree = true; }
+}
+
+function afficherMiniCarte(html) {
+  const mini = document.getElementById('carteMini');
+  mini.innerHTML = html;
+  mini.hidden = false;
+}
+
+function fermerMiniCarte() {
+  const mini = document.getElementById('carteMini');
+  if (!mini || mini.hidden) return;
+  mini.hidden = true;
+  mini.innerHTML = '';
+  cabinetMini = null;
+}
+
+function afficherMiniCabinet(l) {
+  cabinetMini = l;
+  const identite = [l.nom, l.prenom].filter(Boolean).join(' ') || 'Praticien';
+  const itineraire = 'https://www.google.com/maps/dir/?api=1&destination=' + Number(l.lat) + ',' + Number(l.lng);
+  afficherMiniCarte(`<div class="carte-mini-nom">${esc(identite)}</div>
+      ${l.cabinet ? `<div class="carte-mini-ligne">${esc(l.cabinet)}</div>` : ''}
+      ${l.ville ? `<div class="carte-mini-ligne">${esc(l.ville)}</div>` : ''}
+      <div class="carte-mini-actions">
+        <button type="button" class="btn btn-turquoise" onclick="ouvrirFicheEcran(cabinetMini)">Voir la fiche</button>
+        <a class="btn btn-outline" href="${esc(itineraire)}" target="_blank" rel="noopener noreferrer">Itinéraire</a>
+      </div>`);
+}
+
+// « Se connecter » depuis la petite carte d'un département : les écrans
+// se ferment d'abord, la connexion s'ouvre ensuite. Le clic est arrêté
+// ici, avant le gestionnaire du bouton, qui est rejoué à la fin.
+document.getElementById('carteMini').addEventListener('click', (e) => {
+  const bouton = e.target.closest('button[onclick*="openAuth"]');
+  if (!bouton || !ecransPile.length) return;
+  e.stopPropagation();
+  e.preventDefault();
+  fermerTousLesEcrans(() => openAuth('login'));
+}, true);
+
+function ouvrirFicheEcran(l) {
+  if (!l) return;
+  const ecran = document.getElementById('ecranFiche');
+  const contenu = document.getElementById('ecranFicheContenu');
+  contenu.innerHTML = ficheCabinet(l);
+  contenu.scrollTop = 0;
+  ecran.hidden = false;
+  ouvrirEcran('fiche');
+  ecran.querySelector('.ecran-fiche-fermer').focus({ preventScroll: true });
 }
 
 function saisirRechercheAnnuaire() {
