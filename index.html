@@ -2055,6 +2055,15 @@
   .fiche-cabinet-horaires { white-space: pre-line; color: var(--text-secondary); }
   .fiche-cabinet-filet { border: 0; border-top: 1px solid var(--grey-border); margin: 12px 0 0; }
   .fiche-cabinet .annuaire-fiche-texte { margin-top: 10px; }
+  .mafiche-liens { margin-top: 14px; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: baseline; }
+  .mafiche-liens a { color: var(--text-secondary); }
+  .mafiche-liens a:hover { color: var(--navy); }
+  .mafiche-liens .form-note { flex-basis: 100%; margin-top: 0; }
+  .lieu-bloc { border: 1px dashed var(--grey-border); border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 12px; }
+  .lieu-bloc[hidden] { display: none; }
+  .lieu-choix { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top: 8px; }
+  .lieu-choix strong { color: var(--navy); font-weight: 600; }
+  .lieu-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   @media (max-width: 700px) {
     #carteCabinets { height: 60vh; min-height: 320px; }
   }
@@ -3431,6 +3440,8 @@
           <!-- FICHE CABINET -->
           <div class="dash-panel" id="panel-cabinet">
             <h2>Ma fiche</h2>
+
+            <div class="admin-message" id="maFicheMessage"></div>
 
             <!-- Lieux de l'annuaire : seulement si ma_fiche() en renvoie -->
             <div class="mafiche-section" id="maFicheCarte" style="display:none">
@@ -8827,7 +8838,15 @@ const MESSAGES_BASE = [
   [['telephone trop long'], 'Le numéro de téléphone est trop long.'],
   [['trop de techniques'], '15 techniques au maximum.'],
   [['adresse du site invalide'], 'Adresse du site invalide, par exemple www.mon-cabinet.fr'],
-  [['demande introuvable ou deja traitee', 'reserve a l administration'], 'Action impossible, rechargez la page.']
+  [['demande introuvable ou deja traitee', 'reserve a l administration'], 'Action impossible, rechargez la page.'],
+  [['code postal invalide'], "Le code postal de cette adresse n'est pas valide. Choisissez une autre suggestion."],
+  [['ville invalide'], "La ville de cette adresse n'est pas valide. Choisissez une autre suggestion."],
+  [['adresse invalide'], "Cette adresse n'est pas valide. Choisissez une adresse dans la liste."],
+  [['cabinet trop long'], 'Le nom du cabinet est trop long.'],
+  [['coordonnees invalides'], "Cette adresse n'a pas pu être placée sur la carte. Choisissez une autre suggestion."],
+  [['lieu introuvable'], 'Ce lieu est introuvable. Rechargez la page.'],
+  [['ce lieu existe deja'], 'Ce lieu figure déjà dans votre fiche.'],
+  [['trop de lieux'], 'Vous avez atteint le maximum de 8 lieux.']
 ];
 
 function normaliserMessageBase(t) {
@@ -9122,8 +9141,263 @@ function renderMaFiche() {
       </div>
       <div class="admin-message" id="mfMsg${i}"></div>
       <button class="btn btn-turquoise" id="mfBtn${i}" onclick="enregistrerMaFiche(${i})">Enregistrer</button>
+      <div class="mafiche-liens">
+        <a href="#" onclick="event.preventDefault(); basculerBlocLieu('m${i}')">Modifier l'adresse de ce lieu</a>
+        <a href="#" onclick="event.preventDefault(); fermerMonLieu(${i})">Je n'exerce plus ici</a>
+        <div class="form-note">Pour le retrouver plus tard, contactez-nous.</div>
+      </div>
+      ${renderBlocLieu('m' + i, f.cabinet, adresse)}
     </div>`;
-  }).join('');
+  }).join('')
+  + `<button type="button" class="btn btn-outline btn-sm" onclick="basculerBlocLieu('nouveau')">Ajouter un autre lieu d'exercice</button>
+     <div style="max-width:620px">${renderBlocLieu('nouveau', '', '')}</div>`;
+}
+
+// ─────────── Lieux : modifier, fermer, ajouter ───────────
+//
+// Une adresse ne s'enregistre que choisie dans les suggestions de
+// l'API Adresse de la Géoplateforme : elle apporte code postal, ville
+// et coordonnées d'un coup. Aucune adresse libre ne part en base, même
+// quand l'API est injoignable. Même mécanique que brancherCommune :
+// délai de frappe, requête précédente annulée, clavier, mousedown.
+const API_GEOPLATEFORME = 'https://data.geopf.fr/geocodage/search';
+const etatsLieux = {};
+
+function etatLieu(cle) {
+  return etatsLieux[cle] || (etatsLieux[cle] = { minuteur: null, requete: null, resultats: [], survol: -1, choix: null });
+}
+
+function renderBlocLieu(cle, cabinet, adresseActuelle) {
+  return `<div class="lieu-bloc" id="lieuBloc-${cle}" hidden>
+      <div class="form-group">
+        <label for="lieuCab-${cle}">Nom du cabinet</label>
+        <input type="text" id="lieuCab-${cle}" value="${esc(texteChamp(cabinet))}">
+      </div>
+      <div class="form-group champ-commune">
+        <label for="lieuAdr-${cle}">Adresse</label>
+        <input type="text" id="lieuAdr-${cle}" autocomplete="off"
+               placeholder="${esc(adresseActuelle || '12 rue de la République, Lyon')}"
+               oninput="saisirAdresseLieu('${cle}')" onkeydown="toucheAdresseLieu(event, '${cle}')"
+               onblur="setTimeout(() => fermerSuggestionsLieu('${cle}'), 120)">
+        <div class="commune-liste" id="lieuListe-${cle}" onmousedown="clicSuggestionLieu(event, '${cle}')"></div>
+        <div class="lieu-choix" id="lieuChoix-${cle}">Choisissez une adresse dans la liste pour pouvoir enregistrer.</div>
+      </div>
+      <div class="admin-message" id="lieuMsg-${cle}"></div>
+      <div class="lieu-actions">
+        <button type="button" class="btn btn-turquoise btn-sm" id="lieuBtn-${cle}" disabled onclick="enregistrerLieu('${cle}')">Enregistrer</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="basculerBlocLieu('${cle}', false)">Annuler</button>
+      </div>
+    </div>`;
+}
+
+function basculerBlocLieu(cle, ouvrir) {
+  const bloc = document.getElementById('lieuBloc-' + cle);
+  if (!bloc) return;
+  bloc.hidden = ouvrir === undefined ? !bloc.hidden : !ouvrir;
+  if (!bloc.hidden) document.getElementById('lieuAdr-' + cle).focus();
+}
+
+function messageLieu(cle, texte, estErreur) {
+  const el = document.getElementById('lieuMsg-' + cle);
+  el.textContent = texte;
+  el.className = texte ? 'admin-message show ' + (estErreur ? 'ko' : 'ok') : 'admin-message';
+}
+
+function adresseDepuisFeature(f) {
+  const pr = (f && f.properties) || {};
+  const c = (f && f.geometry && f.geometry.coordinates) || [];
+  return {
+    adresse: String(pr.name || '').trim(),
+    codePostal: String(pr.postcode || '').trim(),
+    ville: String(pr.city || '').trim(),
+    lng: Number(c[0]),
+    lat: Number(c[1])
+  };
+}
+
+function afficherChoixLieu(cle) {
+  const e = etatLieu(cle);
+  const zone = document.getElementById('lieuChoix-' + cle);
+  document.getElementById('lieuBtn-' + cle).disabled = !e.choix;
+  if (!e.choix) {
+    zone.textContent = 'Choisissez une adresse dans la liste pour pouvoir enregistrer.';
+    return;
+  }
+  const a = e.choix;
+  zone.innerHTML = `<div><strong>Adresse :</strong> ${esc(a.adresse)}</div>
+      <div><strong>Code postal :</strong> ${esc(a.codePostal)}</div>
+      <div><strong>Ville :</strong> ${esc(a.ville)}</div>
+      <div><strong>Coordonnées :</strong> ${esc(a.lat.toFixed(5))}, ${esc(a.lng.toFixed(5))}</div>`;
+}
+
+function etatSuggestionsLieu(cle, texte) {
+  const liste = document.getElementById('lieuListe-' + cle);
+  liste.innerHTML = `<div class="commune-etat">${esc(texte)}</div>`;
+  liste.classList.add('open');
+}
+
+function rendreSuggestionsLieu(cle) {
+  const e = etatLieu(cle);
+  const liste = document.getElementById('lieuListe-' + cle);
+  liste.innerHTML = e.resultats.map((a, i) => `
+    <div class="commune-item${i === e.survol ? ' survol' : ''}" data-i="${i}">
+      ${esc(a.adresse)}<span>${esc([a.codePostal, a.ville].filter(Boolean).join(' '))}</span>
+    </div>`).join('');
+  liste.classList.add('open');
+}
+
+function fermerSuggestionsLieu(cle) {
+  const e = etatLieu(cle);
+  const liste = document.getElementById('lieuListe-' + cle);
+  if (liste) { liste.classList.remove('open'); liste.innerHTML = ''; }
+  e.resultats = [];
+  e.survol = -1;
+}
+
+function saisirAdresseLieu(cle) {
+  const e = etatLieu(cle);
+  // Toute frappe périme l'adresse retenue.
+  e.choix = null;
+  afficherChoixLieu(cle);
+  messageLieu(cle, '');
+
+  const q = document.getElementById('lieuAdr-' + cle).value.trim();
+  if (e.minuteur) clearTimeout(e.minuteur);
+  if (e.requete) { e.requete.abort(); e.requete = null; }
+  if (q.length < 3) { fermerSuggestionsLieu(cle); return; }
+
+  e.minuteur = setTimeout(async () => {
+    const requete = e.requete = new AbortController();
+    try {
+      const r = await fetch(API_GEOPLATEFORME + '?q=' + encodeURIComponent(q) + '&limit=5&autocomplete=1',
+        { signal: requete.signal });
+      if (!r.ok) throw new Error('Géoplateforme : ' + r.status);
+      const j = await r.json();
+      e.resultats = (Array.isArray(j.features) ? j.features : []).map(adresseDepuisFeature)
+        .filter(a => a.adresse && a.codePostal && a.ville && Number.isFinite(a.lat) && Number.isFinite(a.lng));
+      e.survol = -1;
+      if (e.resultats.length) rendreSuggestionsLieu(cle);
+      else etatSuggestionsLieu(cle, 'Aucune adresse ne correspond.');
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.warn('API Adresse :', err.message);
+      e.resultats = [];
+      etatSuggestionsLieu(cle, "Les suggestions d'adresse sont indisponibles, réessayez dans un instant");
+    } finally {
+      if (e.requete === requete) e.requete = null;
+    }
+  }, 300);
+}
+
+function choisirAdresseLieu(cle, i) {
+  const e = etatLieu(cle);
+  const a = e.resultats[i];
+  if (!a) return;
+  e.choix = a;
+  document.getElementById('lieuAdr-' + cle).value = [a.adresse, a.codePostal, a.ville].join(' ');
+  fermerSuggestionsLieu(cle);
+  afficherChoixLieu(cle);
+}
+
+function toucheAdresseLieu(ev, cle) {
+  const e = etatLieu(cle);
+  if (!e.resultats.length) return;
+  if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+    ev.preventDefault();
+    e.survol = (e.survol + (ev.key === 'ArrowDown' ? 1 : -1) + e.resultats.length) % e.resultats.length;
+    rendreSuggestionsLieu(cle);
+  } else if (ev.key === 'Enter') {
+    if (e.survol >= 0) { ev.preventDefault(); choisirAdresseLieu(cle, e.survol); }
+  } else if (ev.key === 'Escape') {
+    fermerSuggestionsLieu(cle);
+  }
+}
+
+// mousedown et non click : le clic arriverait après le blur.
+function clicSuggestionLieu(ev, cle) {
+  const item = ev.target.closest('.commune-item');
+  if (!item) return;
+  ev.preventDefault();
+  choisirAdresseLieu(cle, +item.dataset.i);
+}
+
+// Relit ma_fiche() après une action réussie. Un échec de relecture ne
+// vide pas l'écran : il le dit.
+async function rechargerMaFiche(confirmation) {
+  const boite = document.getElementById('maFicheMessage');
+  const { data, error } = await sb.rpc('ma_fiche');
+  if (error || !Array.isArray(data)) {
+    if (error) console.warn('ma_fiche :', error.message);
+    boite.textContent = confirmation + " La liste de vos lieux n'a pas pu être relue : rechargez la page.";
+    boite.className = 'admin-message show ok';
+    return;
+  }
+  mesFiches = data;
+  majNavMaFiche();
+  renderMaFiche();
+  boite.textContent = confirmation;
+  boite.className = 'admin-message show ok';
+  setTimeout(() => { if (boite.textContent === confirmation) boite.className = 'admin-message'; }, 5000);
+}
+
+async function enregistrerLieu(cle) {
+  const e = etatLieu(cle);
+  const a = e.choix;
+  if (!a) return;
+  const nouveau = cle === 'nouveau';
+  const f = nouveau ? null : mesFiches[Number(cle.slice(1))];
+  if (!nouveau && !f) return;
+
+  const btn = document.getElementById('lieuBtn-' + cle);
+  btn.disabled = true;
+  messageLieu(cle, '');
+  const champs = {
+    p_cabinet: document.getElementById('lieuCab-' + cle).value.trim() || null,
+    p_adresse: a.adresse,
+    p_code_postal: a.codePostal,
+    p_ville: a.ville,
+    p_lat: a.lat,
+    p_lng: a.lng
+  };
+
+  let res;
+  try {
+    res = nouveau
+      ? await sb.rpc('ajouter_mon_lieu', champs)
+      : await sb.rpc('modifier_mon_lieu', { p_id: f.id, ...champs });
+  } catch (err) {
+    res = { error: err };
+  }
+
+  const ok = !res.error && (nouveau
+    ? res.data !== null && res.data !== undefined && res.data !== false && res.data !== ''
+    : res.data === true);
+  if (!ok) {
+    btn.disabled = false;
+    if (res.error) console.error(nouveau ? 'ajouter_mon_lieu :' : 'modifier_mon_lieu :', res.error);
+    return messageLieu(cle, res.error ? messageBase(res.error) : "L'enregistrement n'a pas été appliqué.", true);
+  }
+
+  delete etatsLieux[cle];
+  await rechargerMaFiche(nouveau ? 'Lieu ajouté.' : 'Adresse du lieu mise à jour.');
+}
+
+async function fermerMonLieu(i) {
+  const f = mesFiches[i];
+  if (!f) return;
+  if (!window.confirm("Ce lieu n'apparaîtra plus sur la carte. Confirmer ?")) return;
+
+  let res;
+  try {
+    res = await sb.rpc('fermer_mon_lieu', { p_id: f.id });
+  } catch (err) {
+    res = { error: err };
+  }
+  if (res.error || res.data !== true) {
+    if (res.error) console.error('fermer_mon_lieu :', res.error);
+    return messageMaFiche(i, res.error ? messageBase(res.error) : "La fermeture de ce lieu n'a pas été appliquée.", true);
+  }
+  await rechargerMaFiche("Ce lieu n'apparaît plus sur la carte.");
 }
 
 function compterPresentation(i) {
