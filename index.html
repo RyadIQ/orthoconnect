@@ -2171,6 +2171,33 @@
   /* Page derrière un écran plein : immobile. */
   html.ecran-bloque, html.ecran-bloque body { overflow: hidden; overscroll-behavior: contain; }
 
+  /* ===== CHAMPS SUR MOBILE (hors /carte, déjà traitée) =====
+     Sous 16 px, Safari iOS zoome la page au toucher d'un champ et ne
+     revient pas : la page paraît plus large que l'écran. !important pour
+     passer devant les règles plus précises (.admin-search, filtres) et
+     les deux listes de l'admin écrites en style en ligne. La hauteur
+     minimale rend aux listes déroulantes leur cible de 44 px. */
+  @media (max-width: 960px) {
+    .page:not(#page-carte) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]),
+    .page:not(#page-carte) select,
+    .page:not(#page-carte) textarea,
+    body > :not(.page) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]),
+    body > :not(.page) select,
+    body > :not(.page) textarea {
+      font-size: 16px !important;
+    }
+    .page:not(#page-carte) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]),
+    body > :not(.page) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]) {
+      min-height: 44px;
+    }
+    /* WebKit ignore padding et min-height d'une liste native, pas sa
+       hauteur : elle est donc fixée (listes simples seulement). */
+    .page:not(#page-carte) select:not([multiple]):not([size]),
+    body > :not(.page) select:not([multiple]):not([size]) {
+      height: 44px;
+    }
+  }
+
   @media (max-width: 700px) {
     #carteCabinets { height: 60vh; min-height: 320px; }
   }
