@@ -2017,6 +2017,27 @@
   .page-carte-resultats li { padding: 9px 0; border-bottom: 1px solid var(--grey-border); font-size: 14px; color: var(--text-secondary); }
   .page-carte-resultats strong { color: var(--navy); font-weight: 600; }
   .page-carte-note { font-size: 13px; color: var(--text-secondary); margin-top: 10px; }
+  .page-carte-resultats li.fiche-resultat { display: flex; align-items: center; justify-content: space-between; gap: 6px 12px; flex-wrap: wrap; }
+  .fiche-revendiquee { font-size: 12px; color: var(--text-light); white-space: nowrap; }
+
+  /* ===== REVENDICATION D'UNE FICHE ===== */
+  .rev-identite {
+    background: var(--grey-bg); border: 1px solid var(--grey-border); border-radius: var(--radius-sm);
+    padding: 12px 14px; font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 16px;
+  }
+  .rev-fiche {
+    border: 1px solid var(--grey-border); border-radius: var(--radius-sm); background: var(--grey-bg);
+    padding: 12px 14px; margin: 6px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+  }
+  .rev-fiche-titre { font-size: 12px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+  .rev-alerte { color: #C0392B; font-weight: 700; margin-bottom: 4px; }
+  .rev-appel { color: var(--navy); font-weight: 600; }
+  .rev-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .mafiche-bloc { border: 1px solid var(--grey-border); border-radius: var(--radius-sm); padding: 18px 20px; margin-bottom: 18px; max-width: 620px; }
+  .mafiche-identite { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px; }
+  .mafiche-bloc textarea.mafiche-court { min-height: 70px; }
+  .mafiche-masquer { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+  .mafiche-masquer input { width: auto; }
   @media (max-width: 700px) {
     #carteCabinets { height: 60vh; min-height: 320px; }
   }
@@ -2361,6 +2382,50 @@
       </div>
     </div>
 
+    <!-- REVENDICATION D'UNE FICHE : deux champs seulement -->
+    <div id="authRevendication" style="display:none">
+      <div class="auth-logo">
+        <div class="logo-oc" style="font-size:38px; justify-content:center">
+          <span class="lo">O</span><span class="lc">C</span>
+        </div>
+      </div>
+      <h3>C'est ma fiche</h3>
+      <p class="auth-sub">Créez votre compte pour revendiquer cette fiche.</p>
+
+      <div class="rev-identite" id="revIdentite"></div>
+
+      <div class="auth-error" id="revError"></div>
+
+      <div class="auth-field">
+        <label for="revEmail">Email</label>
+        <input type="email" id="revEmail" placeholder="marie.dupont@cabinet.fr">
+      </div>
+      <div class="auth-field">
+        <label for="revPassword">Mot de passe</label>
+        <input type="password" id="revPassword" placeholder="8 caractères minimum">
+      </div>
+
+      <button class="btn btn-turquoise" id="revSignupBtn" style="width:100%; justify-content:center; margin-top:8px" onclick="doSignupRevendication()">
+        Créer mon compte
+      </button>
+
+      <div class="auth-switch">
+        Déjà inscrit ? <a onclick="switchAuth('login')">Se connecter</a>
+      </div>
+    </div>
+
+    <!-- ISSUE D'UNE DEMANDE DE FICHE -->
+    <div id="authRevendicationOk" style="display:none">
+      <div class="auth-logo">
+        <div class="logo-oc" style="font-size:38px; justify-content:center">
+          <span class="lo">O</span><span class="lc">C</span>
+        </div>
+      </div>
+      <h3 id="revIssueTitre"></h3>
+      <p class="auth-sub" id="revIssueTexte"></p>
+      <button class="btn btn-turquoise" style="width:100%; justify-content:center; margin-top:8px" onclick="fermerIssueRevendication()">Fermer</button>
+    </div>
+
     <!-- CONNEXION -->
     <div id="authLogin" style="display:none">
       <div class="auth-logo">
@@ -2675,6 +2740,7 @@
         <div class="page-carte-recherche" id="cabinetsVisiteur">
           <input type="text" class="admin-search" id="annuaireRechercheNom" placeholder="Rechercher un praticien par nom"
                  aria-label="Rechercher un praticien par nom" oninput="saisirRechercheAnnuaire()">
+          <p class="page-carte-note">Orthodontiste ? Cherchez votre nom pour revendiquer votre fiche.</p>
           <div id="annuaireResultats" aria-live="polite"></div>
         </div>
 
@@ -3303,6 +3369,7 @@
         <div class="dash-nav">
           <button class="active" onclick="showDashPanel('accueil', this)">🏠 Tableau de bord</button>
           <button onclick="showDashPanel('cabinet', this)">🏥 Ma fiche cabinet</button>
+          <button id="navMaFiche" style="display:none" onclick="showDashPanel('mafiche', this)">📍 Ma fiche</button>
           <button onclick="showDashPanel('formations', this)">📚 Mes formations</button>
           <button onclick="showDashPanel('codes', this)">🎟 Mes codes</button>
           <button onclick="showDashPanel('annonces', this)">💼 Mes annonces</button>
@@ -3676,6 +3743,13 @@
 
               <button class="btn btn-turquoise" onclick="enregistrerRecherche(false)">Enregistrer mes critères</button>
             </div>
+          </div>
+
+          <!-- MA FICHE (annuaire) -->
+          <div class="dash-panel" id="panel-mafiche">
+            <h2>Ma fiche</h2>
+            <p class="panel-sub">Les praticiens validés voient ces informations sur la carte.</p>
+            <div id="maFicheListe"></div>
           </div>
 
           <!-- ACTUS -->
@@ -4520,7 +4594,13 @@
             <h2>Comptes à valider</h2>
             <p class="panel-sub">Inscriptions en attente de vérification. L'annuaire ne référence que les orthodontistes en exercice : une absence ne suffit pas à conclure.</p>
             <div class="admin-message ko" id="admComptesErreur"></div>
+            <div class="admin-message ko" id="admRevErreur"></div>
+            <div id="admRevPrevenir"></div>
             <div id="admComptesListe"></div>
+
+            <div class="dash-section-title">Demandes de fiche</div>
+            <p class="panel-sub">Demandes en attente venant de comptes déjà validés.</p>
+            <div id="admRevendicationsListe"></div>
           </div>
 
           <!-- CARTE DE L'ANNUAIRE -->
@@ -5117,6 +5197,15 @@ let mesInterets = new Set();
 let erreurMesInterets = null;
 const totauxInterets = new Map();
 let jetonTotauxInterets = 0;
+// Revendication d'une fiche de l'annuaire. sessionUtilisateur est posé
+// même pour un compte non validé, contrairement à currentUser.
+let sessionUtilisateur = null;
+let maRevendicationEnCours = false;
+let ficheVoulue = null;        // fiche choisie depuis l'écran « C'est ma fiche »
+let ficheInscription = null;   // la ligne de recherche correspondante
+const revendicationsTentees = new Set();
+let annuaireResultatsParId = new Map();
+let mesFiches = [];
 let jobsDB = [];
 let annonceEnCours = null;
 let actusDB = [];
@@ -5379,6 +5468,8 @@ async function loadCatalogues() {
 // AUTHENTIFICATION
 // ═══════════════════════════════════════════════
 function openAuth(mode) {
+  // Une inscription ou une connexion ordinaire ne revendique rien.
+  ficheVoulue = null;
   // Déjà inscrit : les invitations à créer un compte mènent à son message.
   if (compteNonValide) { showPage('dashboard'); return; }
   document.getElementById('authOverlay').classList.add('open');
@@ -5392,6 +5483,8 @@ function closeAuth() {
 function switchAuth(mode) {
   document.getElementById('authSignup').style.display = mode === 'signup' ? 'block' : 'none';
   document.getElementById('authLogin').style.display = mode === 'login' ? 'block' : 'none';
+  document.getElementById('authRevendication').style.display = 'none';
+  document.getElementById('authRevendicationOk').style.display = 'none';
   clearMessage('signupError');
   clearMessage('loginError');
 }
@@ -5601,7 +5694,8 @@ function renderCompteNonValide() {
   };
   const [titre, texte] = messages[compteNonValide];
   document.getElementById('verifTitre').textContent = titre;
-  document.getElementById('verifTexte').textContent = texte;
+  document.getElementById('verifTexte').textContent =
+    compteNonValide === 'en_attente' && maRevendicationEnCours ? MESSAGE_REVENDICATION : texte;
 }
 
 async function refreshAuthUI() {
@@ -5612,6 +5706,9 @@ async function refreshAuthUI() {
   const profil = session ? await ensureProfile(session.user) : null;
   compteNonValide = session ? etatValidation(profil) : null;
   currentUser = session && !compteNonValide ? session.user : null;
+  sessionUtilisateur = session ? session.user : null;
+  // Après ensureProfile, jamais avant : la demande suppose le profil créé.
+  await suivreRevendication(session, profil);
   rechercheRemplie = false;
 
   // La liste est la même dans les deux cas — elle ne transporte aucun
@@ -5653,6 +5750,7 @@ async function refreshAuthUI() {
 
     await chargerMesInterets();
     await chargerTotauxInterets();
+    await chargerMaFiche();
 
     await chargerMesAnnonces();
 
@@ -5678,6 +5776,8 @@ async function refreshAuthUI() {
     erreurMesInterets = null;
     jetonTotauxInterets++;
     totauxInterets.clear();
+    mesFiches = [];
+    majNavMaFiche();
     mesAnnonces = [];
     navUser.classList.remove('show');
     if (loginBtn) loginBtn.classList.remove('hide');
@@ -8658,6 +8758,369 @@ async function basculerInteret(btn) {
   majCoeursInterets();
 }
 
+// ═══════════════════════════════════════════════
+// REVENDICATION D'UNE FICHE DE L'ANNUAIRE
+//
+// Côté praticien, l'annuaire n'est lu que par ses fonctions :
+// annuaire_recherche, demander_revendication, ma_fiche, maj_ma_fiche.
+// Le RPPS de la fiche est repris par la base, le navigateur ne le voit
+// jamais. La fiche choisie voyage dans les métadonnées du compte, pour
+// survivre à la confirmation de l'adresse e-mail, avec un repli local.
+// ═══════════════════════════════════════════════
+const MESSAGE_REVENDICATION = "Demande enregistrée. Nous vérifions votre identité par téléphone sous 48 h et nous vous écrivons dès que c'est validé.";
+const CLE_FICHE_LOCALE = 'oc_fiche_a_revendiquer';
+const MAX_PRESENTATION = 1200;
+const MAX_TECHNIQUES = 15;
+
+function prenomNomFiche(l) {
+  return [l.prenom, l.nom ? String(l.nom).toLocaleUpperCase('fr-FR') : ''].filter(Boolean).join(' ');
+}
+
+function lireFicheLocale() {
+  try { return JSON.parse(localStorage.getItem(CLE_FICHE_LOCALE) || 'null'); } catch (e) { return null; }
+}
+function oublierFicheLocale() {
+  try { localStorage.removeItem(CLE_FICHE_LOCALE); } catch (e) { /* stockage indisponible */ }
+}
+
+// Les messages levés par les fonctions de l'annuaire, rendus lisibles.
+// La base les écrit sans accents ni majuscules : la comparaison ignore
+// les deux, et la ponctuation. Un message inconnu s'affiche tel quel.
+const MESSAGES_BASE = [
+  [['connexion requise'], 'Connectez-vous pour continuer.'],
+  [['fiche introuvable', 'profil introuvable'], 'Cette fiche est introuvable.'],
+  [['fiche deja revendiquee', 'fiche deja attribuee a un autre compte'],
+    "Cette fiche est déjà revendiquée. Si c'est la vôtre, écrivez-nous à contact@orthoconnect.fr."],
+  [['trop de demandes en attente'], 'Vous avez déjà plusieurs demandes en attente.'],
+  [['ce compte est deja valide avec un autre rpps'], 'Ce compte est déjà rattaché à un autre praticien.'],
+  [['compte non valide'], "Votre compte n'a pas été validé."],
+  [['presentation trop longue'], 'La présentation dépasse 1200 caractères.'],
+  [['horaires trop longs'], 'Les horaires sont trop longs. Raccourcissez-les.'],
+  [['telephone trop long'], 'Le numéro de téléphone est trop long.'],
+  [['trop de techniques'], '15 techniques au maximum.'],
+  [['adresse du site invalide'], "L'adresse du site doit commencer par http:// ou https://."],
+  [['demande introuvable ou deja traitee', 'reserve a l administration'], 'Action impossible, rechargez la page.']
+];
+
+function normaliserMessageBase(t) {
+  return String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function messageBase(error) {
+  const texte = normaliserMessageBase(error && error.message);
+  const trouve = MESSAGES_BASE.find(([motifs]) => motifs.some(m => texte.includes(normaliserMessageBase(m))));
+  return trouve ? trouve[1] : String((error && error.message) || 'Erreur inconnue.');
+}
+
+async function envoyerRevendication(ficheId) {
+  try {
+    const { data, error } = await sb.rpc('demander_revendication', { p_fiche: ficheId });
+    if (error) {
+      console.error('demander_revendication :', error);
+      return { ok: false, message: messageBase(error) };
+    }
+    if (data !== 'en_attente') {
+      console.error('demander_revendication, retour inattendu :', data);
+      return { ok: false, message: "La demande n'a pas pu être confirmée. Réessayez dans quelques instants." };
+    }
+    maRevendicationEnCours = true;
+    return { ok: true };
+  } catch (e) {
+    console.error('demander_revendication :', e);
+    return { ok: false, message: "La demande n'a pas pu être envoyée. Vérifiez votre connexion et réessayez." };
+  }
+}
+
+// Appelée par refreshAuthUI une fois le profil lu ou créé. Une seule
+// tentative par compte et par fiche dans la session, même si deux
+// rafraîchissements se croisent (inscription et onAuthStateChange).
+async function suivreRevendication(session, profil) {
+  maRevendicationEnCours = false;
+  if (!session || !profil) return;
+  const user = session.user;
+
+  // Fiche choisie à l'instant (écran « C'est ma fiche » puis connexion),
+  // ou reprise des métadonnées pour un compte en attente.
+  const choisie = !!ficheVoulue;
+  let fiche = ficheVoulue;
+  if (!fiche && compteNonValide === 'en_attente') {
+    const meta = user.user_metadata || {};
+    const locale = lireFicheLocale();
+    fiche = meta.fiche_id
+      || (locale && locale.fiche_id && locale.email
+          && String(locale.email).toLowerCase() === String(user.email || '').toLowerCase() ? locale.fiche_id : null);
+  }
+  ficheVoulue = null;
+
+  if (fiche) {
+    const cle = 'oc_revendication_' + user.id + '_' + fiche;
+    let dejaTentee = revendicationsTentees.has(cle);
+    try { dejaTentee = dejaTentee || sessionStorage.getItem(cle) === '1'; } catch (e) { /* stockage indisponible */ }
+    if (!dejaTentee) {
+      revendicationsTentees.add(cle);
+      try { sessionStorage.setItem(cle, '1'); } catch (e) { /* stockage indisponible */ }
+      const r = await envoyerRevendication(String(fiche));
+      if (r.ok) oublierFicheLocale();
+      // La reprise automatique revient à chaque session : son succès se
+      // lit sur la page des comptes en attente, seul un échec s'affiche.
+      if (choisie || !r.ok) afficherIssueRevendication(r);
+    }
+  }
+
+  // La page des comptes en attente dit où en est la demande : lecture
+  // de la seule ligne du praticien, jamais de la fiche.
+  if (compteNonValide === 'en_attente' && !maRevendicationEnCours) {
+    const { data, error } = await sb.from('revendications')
+      .select('id').eq('praticien_id', user.id).eq('statut', 'en_attente').limit(1);
+    if (error) console.warn('Revendications indisponibles :', error.message);
+    maRevendicationEnCours = !error && Array.isArray(data) && data.length > 0;
+  }
+}
+
+async function cliquerMaFiche(btn) {
+  const l = annuaireResultatsParId.get(String(btn.dataset.fiche));
+  if (!l || l.revendiquee !== false) return;
+
+  if (sessionUtilisateur) {
+    btn.disabled = true;
+    const r = await envoyerRevendication(String(l.id));
+    btn.disabled = false;
+    if (r.ok && compteNonValide) renderCompteNonValide();
+    afficherIssueRevendication(r);
+    return;
+  }
+
+  ficheVoulue = String(l.id);
+  ficheInscription = l;
+  document.getElementById('authOverlay').classList.add('open');
+  document.getElementById('authSignup').style.display = 'none';
+  document.getElementById('authLogin').style.display = 'none';
+  document.getElementById('authRevendicationOk').style.display = 'none';
+  document.getElementById('authRevendication').style.display = 'block';
+  document.getElementById('revIdentite').textContent =
+    [prenomNomFiche(l), l.specialite, l.ville].filter(Boolean).join(', ');
+  clearMessage('revError');
+}
+
+function afficherIssueRevendication(r) {
+  document.getElementById('authOverlay').classList.add('open');
+  document.getElementById('authSignup').style.display = 'none';
+  document.getElementById('authLogin').style.display = 'none';
+  document.getElementById('authRevendication').style.display = 'none';
+  document.getElementById('authRevendicationOk').style.display = 'block';
+  document.getElementById('revIssueTitre').textContent = r.ok ? 'Merci' : 'Demande non envoyée';
+  document.getElementById('revIssueTexte').textContent = r.ok ? MESSAGE_REVENDICATION : r.message;
+}
+
+function fermerIssueRevendication() {
+  closeAuth();
+  if (compteNonValide) showPage('dashboard');
+}
+
+// Calquée sur doSignup : mêmes métadonnées pour le trigger
+// handle_new_user et pour ensureProfile, sans rien à saisir que
+// l'e-mail et le mot de passe. Le RPPS reste vide, la base le pose.
+async function doSignupRevendication() {
+  const l = ficheInscription;
+  if (!l) return showError('revError', "Recherchez de nouveau votre nom sur la carte.");
+  const email = document.getElementById('revEmail').value.trim();
+  const mdp = document.getElementById('revPassword').value;
+
+  if (!email || !email.includes('@')) return showError('revError', "Indiquez un email valide.");
+  if (!mdp || mdp.length < 8) return showError('revError', "Choisissez un mot de passe d'au moins 8 caractères.");
+
+  const btn = document.getElementById('revSignupBtn');
+  btn.disabled = true;
+  btn.textContent = 'Création en cours...';
+  const resetBtn = () => {
+    btn.disabled = false;
+    btn.textContent = 'Créer mon compte';
+  };
+
+  try {
+    localStorage.setItem(CLE_FICHE_LOCALE, JSON.stringify({ fiche_id: String(l.id), email: email.toLowerCase() }));
+  } catch (e) { /* les métadonnées suffisent */ }
+
+  try {
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password: mdp,
+      options: {
+        data: {
+          nom: prenomNomFiche(l),
+          ville: l.ville || null,
+          statut: 'liberal',
+          rpps: null,
+          faculte: null,
+          fiche_id: String(l.id)
+        }
+      }
+    });
+
+    if (error) {
+      resetBtn();
+      if (error.message.includes('already registered')) {
+        return showError('revError', "Cet email est déjà utilisé. Connectez-vous : la demande partira à la connexion.");
+      }
+      return showError('revError', error.message);
+    }
+
+    if (!data || !data.user) {
+      resetBtn();
+      return showError('revError', "Le compte n'a pas pu être créé. Réessayez dans quelques instants.");
+    }
+
+    if (!data.session) {
+      resetBtn();
+      return showNotice('revError', "Votre compte est créé. Confirmez votre adresse via le lien envoyé à " + email + " : la demande partira à votre première connexion. Inutile de refaire une inscription.");
+    }
+
+    // suivreRevendication, appelée par refreshAuthUI, envoie la demande
+    // et affiche son issue.
+    await refreshAuthUI();
+    resetBtn();
+
+    if (compteNonValide === 'indisponible') {
+      return showNotice('revError', "Votre compte est bien créé, mais votre fiche praticien n'a pas pu être enregistrée. Connectez-vous avec " + email + " dans quelques instants, la demande partira à ce moment, ou écrivez à contact@orthoconnect.fr.");
+    }
+    if (maRevendicationEnCours) afficherIssueRevendication({ ok: true });
+
+  } catch (e) {
+    resetBtn();
+    console.error('Inscription (revendication) :', e);
+    showError('revError', "Une erreur est survenue. Réessayez.");
+  }
+}
+
+// ─────────── Ma fiche (espace praticien) ───────────
+async function chargerMaFiche() {
+  mesFiches = [];
+  const { data, error } = await sb.rpc('ma_fiche');
+  if (error) console.warn('ma_fiche :', error.message);
+  else mesFiches = Array.isArray(data) ? data : [];
+  majNavMaFiche();
+  renderMaFiche();
+}
+
+function majNavMaFiche() {
+  const b = document.getElementById('navMaFiche');
+  if (b) b.style.display = mesFiches.length ? '' : 'none';
+}
+
+function texteChamp(v) {
+  if (v === null || v === undefined) return '';
+  return typeof v === 'string' ? v : JSON.stringify(v);
+}
+
+function renderMaFiche() {
+  const zone = document.getElementById('maFicheListe');
+  if (!zone) return;
+  zone.innerHTML = mesFiches.map((f, i) => {
+    const commune = [f.code_postal, f.ville].filter(Boolean).join(' ');
+    const adresse = [f.adresse, commune].filter(Boolean).join(', ');
+    const presentation = texteChamp(f.presentation);
+    const techniques = Array.isArray(f.techniques) ? f.techniques.join(', ') : texteChamp(f.techniques);
+    return `
+    <div class="mafiche-bloc">
+      <div class="mafiche-identite">
+        <div class="admin-nom">${esc(prenomNomFiche(f) || 'Nom non renseigné')}</div>
+        ${f.specialite ? `<div>${esc(f.specialite)}</div>` : ''}
+        ${f.cabinet ? `<div>${esc(f.cabinet)}</div>` : ''}
+        ${adresse ? `<div>${esc(adresse)}</div>` : ''}
+      </div>
+      <div class="form-group">
+        <label for="mfTel${i}">Téléphone</label>
+        <input type="tel" id="mfTel${i}" value="${esc(texteChamp(f.telephone))}">
+      </div>
+      <div class="form-group">
+        <label for="mfSite${i}">Site web</label>
+        <input type="url" id="mfSite${i}" placeholder="https://" value="${esc(texteChamp(f.site_web))}">
+      </div>
+      <div class="form-group">
+        <label for="mfHoraires${i}">Horaires</label>
+        <textarea class="mafiche-court" id="mfHoraires${i}">${esc(texteChamp(f.horaires))}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="mfPres${i}">Présentation</label>
+        <textarea id="mfPres${i}" maxlength="${MAX_PRESENTATION}" oninput="compterPresentation(${i})">${esc(presentation)}</textarea>
+        <div class="form-note" id="mfCompte${i}">${presentation.length} / ${MAX_PRESENTATION} caractères</div>
+      </div>
+      <div class="form-group">
+        <label for="mfTech${i}">Techniques</label>
+        <input type="text" id="mfTech${i}" value="${esc(techniques)}">
+        <div class="form-note">Séparées par des virgules, ${MAX_TECHNIQUES} au maximum.</div>
+      </div>
+      <div class="form-group">
+        <label class="mafiche-masquer"><input type="checkbox" id="mfMasq${i}" ${f.masquee ? 'checked' : ''}> Masquer ce lieu sur la carte</label>
+      </div>
+      <div class="admin-message" id="mfMsg${i}"></div>
+      <button class="btn btn-turquoise" id="mfBtn${i}" onclick="enregistrerMaFiche(${i})">Enregistrer</button>
+    </div>`;
+  }).join('');
+}
+
+function compterPresentation(i) {
+  const n = document.getElementById('mfPres' + i).value.length;
+  document.getElementById('mfCompte' + i).textContent = n + ' / ' + MAX_PRESENTATION + ' caractères';
+}
+
+function messageMaFiche(i, texte, estErreur) {
+  const el = document.getElementById('mfMsg' + i);
+  el.textContent = texte;
+  el.className = 'admin-message show ' + (estErreur ? 'ko' : 'ok');
+}
+
+async function enregistrerMaFiche(i) {
+  const f = mesFiches[i];
+  if (!f) return;
+  const val = id => document.getElementById(id + i).value.trim();
+  const telephone = val('mfTel');
+  const site = val('mfSite');
+  const horaires = val('mfHoraires');
+  const presentation = val('mfPres');
+  const techniques = [...new Set(val('mfTech').split(',').map(t => t.trim()).filter(Boolean))];
+  const masquee = document.getElementById('mfMasq' + i).checked;
+
+  if (site) {
+    let ok = false;
+    try {
+      const u = new URL(site);
+      ok = (u.protocol === 'http:' || u.protocol === 'https:') && u.hostname.includes('.');
+    } catch (e) { ok = false; }
+    if (!ok) return messageMaFiche(i, "L'adresse du site doit commencer par http:// ou https://, par exemple https://www.cabinet-ortho.fr.", true);
+  }
+  if (presentation.length > MAX_PRESENTATION)
+    return messageMaFiche(i, 'La présentation dépasse ' + MAX_PRESENTATION + ' caractères.', true);
+  if (techniques.length > MAX_TECHNIQUES)
+    return messageMaFiche(i, MAX_TECHNIQUES + ' techniques au maximum (' + techniques.length + ' saisies).', true);
+
+  const btn = document.getElementById('mfBtn' + i);
+  btn.disabled = true;
+  const { data, error } = await sb.rpc('maj_ma_fiche', {
+    p_id: f.id,
+    p_telephone: telephone || null,
+    p_site_web: site || null,
+    p_horaires: horaires || null,
+    p_presentation: presentation || null,
+    p_techniques: techniques,
+    p_masquee: masquee
+  });
+  btn.disabled = false;
+
+  if (error) {
+    console.error('maj_ma_fiche :', error);
+    return messageMaFiche(i, messageBase(error), true);
+  }
+  if (data !== true) return messageMaFiche(i, "Enregistrement non appliqué : aucune ligne n'a été modifiée.", true);
+
+  Object.assign(f, {
+    telephone: telephone || null, site_web: site || null, horaires: horaires || null,
+    presentation: presentation || null, techniques, masquee
+  });
+  messageMaFiche(i, 'Fiche enregistrée.', false);
+}
+
 // ─────────── Intérêts (admin) ───────────
 //
 // Le même appel unique à interets_totaux(), rapproché des produits et
@@ -9420,6 +9883,7 @@ async function chargerComptesAValider() {
 
   adminComptes = r.data || [];
   adminFichesRpps = await lireFichesRpps(adminComptes);
+  await chargerRevendicationsAdmin();
 
   boite.textContent = erreurFichesRpps ? 'Annuaire indisponible : ' + erreurFichesRpps : '';
   boite.classList.toggle('show', !!erreurFichesRpps);
@@ -9459,6 +9923,8 @@ function renderAdminComptes() {
   pastille.textContent = adminComptes.length;
   pastille.hidden = adminComptes.length === 0;
 
+  renderRevendicationsAdmin();
+
   const zone = document.getElementById('admComptesListe');
   if (!adminComptes.length) {
     zone.innerHTML = '<div class="admin-empty">Aucun compte en attente.</div>';
@@ -9474,7 +9940,9 @@ function renderAdminComptes() {
           </tr>
         </thead>
         <tbody>
-          ${adminComptes.map(c => `
+          ${adminComptes.map(c => {
+            const demandes = demandesDuCompte(c.id);
+            return `
             <tr>
               <td>
                 <div class="admin-nom">${esc(c.nom || 'Non renseigné')}</div>
@@ -9486,11 +9954,17 @@ function renderAdminComptes() {
               <td>${renderRppsCompte(c)}</td>
               <td>${renderAnnuaireCompte(c)}</td>
               <td class="col-actions">
-                <button class="btn btn-turquoise btn-sm" data-id="${esc(c.id)}" onclick="deciderCompte(this, 'valide')">Valider</button>
-                <button class="btn btn-outline btn-sm" data-id="${esc(c.id)}" onclick="deciderCompte(this, 'refuse')">Refuser</button>
+                ${demandes.length
+                  ? '<span style="font-size:12px; color:var(--text-light)">Décision sur la fiche ci-dessous</span>'
+                  : `<button class="btn btn-turquoise btn-sm" data-id="${esc(c.id)}" onclick="deciderCompte(this, 'valide')">Valider</button>
+                <button class="btn btn-outline btn-sm" data-id="${esc(c.id)}" onclick="deciderCompte(this, 'refuse')">Refuser</button>`}
               </td>
             </tr>
-          `).join('')}
+            ${demandes.length
+              ? `<tr><td colspan="7">${demandes.map(renderFicheRevendication).join('')}</td></tr>`
+              : ''}
+          `;
+          }).join('')}
         </tbody>
       </table>
     </div>`;
@@ -9521,6 +9995,173 @@ async function deciderCompte(btn, validation) {
   }
 
   await chargerComptesAValider();
+}
+
+// ─────────── Demandes de fiche (admin) ───────────
+// Les demandes en attente, la fiche liée lue dans annuaire_praticiens
+// (lecture réservée à l'admin) et, pour les comptes déjà validés, leur
+// nom et leur e-mail. La décision passe par valider_revendication et
+// refuser_revendication, jamais par un update direct.
+let adminRevendications = [];
+let adminFichesRevendiquees = new Map();
+let adminComptesRevendication = new Map();
+let erreurRevendications = null;
+let revendicationValidee = null;
+
+async function chargerRevendicationsAdmin() {
+  adminRevendications = [];
+  adminFichesRevendiquees = new Map();
+  adminComptesRevendication = new Map();
+  erreurRevendications = null;
+
+  const r = await sb.from('revendications')
+    .select('id, praticien_id, rpps, fiche_id, statut, cree_le')
+    .eq('statut', 'en_attente').order('cree_le');
+  if (r.error) { erreurRevendications = 'Demandes de fiche indisponibles : ' + r.error.message; return; }
+  adminRevendications = r.data || [];
+  if (!adminRevendications.length) return;
+
+  // Lecture de la table réservée à l'admin.
+  const ids = [...new Set(adminRevendications.map(d => d.fiche_id).filter(Boolean).map(String))];
+  for (let i = 0; i < ids.length; i += TAILLE_LOT_RPPS) {
+    const f = await sb.from('annuaire_praticiens')
+      .select('id, rpps, nom, prenom, specialite, cabinet, adresse, code_postal, ville, telephone')
+      .in('id', ids.slice(i, i + TAILLE_LOT_RPPS));
+    if (f.error) { erreurRevendications = 'Fiches de l\'annuaire indisponibles : ' + f.error.message; break; }
+    (f.data || []).forEach(l => adminFichesRevendiquees.set(String(l.id), l));
+  }
+
+  const enAttente = new Set(adminComptes.map(c => String(c.id)));
+  const autres = [...new Set(adminRevendications.map(d => String(d.praticien_id)))].filter(id => !enAttente.has(id));
+  if (autres.length) {
+    const c = await sb.from('praticiens').select('id, nom, email, validation').in('id', autres);
+    if (c.error) erreurRevendications = 'Comptes des demandes indisponibles : ' + c.error.message;
+    else (c.data || []).forEach(l => adminComptesRevendication.set(String(l.id), l));
+  }
+}
+
+function demandesDuCompte(id) {
+  return adminRevendications.filter(d => String(d.praticien_id) === String(id));
+}
+
+function compteDeRevendication(d) {
+  return adminComptes.find(c => String(c.id) === String(d.praticien_id))
+    || adminComptesRevendication.get(String(d.praticien_id)) || null;
+}
+
+function rppsDeRevendication(d) {
+  const f = adminFichesRevendiquees.get(String(d.fiche_id));
+  return String(d.rpps || (f && f.rpps) || '');
+}
+
+function renderFicheRevendication(d) {
+  const f = adminFichesRevendiquees.get(String(d.fiche_id));
+  const rpps = rppsDeRevendication(d);
+  const plusieurs = rpps && adminRevendications.filter(x => rppsDeRevendication(x) === rpps).length > 1;
+  const adresse = f ? [f.adresse, [f.code_postal, f.ville].filter(Boolean).join(' ')].filter(Boolean).join(', ') : '';
+  const tel = f && f.telephone ? String(f.telephone) : '';
+
+  return `<div class="rev-fiche">
+      ${plusieurs ? '<div class="rev-alerte">Plusieurs demandes pour cette fiche</div>' : ''}
+      <div class="rev-fiche-titre">Fiche demandée le ${esc(formatDate(d.cree_le))}</div>
+      ${f ? `
+        <div class="admin-nom">${esc([f.nom, f.prenom].filter(Boolean).join(' ') || 'Nom non renseigné')}</div>
+        ${f.specialite ? `<div>${esc(f.specialite)}</div>` : ''}
+        ${f.cabinet ? `<div>${esc(f.cabinet)}</div>` : ''}
+        ${adresse ? `<div>${esc(adresse)}</div>` : ''}
+        <div>Téléphone : ${tel
+          ? `<a href="tel:${esc(tel.replace(/[^\d+]/g, ''))}">${esc(tel)}</a> · <span class="rev-appel">Appeler ce numéro pour vérifier</span>`
+          : 'non renseigné sur la fiche'}</div>`
+        : '<div class="rev-alerte">Fiche introuvable dans l\'annuaire</div>'}
+      <div>RPPS : ${rpps ? `<span style="font-variant-numeric:tabular-nums">${esc(rpps)}</span>` : 'non renseigné'}</div>
+      <div><a href="${ANNUAIRE_SANTE_URL}" target="_blank" rel="noopener noreferrer">Annuaire Santé</a></div>
+      <div class="rev-actions">
+        <button class="btn btn-turquoise btn-sm" data-rev="${esc(d.id)}" onclick="deciderRevendication(this, 'valider')">Valider</button>
+        <button class="btn btn-outline btn-sm" data-rev="${esc(d.id)}" onclick="deciderRevendication(this, 'refuser')">Refuser</button>
+      </div>
+    </div>`;
+}
+
+function lienPrevenirParEmail(email) {
+  const corps = "Bonjour,\n\nVotre fiche OrthoConnect est validée. Connectez-vous pour la compléter depuis votre espace praticien, rubrique « Ma fiche ».\n\nBien cordialement,\nOrthoConnect";
+  return 'mailto:' + encodeURIComponent(email).replace(/%40/g, '@')
+    + '?subject=' + encodeURIComponent('Votre fiche OrthoConnect est validée')
+    + '&body=' + encodeURIComponent(corps);
+}
+
+function renderRevendicationsAdmin() {
+  const erreur = document.getElementById('admRevErreur');
+  erreur.textContent = erreurRevendications || '';
+  erreur.classList.toggle('show', !!erreurRevendications);
+
+  const prevenir = document.getElementById('admRevPrevenir');
+  const v = revendicationValidee;
+  prevenir.innerHTML = v
+    ? `<div class="admin-message ok show">Fiche validée pour ${esc(v.nom || 'ce compte')}.
+        ${v.email ? `<a href="${esc(lienPrevenirParEmail(v.email))}">Prévenir par e-mail</a>` : "Aucune adresse e-mail connue pour ce compte."}</div>`
+    : '';
+
+  const zone = document.getElementById('admRevendicationsListe');
+  const lignes = adminRevendications.filter(d => {
+    const c = adminComptesRevendication.get(String(d.praticien_id));
+    return c && c.validation === 'valide';
+  });
+  if (!lignes.length) {
+    zone.innerHTML = '<div class="admin-empty">Aucune demande de fiche en attente.</div>';
+    return;
+  }
+  zone.innerHTML = lignes.map(d => {
+    const c = adminComptesRevendication.get(String(d.praticien_id));
+    return `<div style="margin-bottom:14px">
+        <div class="admin-nom">${esc(c.nom || 'Non renseigné')}</div>
+        <div style="font-size:12px; color:var(--text-light)">${esc(c.email || '')}</div>
+        ${renderFicheRevendication(d)}
+      </div>`;
+  }).join('');
+}
+
+async function rechargerInscritsAdmin() {
+  const r = await chargerPraticiensAdmin();
+  if (r.error) { adminMessage('Liste des inscrits non rechargée : ' + r.error.message, true); return; }
+  adminPraticiens = r.data || [];
+  renderAdminInscrits();
+}
+
+async function deciderRevendication(btn, action) {
+  if (!estAdmin()) return;
+  const id = btn.dataset.rev;
+  const d = adminRevendications.find(x => String(x.id) === id);
+  if (!d) return;
+  const compte = compteDeRevendication(d);
+  const nom = (compte && compte.nom) || 'ce compte';
+  if (action === 'refuser' && !window.confirm('Refuser la demande de fiche de « ' + nom + ' » ?')) return;
+
+  btn.closest('.rev-fiche').querySelectorAll('button').forEach(b => { b.disabled = true; });
+  revendicationValidee = null;
+
+  const { data, error } = await sb.rpc(action === 'valider' ? 'valider_revendication' : 'refuser_revendication', { p_id: d.id });
+  let ok = false;
+  if (error) { console.error(action + '_revendication :', error); adminMessage(messageBase(error), true); }
+  else if (data === false) adminMessage("Décision non enregistrée : cette demande n'est plus en attente ou n'a pas pu être modifiée.", true);
+  else ok = true;
+
+  // valider_revendication valide aussi le compte : les deux listes bougent.
+  await Promise.all([chargerComptesAValider(), rechargerInscritsAdmin()]);
+
+  // La relecture fait foi : une demande encore en attente n'a pas été traitée.
+  if (ok && adminRevendications.some(x => String(x.id) === id)) {
+    adminMessage('Décision non enregistrée : la demande est toujours en attente après relecture.', true);
+    return;
+  }
+  if (!ok) return;
+
+  if (action === 'valider') {
+    revendicationValidee = { nom: compte && compte.nom, email: compte && compte.email };
+    renderRevendicationsAdmin();
+    adminMessage('Fiche validée.');
+  } else {
+    adminMessage('Demande refusée.');
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -9872,15 +10513,26 @@ async function lancerRechercheAnnuaire(terme, jeton) {
     return;
   }
   const lignes = r.data || [];
+  annuaireResultatsParId = new Map(lignes.map(l => [String(l.id), l]));
+  // Un compte existe déjà dès qu'une session est ouverte : pas d'invitation.
+  const invitation = sessionUtilisateur ? '' : '<p class="page-carte-note">Vous ne trouvez pas votre fiche ? '
+    + '<a href="#" onclick="event.preventDefault(); openAuth(\'signup\')">Inscrivez-vous quand même</a></p>';
   if (!lignes.length) {
-    zone.innerHTML = '<p class="page-carte-note">Aucun praticien ne correspond à cette recherche.</p>';
+    zone.innerHTML = '<p class="page-carte-note">Aucun praticien ne correspond à cette recherche.</p>' + invitation;
     return;
   }
   zone.innerHTML = '<ul class="page-carte-resultats">'
-    + lignes.map(l => '<li><strong>' + esc([l.nom, l.prenom].filter(Boolean).join(' ')) + '</strong>'
+    + lignes.map(l => '<li class="fiche-resultat"><span><strong>' + esc([l.nom, l.prenom].filter(Boolean).join(' ')) + '</strong>'
       + (l.specialite ? ' · ' + esc(l.specialite) : '')
-      + (l.ville ? ' · ' + esc(l.ville) : '') + '</li>').join('')
-    + '</ul><p class="page-carte-note">La revendication des fiches ouvrira prochainement.</p>';
+      + (l.ville ? ' · ' + esc(l.ville) : '') + '</span>'
+      + (l.revendiquee === true
+          ? '<span class="fiche-revendiquee">Fiche déjà revendiquée</span>'
+          : l.revendiquee === false
+            ? '<button type="button" class="btn btn-turquoise btn-sm" data-fiche="' + esc(l.id)
+              + '" onclick="cliquerMaFiche(this)">C\'est ma fiche</button>'
+            : '')
+      + '</li>').join('')
+    + '</ul>' + invitation;
 }
 
 // ─────────── Congrès ───────────
