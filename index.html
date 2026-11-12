@@ -2174,96 +2174,175 @@
   .landing-connecte { display: none !important; }
   body.oc-session .landing-connecte { display: inline-flex !important; }
   body.oc-session .landing-visiteur { display: none !important; }
-  .lp-section { padding: 72px 0; }
+
+  /* Un accent par univers, chacun avec sa teinte claire et un texte qui
+     tient le contraste AA sur blanc comme sur les fonds teintés. */
+  #page-landing {
+    --lp-turquoise: #00B8C8; --lp-turquoise-clair: #E2F5F7; --lp-turquoise-texte: #00717B; --lp-turquoise-ombre: rgba(0,184,200,0.28);
+    --lp-violet: #8A7BE6;    --lp-violet-clair: #EEEBFC;    --lp-violet-texte: #5847B8;    --lp-violet-ombre: rgba(138,123,230,0.28);
+    --lp-corail: #F07A62;    --lp-corail-clair: #FDEBE6;    --lp-corail-texte: #B13F28;    --lp-corail-ombre: rgba(240,122,98,0.28);
+    --lp-vert: #34B27B;      --lp-vert-clair: #E4F5EC;      --lp-vert-texte: #1C7A4F;      --lp-vert-ombre: rgba(52,178,123,0.28);
+    --lp-fond-turquoise: #F0FAFB; --lp-fond-chaud: #FFF6EF;
+  }
+  .lp-u-formations { --u: var(--lp-turquoise); --u-clair: var(--lp-turquoise-clair); --u-texte: var(--lp-turquoise-texte); --u-ombre: var(--lp-turquoise-ombre); }
+  .lp-u-produits   { --u: var(--lp-violet);    --u-clair: var(--lp-violet-clair);    --u-texte: var(--lp-violet-texte);    --u-ombre: var(--lp-violet-ombre); }
+  .lp-u-congres    { --u: var(--lp-corail);    --u-clair: var(--lp-corail-clair);    --u-texte: var(--lp-corail-texte);    --u-ombre: var(--lp-corail-ombre); }
+  .lp-u-emploi     { --u: var(--lp-vert);      --u-clair: var(--lp-vert-clair);      --u-texte: var(--lp-vert-texte);      --u-ombre: var(--lp-vert-ombre); }
+
+  /* Sections : fonds alternés, séparées par une courbe ou une diagonale
+     en bas, de la couleur de la section suivante. */
+  .lp-section { position: relative; padding: 72px 0 120px; }
+  .lp-fond-blanc { background: var(--white); }
+  .lp-fond-turquoise { background: var(--lp-fond-turquoise); }
+  .lp-fond-chaud { background: var(--lp-fond-chaud); }
+  .lp-fond-navy { background: var(--navy); color: var(--white); }
+  .lp-sep { position: absolute; left: 0; bottom: -1px; width: 100%; height: 48px; display: block; pointer-events: none; }
+  .lp-sep path { fill: currentColor; }
   /* Cibles de « Découvrir » et « Retrouvez votre fiche » : sous la barre fixe. */
   #lpRangees, #lpRecherche { scroll-margin-top: 76px; }
-  .lp-section + .lp-section { padding-top: 0; }
-  .lp-titre { font-size: 26px; font-weight: 800; color: var(--navy); letter-spacing: -0.3px; margin-bottom: 8px; }
+  .lp-titre { font-size: 28px; font-weight: 800; color: var(--navy); letter-spacing: -0.3px; margin-bottom: 8px; }
   .lp-intro { font-size: 15px; color: var(--text-secondary); line-height: 1.6; max-width: 640px; margin-bottom: 28px; }
-  .lp-icone { width: 44px; height: 44px; border-radius: 12px; background: var(--turquoise-light); color: var(--navy);
+  .lp-icone { width: 52px; height: 52px; border-radius: 50%; background: var(--u-clair, var(--turquoise-light)); color: var(--u-texte, var(--navy));
     display: inline-flex; align-items: center; justify-content: center; flex: none; }
-  .lp-icone svg { width: 22px; height: 22px; }
+  .lp-icone svg { width: 26px; height: 26px; }
 
-  .lp-hero { background: linear-gradient(135deg, var(--navy) 0%, #1A3F70 100%); color: var(--white); padding: 64px 0 72px; }
+  /* ── Hero : dégradés lents (transform seulement) et rangée de dents ── */
+  .lp-hero { position: relative; overflow: hidden; isolation: isolate;
+    background: linear-gradient(135deg, var(--navy) 0%, #163A63 60%, #1A3F70 100%); color: var(--white); padding: 56px 0 112px; }
+  .lp-hero::before { content: ''; position: absolute; inset: -35%; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(circle at 28% 32%, rgba(0,184,200,0.30), transparent 42%),
+      radial-gradient(circle at 76% 62%, rgba(138,123,230,0.24), transparent 44%),
+      radial-gradient(circle at 52% 96%, rgba(240,122,98,0.16), transparent 38%);
+    animation: lpFond 20s ease-in-out infinite alternate; will-change: transform; }
+  @keyframes lpFond { from { transform: translate3d(-5%, -3%, 0) rotate(0deg) scale(1); } to { transform: translate3d(5%, 4%, 0) rotate(10deg) scale(1.08); } }
   .lp-hero-grille { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 56px; align-items: center; }
+  /* Chaque dent est un élément HTML : ses animations restent sur le
+     compositeur, sans repeindre la page à chaque image. */
+  .lp-dents { position: relative; display: flex; gap: 1.365%; width: 293px; max-width: 100%; aspect-ratio: 293 / 36; margin: 0 0 20px; }
+  .lp-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .lp-dent { display: block; flex: 0 0 9.898%; transform-origin: 50% 100%; animation: lpAligne 2s cubic-bezier(.2,.8,.2,1) both; }
+  .lp-dent-souffle { display: block; transform-origin: 50% 60%; animation: lpSouffle 4s ease-in-out infinite alternate; animation-delay: calc(2s + var(--d, 0ms)); }
+  .lp-dent svg { display: block; width: 100%; height: auto; }
+  @keyframes lpAligne { from { transform: translateY(var(--y, 0)) rotate(var(--r, 0deg)); } to { transform: none; } }
+  @keyframes lpSouffle { from { transform: scale(1); } to { transform: scale(1.045); } }
+  .lp-eclat-cadre { position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 293 36' preserveAspectRatio='none'%3E%3Cpath transform='translate(0 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(33 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(66 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(99 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(132 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(165 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(198 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(231 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(264 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 293 36' preserveAspectRatio='none'%3E%3Cpath transform='translate(0 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(33 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(66 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(99 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(132 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(165 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(198 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(231 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3Cpath transform='translate(264 0) scale(1.2083)' d='M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat; }
+  .lp-eclat { position: absolute; top: 0; bottom: 0; left: 0; width: 18%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0) 100%);
+    opacity: 0; transform: translateX(-120%); animation: lpEclat 8s ease-in-out 2.4s infinite; }
+  @keyframes lpEclat { 0% { transform: translateX(-120%); opacity: 0; } 3% { opacity: 1; } 16% { transform: translateX(560%); opacity: 0.9; } 18%, 100% { transform: translateX(560%); opacity: 0; } }
   .lp-hero h1 { font-size: 46px; font-weight: 800; line-height: 1.1; letter-spacing: -1px; margin-bottom: 16px; }
-  .lp-hero-sous { font-size: 18px; line-height: 1.55; color: rgba(255,255,255,0.86); max-width: 560px; margin-bottom: 28px; }
+  .lp-hero-sous { font-size: 18px; line-height: 1.55; color: rgba(255,255,255,0.88); max-width: 560px; margin-bottom: 28px; }
   .lp-recherche { background: var(--white); color: var(--text-main); border-radius: 16px; padding: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.18); max-width: 560px; }
+    box-shadow: 0 14px 36px rgba(0,0,0,0.22); max-width: 560px; border-top: 4px solid var(--lp-turquoise); }
   .lp-recherche-label { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 10px; display: block; }
   .lp-recherche-champ { position: relative; }
-  .lp-recherche-champ svg { position: absolute; left: 14px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; }
+  .lp-recherche-champ svg { position: absolute; left: 14px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--lp-turquoise-texte); pointer-events: none; }
   .lp-recherche-champ input { font-size: 16px; min-height: 48px; padding-left: 42px; }
   .lp-appui { font-size: 13px; color: var(--text-secondary); margin-top: 10px; line-height: 1.5; }
   .lp-resultats:empty { display: none; }
   .lp-hero-liens { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
   .lp-hero-liens .btn { min-height: 44px; }
   .lp-hero-apercu { display: flex; flex-direction: column; gap: 14px; }
-  .lp-mini { background: var(--white); color: var(--text-main); border-radius: 16px; padding: 16px 18px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.18); min-height: 92px; }
+  .lp-mini { position: relative; background: var(--white); color: var(--text-main); border-radius: 16px; padding: 16px 18px 16px 20px;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.22); min-height: 92px; border-left: 5px solid var(--u, var(--lp-turquoise)); }
   .lp-mini:nth-child(2) { margin-left: 28px; }
   .lp-mini[hidden] { display: none; }
-  .lp-mini-type { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: #007C87; }
+  .lp-mini-type { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--u-texte, #007C87); }
   .lp-mini-titre { font-size: 15px; font-weight: 700; color: var(--navy); margin-top: 4px;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .lp-mini-ligne { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
 
-  .lp-squelette { display: block; border-radius: 8px; background: linear-gradient(90deg, #EEF2F6 0%, #F7F9FB 50%, #EEF2F6 100%);
-    background-size: 200% 100%; animation: lpSquelette 1.2s ease-in-out infinite; }
-  @keyframes lpSquelette { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+  /* Squelettes : une pulsation d'opacité, rien d'autre. */
+  .lp-squelette { display: block; border-radius: 8px; background: #E9EEF3; animation: lpSquelette 1.2s ease-in-out infinite alternate; }
+  @keyframes lpSquelette { from { opacity: 1; } to { opacity: 0.45; } }
 
-  .lp-chiffres { border-bottom: 1px solid var(--grey-border); }
-  .lp-chiffres-liste { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 28px 0; }
-  .lp-chiffres-liste li { display: flex; flex-direction: column; gap: 2px; }
+  /* ── Chiffres ── */
+  .lp-chiffres { position: relative; padding-bottom: 48px; background: var(--white); }
+  .lp-chiffres-liste { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 32px 0 8px; }
+  .lp-chiffres-liste li { display: flex; flex-direction: column; gap: 2px; padding-left: 14px; border-left: 4px solid var(--u, var(--navy)); }
   .lp-chiffres-liste li[hidden] { display: none; }
-  .lp-chiffre { font-size: 30px; font-weight: 800; color: var(--navy); line-height: 1.15; min-height: 35px; }
+  .lp-chiffre { font-size: 32px; font-weight: 800; color: var(--u-texte, var(--navy)); line-height: 1.15; min-height: 37px; font-variant-numeric: tabular-nums; }
   .lp-chiffre .lp-squelette { width: 72px; height: 30px; margin-top: 3px; }
   .lp-chiffre-libelle { font-size: 14px; color: var(--text-secondary); }
 
-  .lp-rangee + .lp-rangee { margin-top: 48px; }
+  /* ── Rangées ── */
+  .lp-rangee + .lp-rangee { margin-top: 52px; }
   .lp-rangee[hidden] { display: none; }
-  .lp-rangee-tete { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .lp-rangee-tete { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .lp-rangee-tete .lp-icone { width: 44px; height: 44px; }
+  .lp-rangee-tete .lp-icone svg { width: 22px; height: 22px; }
   .lp-rangee-tete h2 { font-size: 22px; font-weight: 800; color: var(--navy); margin-right: auto; }
-  .lp-voir-tout { font-size: 14px; font-weight: 600; color: #007C87; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+  .lp-voir-tout { font-size: 14px; font-weight: 700; color: var(--u-texte, #007C87); text-decoration: none; min-height: 44px; min-width: 44px; justify-content: center; display: inline-flex; align-items: center; }
   .lp-voir-tout:hover { text-decoration: underline; }
   .lp-fleches { display: none; gap: 8px; }
   .lp-fleche { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--grey-border); background: var(--white);
-    color: var(--navy); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+    color: var(--u-texte, var(--navy)); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease; }
   .lp-fleche svg { width: 18px; height: 18px; }
-  .lp-fleche:hover:not(:disabled) { border-color: var(--turquoise); }
+  .lp-fleche:hover:not(:disabled) { transform: scale(1.06); border-color: var(--u, var(--turquoise)); }
   .lp-fleche:disabled { opacity: 0.35; cursor: default; }
   .lp-piste { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
-    padding: 4px 4px 14px; margin: -4px -4px 0; scroll-padding-inline: 4px; min-height: 214px; scrollbar-width: thin; scroll-behavior: smooth; }
-  .lp-piste:focus-visible, .lp-carte:focus-visible, .lp-fleche:focus-visible { outline: 3px solid var(--turquoise); outline-offset: 2px; }
-  .lp-carte { flex: 0 0 280px; scroll-snap-align: start; min-height: 196px; display: flex; flex-direction: column; gap: 6px;
-    background: var(--white); border: 1px solid var(--grey-border); border-radius: 16px; padding: 18px 20px;
-    box-shadow: 0 2px 10px rgba(15,43,77,0.06); text-decoration: none; color: var(--text-main);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
-  .lp-carte:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(15,43,77,0.12); border-color: var(--turquoise); }
-  .lp-carte.lp-squelette { border: 0; box-shadow: none; }
-  .lp-carte-sur { font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #007C87; }
+    padding: 8px 6px 22px; margin: -8px -6px 0; scroll-padding-inline: 6px; min-height: 300px; scrollbar-width: thin; scroll-behavior: smooth; }
+  .lp-piste:focus-visible, .lp-carte:focus-visible, .lp-fleche:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+  .lp-carte { position: relative; isolation: isolate; flex: 0 0 280px; scroll-snap-align: start; min-height: 270px;
+    display: flex; flex-direction: column; gap: 6px; background: var(--white); border: 1px solid var(--grey-border);
+    border-top: 6px solid var(--u, var(--turquoise)); border-radius: 16px; padding: 16px 20px 18px;
+    box-shadow: 0 2px 10px rgba(15,43,77,0.06); text-decoration: none; color: var(--text-main); transition: transform 0.2s ease; }
+  /* L'ombre teintée vit sur un calque à part : seule son opacité change. */
+  .lp-carte::after { content: ''; position: absolute; inset: -1px; border-radius: inherit; z-index: -1; pointer-events: none;
+    box-shadow: 0 16px 32px var(--u-ombre, rgba(15,43,77,0.18)); opacity: 0; transition: opacity 0.2s ease; }
+  .lp-carte:hover { transform: translateY(-4px); }
+  .lp-carte:hover::after { opacity: 1; }
+  .lp-carte.lp-squelette { border: 0; box-shadow: none; background: #E9EEF3; }
+  .lp-carte-tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+  .lp-picto { width: 52px; height: 52px; border-radius: 50%; background: var(--u-clair); color: var(--u-texte);
+    display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .lp-picto svg { width: 28px; height: 28px; }
+  .lp-date { width: 54px; border-radius: 12px; background: var(--u-clair); color: var(--u-texte); text-align: center; padding: 6px 0 7px; line-height: 1; flex: none; }
+  .lp-date-jour { display: block; font-size: 22px; font-weight: 800; }
+  .lp-date-mois { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+  .lp-mono { width: 42px; height: 42px; border-radius: 12px; background: var(--u-texte); color: var(--white);
+    display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; flex: none; }
+  .lp-pastille { align-self: flex-start; font-size: 12px; font-weight: 700; color: var(--u-texte); background: var(--u-clair);
+    border-radius: 20px; padding: 3px 10px; }
   .lp-carte-titre { font-size: 16px; font-weight: 700; color: var(--navy); line-height: 1.35;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .lp-carte-ligne { font-size: 14px; color: var(--text-secondary); }
   .lp-carte-accroche { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-top: 2px;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .lp-carte-bas { margin-top: auto; font-size: 13px; font-weight: 600; color: var(--navy); }
+  .lp-carte-bas { margin-top: auto; font-size: 13px; font-weight: 700; color: var(--u-texte); }
+  .lp-carte.lp-entree { animation: lpEntree 0.3s ease-out backwards; animation-delay: calc(var(--i, 0) * 60ms); }
+  @keyframes lpEntree { from { opacity: 0; transform: translateY(8px); } }
 
+  /* ── Étapes, profils, cœur, marques, appel final ── */
   .lp-etapes, .lp-profils { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .lp-etape, .lp-profil { background: var(--white); border: 1px solid var(--grey-border); border-radius: 16px; padding: 22px;
-    box-shadow: 0 2px 10px rgba(15,43,77,0.05); }
-  .lp-etape-num { font-size: 13px; font-weight: 700; color: #007C87; margin: 14px 0 4px; }
+    box-shadow: 0 4px 16px rgba(15,43,77,0.06); }
+  .lp-etape { border-top: 6px solid var(--u); }
+  .lp-illus { display: block; width: 112px; height: 84px; margin-bottom: 10px; }
+  .lp-etape-num { font-size: 13px; font-weight: 700; color: var(--u-texte); margin: 0 0 4px; }
   .lp-etape h3, .lp-profil h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
   .lp-etape p, .lp-profil p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-  .lp-coeur { display: flex; gap: 20px; align-items: flex-start; background: var(--grey-bg); border-radius: 16px; padding: 28px; }
-  .lp-coeur h2 { font-size: 22px; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
-  .lp-coeur p { font-size: 15px; color: var(--text-secondary); line-height: 1.65; max-width: 680px; }
+  .lp-coeur { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 32px; align-items: center; }
+  .lp-coeur h2 { font-size: 28px; font-weight: 800; color: var(--white); margin-bottom: 10px; }
+  .lp-coeur p { font-size: 16px; color: rgba(255,255,255,0.88); line-height: 1.65; max-width: 640px; }
+  .lp-coeur-illus { position: relative; width: 220px; height: 170px; justify-self: center; flex: none; }
+  .lp-anneau { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.07); }
+  .lp-orbite { position: absolute; border-radius: 50%; animation: lpRapproche 6s ease-in-out infinite alternate; }
+  @keyframes lpRapproche { from { transform: translate(0, 0); } to { transform: translate(var(--x, 0), var(--y, 0)); } }
+  .lp-coeur-battement { position: absolute; left: 80px; top: 60px; width: 60px; height: 52px; animation: lpBat 3s ease-in-out infinite; }
+  .lp-coeur-battement svg { display: block; width: 100%; height: 100%; }
+  @keyframes lpBat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
   .lp-marques { display: flex; gap: 8px 16px; flex-wrap: wrap; align-items: center; justify-content: center;
-    font-size: 14px; color: var(--text-secondary); border: 1px solid var(--grey-border); border-radius: 16px; padding: 14px 20px; }
-  .lp-marques a { color: #007C87; font-weight: 600; min-height: 44px; display: inline-flex; align-items: center; }
-  .lp-final { text-align: center; background: var(--navy); color: var(--white); border-radius: 16px; padding: 44px 24px; }
-  .lp-final h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
-  .lp-final p { color: rgba(255,255,255,0.82); font-size: 15px; margin-bottom: 22px; }
+    font-size: 15px; color: var(--navy); background: var(--lp-fond-turquoise); border-radius: 16px; padding: 14px 20px; }
+  .lp-marques a { color: var(--lp-turquoise-texte); font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
+  .lp-final { position: relative; overflow: hidden; isolation: isolate; text-align: center; color: var(--white); border-radius: 20px; padding: 48px 24px;
+    background: linear-gradient(135deg, var(--navy) 0%, #1A3F70 100%); }
+  .lp-final::before { content: ''; position: absolute; inset: -40%; z-index: -1; pointer-events: none;
+    background: radial-gradient(circle at 20% 30%, rgba(0,184,200,0.28), transparent 40%), radial-gradient(circle at 85% 80%, rgba(138,123,230,0.22), transparent 40%); }
+  .lp-final h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .lp-final p { color: rgba(255,255,255,0.88); font-size: 15px; margin-bottom: 22px; }
   .lp-final-boutons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .lp-final-boutons .btn { min-height: 44px; }
 
@@ -2272,31 +2351,50 @@
   #page-landing .btn-turquoise { color: var(--navy); }
   #page-landing .btn-turquoise:hover { color: var(--navy); }
   #page-landing .footer-bottom span { color: rgba(255,255,255,0.72); }
+  /* La dernière courbe se raccorde au pied de page : pas de marge entre les deux. */
+  #page-landing > footer { margin-top: 0; }
 
-  html.lp-anim .lp-apparait { opacity: 0; transform: translateY(8px); transition: opacity 0.3s ease, transform 0.3s ease; }
-  html.lp-anim .lp-apparait.visible { opacity: 1; transform: none; }
+  /* Apparition au défilement : la section, puis ses éléments à 60 ms
+     d'écart. */
+  html.lp-anim .lp-apparait .lp-echelon { opacity: 0; transform: translateY(8px); transition: opacity 0.3s ease, transform 0.3s ease;
+    transition-delay: calc(var(--i, 0) * 60ms); }
+  html.lp-anim .lp-apparait.visible .lp-echelon { opacity: 1; transform: none; }
+  /* Boucles en pause hors de l'écran ou onglet caché (classes posées par
+     ouvrirLanding) ; elles reprennent où elles en étaient. */
+  .lp-pause::before, .lp-pause *, html.lp-onglet-cache #page-landing *, html.lp-onglet-cache #page-landing *::before {
+    animation-play-state: paused !important;
+  }
   @media (prefers-reduced-motion: reduce) {
-    html.lp-anim .lp-apparait { opacity: 1; transform: none; transition: none; }
-    .lp-squelette { animation: none; }
+    .lp-hero::before, .lp-dent, .lp-dent-souffle, .lp-eclat, .lp-orbite, .lp-coeur-battement, .lp-squelette, .lp-carte.lp-entree { animation: none !important; }
+    .lp-eclat { opacity: 0; }
+    html.lp-anim .lp-apparait .lp-echelon { opacity: 1; transform: none; transition: none; }
     .lp-piste { scroll-behavior: auto; }
-    .lp-carte, .lp-carte:hover { transition: none; transform: none; }
+    .lp-carte, .lp-carte:hover, .lp-fleche:hover:not(:disabled) { transition: none; transform: none; }
+    .lp-carte::after { transition: none; }
   }
   @media (hover: hover) and (min-width: 961px) { .lp-fleches { display: flex; } }
   @media (max-width: 960px) {
     .lp-hero-grille { grid-template-columns: minmax(0, 1fr); }
-    .lp-chiffres-liste { grid-template-columns: repeat(2, 1fr); }
+    .lp-chiffres-liste { grid-template-columns: repeat(2, 1fr); row-gap: 20px; }
   }
   @media (max-width: 899px) { .lp-hero-apercu { display: none; } }
+  /* Liens du pied de page de l'accueil : 44 px de cible au doigt. */
+  @media (max-width: 960px) {
+    #page-landing .footer-col a { min-height: 44px; display: flex; align-items: center; margin-bottom: 0; }
+  }
   @media (max-width: 700px) {
-    .lp-section { padding: 48px 0; }
-    .lp-hero { padding: 40px 0 48px; }
+    .lp-section { padding: 48px 0 84px; }
+    .lp-sep { height: 28px; }
+    .lp-hero { padding: 36px 0 76px; }
+    .lp-dents { width: 230px; margin-bottom: 14px; }
+    .lp-coeur-illus { order: -1; }
     .lp-hero h1 { font-size: 34px; }
     .lp-hero-sous { font-size: 16px; }
     .lp-recherche { padding: 16px; }
     .lp-etapes, .lp-profils { grid-template-columns: minmax(0, 1fr); }
     .lp-carte { flex-basis: 85%; }
-    .lp-coeur { flex-direction: column; padding: 22px; }
-    .lp-titre { font-size: 23px; }
+    .lp-coeur { grid-template-columns: minmax(0, 1fr); }
+    .lp-titre, .lp-coeur h2, .lp-final h2 { font-size: 24px; }
   }
 
   /* Page derrière un écran plein : immobile. */
@@ -2813,6 +2911,14 @@
   <section class="lp-hero">
     <div class="container lp-hero-grille">
       <div>
+        <div class="lp-dents" aria-hidden="true">
+          <svg class="lp-defs" width="0" height="0" focusable="false"><defs>
+            <linearGradient id="lpDentFond" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D7F3F6"/></linearGradient>
+            <symbol id="lpDent" viewBox="0 0 24 30"><path d="M5 3C8 1 10 2.6 12 2.6S16 1 19 3c3.5 2 3.6 7 2.4 11-1 3.4-1.6 6-2.2 11-.4 3.6-3.2 4-3.8.6l-.8-4.2C14.2 19.6 13 19 12 19s-2.2.6-2.6 2.4l-.8 4.2c-.6 3.4-3.4 3-3.8-.6-.6-5-1.2-7.6-2.2-11C1.4 10 1.5 5 5 3z" fill="url(#lpDentFond)"/></symbol>
+          </defs></svg>
+          <span class="lp-dent" style="--r:-9deg;--y:-6px"><span class="lp-dent-souffle" style="--d:0ms"><svg viewBox="0 0 24 30" focusable="false"><use href="#lpDent"/><path d="M7.2 6.4c1.2-.9 2.6-1 3.8-.5" fill="none" stroke="#00B8C8" stroke-width="1.5" stroke-linecap="round" opacity=".85"/></svg></span></span><span class="lp-dent" style="--r:6deg;--y:5px"><span class="lp-dent-souffle" style="--d:180ms"><svg viewBox="0 0 24 30" focusable="false"><use href="#lpDent"/><path d="M7.2 6.4c1.2-.9 2.6-1 3.8-.5" fill="none" stroke="#00B8C8" stroke-width="1.5" stroke-linecap="round" opacity=".85"/></svg></span></span><span class="lp-dent" style="--r:-4deg;--y:8px"><span class="lp-dent-souffle" style="--d:360ms"><svg viewBox="0 0 24 30" focusable="false"><use href="#lpDent"/><path d="M7.2 6.4c1.2-.9 2.6-1 3.8-.5" fill="none" stroke="#00B8C8" stroke-width="1.5" stroke-linecap="round" opacity=".85"/></svg></span></span><span class="lp-dent" style="--r:11deg;--y:-3px"><span class="lp-dent-souffle" style="--d:540ms"><svg viewBox="0 0 24 30" focusable="false"><use href="#lpDent"/><path d="M7.2 6.4c1.2-.9 2.6-1 3.8-.5" fill="none" stroke="#00B8C8" stroke-width="1.5" stroke-linecap="round" opacity=".85"/></svg></span></span><span class="lp-dent" style="--r:-7deg;--y:4px"><span class="lp-dent-souffle" style="--d:720ms"><svg viewBox="0 0 24 30" focusable="false"><use href="#lpDent"/><path d="M7.2 6.4c1.2-.9 2.6-1 3.8-.5" fill="none" stroke="#00B8C8" stroke-width="1.5" stroke-linecap="round" opacity=".85"/></svg></span></span><span class="lp-dent" style="--r:5deg;--y:-7px"><span class="lp-dent-souffle" style="--d:900ms"><svg viewBox="0 0 24 30" focusable="false"><use href="#lpDent"/><path d="M7.2 6.4c1.2-.9 2.6-1 3.8-.5" fill="none" stroke="#00B8C8" stroke-width="1.5" stroke-linecap="round" opacity=".85"/></svg></span></span><span class="lp-dent" style="--r:-10deg;--y:3px"><span class="lp-dent-souffle" style="--d:1080ms"><svg viewBox="0 0 24 30" focusable="false"><use href="#lpDent"/><path d="M7.2 6.4c1.2-.9 2.6-1 3.8-.5" fill="none" stroke="#00B8C8" stroke-width="1.5" stroke-linecap="round" opacity=".85"/></svg></span></span><span class="lp-dent" style="--r:8deg;--y:6px"><span class="lp-dent-souffle" style="--d:1260ms"><svg viewBox="0 0 24 30" focusable="false"><use href="#lpDent"/><path d="M7.2 6.4c1.2-.9 2.6-1 3.8-.5" fill="none" stroke="#00B8C8" stroke-width="1.5" stroke-linecap="round" opacity=".85"/></svg></span></span><span class="lp-dent" style="--r:-3deg;--y:-5px"><span class="lp-dent-souffle" style="--d:1440ms"><svg viewBox="0 0 24 30" focusable="false"><use href="#lpDent"/><path d="M7.2 6.4c1.2-.9 2.6-1 3.8-.5" fill="none" stroke="#00B8C8" stroke-width="1.5" stroke-linecap="round" opacity=".85"/></svg></span></span>
+          <span class="lp-eclat-cadre"><span class="lp-eclat"></span></span>
+        </div>
         <h1>Se former, s'équiper, recruter.</h1>
         <p class="lp-hero-sous">Les formations, les produits, les congrès et les postes de l'orthodontie, réunis pour les praticiens.</p>
         <div class="lp-recherche landing-visiteur" id="lpRecherche">
@@ -2832,28 +2938,31 @@
         </div>
       </div>
       <div class="lp-hero-apercu" id="lpApercu" aria-hidden="true">
-        <div class="lp-mini" id="lpMiniCongres"><span class="lp-squelette" style="height:60px"></span></div>
-        <div class="lp-mini" id="lpMiniFormation"><span class="lp-squelette" style="height:60px"></span></div>
-        <div class="lp-mini" id="lpMiniProduit"><span class="lp-squelette" style="height:60px"></span></div>
+        <div class="lp-mini lp-u-congres" id="lpMiniCongres"><span class="lp-squelette" style="height:60px"></span></div>
+        <div class="lp-mini lp-u-formations" id="lpMiniFormation"><span class="lp-squelette" style="height:60px"></span></div>
+        <div class="lp-mini lp-u-produits" id="lpMiniProduit"><span class="lp-squelette" style="height:60px"></span></div>
       </div>
     </div>
+    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#FFFFFF" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
   </section>
 
   <section class="lp-chiffres" aria-label="OrthoConnect en chiffres" id="lpChiffres">
     <div class="container">
       <ul class="lp-chiffres-liste">
         <li data-chiffre="annuaire" data-un="orthodontiste référencé"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">orthodontistes référencés</span></li>
-        <li data-chiffre="formations" data-un="formation publiée"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">formations publiées</span></li>
-        <li data-chiffre="produits" data-un="produit comparable"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">produits comparables</span></li>
-        <li data-chiffre="congres" data-un="congrès à venir"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">congrès à venir</span></li>
+        <li class="lp-u-formations" data-chiffre="formations" data-un="formation publiée"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">formations publiées</span></li>
+        <li class="lp-u-produits" data-chiffre="produits" data-un="produit comparable"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">produits comparables</span></li>
+        <li class="lp-u-congres" data-chiffre="congres" data-un="congrès à venir"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">congrès à venir</span></li>
       </ul>
     </div>
+    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#F0FAFB" aria-hidden="true" focusable="false"><path d="M0 48 L1440 6 L1440 48 Z"/></svg>
   </section>
 
-  <section class="lp-section" id="lpRangees">
+  <section class="lp-section lp-fond-turquoise" id="lpRangees">
     <div class="container">
-      <div class="lp-rangee" id="lpRangeeCongres" data-rangee="congres">
+      <div class="lp-rangee lp-u-congres" id="lpRangeeCongres" data-rangee="congres">
         <div class="lp-rangee-tete">
+          <span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="M8.5 14h2M13.5 14h2M8.5 17h2"/></svg></span>
           <h2>Prochains congrès</h2>
           <a class="lp-voir-tout" href="/congres" onclick="return lienInterne(event, () => showPage('congres'))">Voir tout</a>
           <div class="lp-fleches">
@@ -2863,8 +2972,9 @@
         </div>
         <div class="lp-piste" tabindex="0" role="region" aria-label="Prochains congrès" onkeydown="toucheRangee(event, this)"><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div></div>
       </div>
-      <div class="lp-rangee" id="lpRangeeFormations" data-rangee="formations">
+      <div class="lp-rangee lp-u-formations" id="lpRangeeFormations" data-rangee="formations">
         <div class="lp-rangee-tete">
+          <span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5-.7 1.5-1.5z"/><path d="M6.5 8h2.5M6.5 11h2.5M15 8h2.5M15 11h2.5"/></svg></span>
           <h2>Formations à venir</h2>
           <a class="lp-voir-tout" href="/formations" onclick="return lienInterne(event, () => showPage('formations'))">Voir tout</a>
           <div class="lp-fleches">
@@ -2874,8 +2984,9 @@
         </div>
         <div class="lp-piste" tabindex="0" role="region" aria-label="Formations à venir" onkeydown="toucheRangee(event, this)"><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div></div>
       </div>
-      <div class="lp-rangee" id="lpRangeeProduits" data-rangee="produits">
+      <div class="lp-rangee lp-u-produits" id="lpRangeeProduits" data-rangee="produits">
         <div class="lp-rangee-tete">
+          <span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5c2 0 3 .9 5 .9s3-.9 5-.9c2.6 0 3.7 2.5 3.1 5.4-.4 2-1.4 3.4-1.8 5.4-.4 2.2-.6 6.2-2.4 6.2-1.6 0-1.4-3.8-2.3-5.2-.4-.6-1-.7-1.6-.7s-1.2.1-1.6.7c-.9 1.4-.7 5.2-2.3 5.2-1.8 0-2-4-2.4-6.2-.4-2-1.4-3.4-1.8-5.4C3.3 6 4.4 3.5 7 3.5z"/></svg></span>
           <h2>Produits à comparer</h2>
           <a class="lp-voir-tout" href="/produits" onclick="return lienInterne(event, () => showPage('produits'))">Voir tout</a>
           <div class="lp-fleches">
@@ -2886,52 +2997,77 @@
         <div class="lp-piste" tabindex="0" role="region" aria-label="Produits à comparer" onkeydown="toucheRangee(event, this)"><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div></div>
       </div>
     </div>
+    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#FFFFFF" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
   </section>
 
-  <section class="lp-section lp-apparait">
+  <section class="lp-section lp-fond-blanc lp-apparait">
     <div class="container">
       <h2 class="lp-titre" style="margin-bottom:24px">Trois étapes pour commencer.</h2>
       <ol class="lp-etapes">
-        <li class="lp-etape"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><div class="lp-etape-num">Étape 1</div><h3>Retrouvez votre fiche</h3><p>Cherchez votre nom dans l'annuaire et signalez que c'est vous.</p></li>
-        <li class="lp-etape"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 9.5 4-1.1 7-5.1 7-9.5V6l-7-3z"/><path d="m9 12 2 2 4-4"/></svg></span><div class="lp-etape-num">Étape 2</div><h3>Nous vérifions votre identité</h3><p>Un appel au cabinet, puis un e-mail dès que c'est validé.</p></li>
-        <li class="lp-etape"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></span><div class="lp-etape-num">Étape 3</div><h3>Accédez à tout</h3><p>Carte des cabinets, comparatifs, tarifs préférentiels, annonces.</p></li>
+        <li class="lp-etape lp-echelon lp-u-formations" style="--i:0"><svg class="lp-illus" viewBox="0 0 112 84" aria-hidden="true" focusable="false">
+            <rect x="10" y="10" width="62" height="64" rx="10" fill="#E2F5F7"/>
+            <circle cx="28" cy="30" r="8" fill="#00B8C8"/><rect x="40" y="25" width="24" height="5" rx="2.5" fill="#0F2B4D"/><rect x="40" y="34" width="16" height="4" rx="2" fill="#8FC9CF"/>
+            <rect x="20" y="48" width="42" height="4" rx="2" fill="#8FC9CF"/><rect x="20" y="57" width="30" height="4" rx="2" fill="#8FC9CF"/>
+            <circle cx="72" cy="50" r="17" fill="#fff" fill-opacity=".55" stroke="#0F2B4D" stroke-width="5"/><path d="m84 62 14 14" stroke="#0F2B4D" stroke-width="7" stroke-linecap="round"/>
+            <path d="M64 44a9 9 0 0 1 9-4" fill="none" stroke="#00B8C8" stroke-width="3" stroke-linecap="round"/></svg><div class="lp-etape-num">Étape 1</div><h3>Retrouvez votre fiche</h3><p>Cherchez votre nom dans l'annuaire et signalez que c'est vous.</p></li>
+        <li class="lp-etape lp-echelon lp-u-emploi" style="--i:1"><svg class="lp-illus" viewBox="0 0 112 84" aria-hidden="true" focusable="false">
+            <circle cx="56" cy="44" r="34" fill="#E4F5EC"/>
+            <path d="M56 12 30 22v17c0 16 11 29 26 33 15-4 26-17 26-33V22z" fill="#34B27B"/>
+            <path d="M56 12v60c15-4 26-17 26-33V22z" fill="#1C7A4F" fill-opacity=".35"/>
+            <path d="m44 42 9 9 17-18" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="lp-etape-num">Étape 2</div><h3>Nous vérifions votre identité</h3><p>Un appel au cabinet, puis un e-mail dès que c'est validé.</p></li>
+        <li class="lp-etape lp-echelon lp-u-produits" style="--i:2"><svg class="lp-illus" viewBox="0 0 112 84" aria-hidden="true" focusable="false">
+            <path d="M14 22 38 14l36 10 24-8v48l-24 8-36-10-24 8z" fill="#EEEBFC"/>
+            <path d="M38 14v48l36 10V24z" fill="#E2F5F7"/>
+            <path d="M14 22 38 14l36 10 24-8v48l-24 8-36-10-24 8z" fill="none" stroke="#5847B8" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M38 14v48M74 24v48" stroke="#5847B8" stroke-width="2.5"/>
+            <path d="M30 26c-5 0-8 3.6-8 7.6 0 6 8 12.4 8 12.4s8-6.4 8-12.4c0-4-3-7.6-8-7.6z" fill="#F07A62"/><circle cx="30" cy="33.5" r="3" fill="#fff"/>
+            <path d="M62 34c-5 0-8 3.6-8 7.6 0 6 8 12.4 8 12.4s8-6.4 8-12.4c0-4-3-7.6-8-7.6z" fill="#00B8C8"/><circle cx="62" cy="41.5" r="3" fill="#fff"/>
+            <path d="M86 22c-4 0-6.4 2.9-6.4 6.1 0 4.8 6.4 9.9 6.4 9.9s6.4-5.1 6.4-9.9c0-3.2-2.4-6.1-6.4-6.1z" fill="#8A7BE6"/><circle cx="86" cy="28" r="2.4" fill="#fff"/></svg><div class="lp-etape-num">Étape 3</div><h3>Accédez à tout</h3><p>Carte des cabinets, comparatifs, tarifs préférentiels, annonces.</p></li>
       </ol>
     </div>
+    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#FFF6EF" aria-hidden="true" focusable="false"><path d="M0 48 L1440 6 L1440 48 Z"/></svg>
   </section>
 
-  <section class="lp-section lp-apparait">
+  <section class="lp-section lp-fond-chaud lp-apparait">
     <div class="container">
-      <h2 class="lp-titre">Selon où vous en êtes</h2>
+      <h2 class="lp-titre" style="margin-bottom:24px">Selon où vous en êtes</h2>
       <ul class="lp-profils">
-        <li class="lp-profil"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-4 9 4-9 4-9-4z"/><path d="M7 11v4c0 1.2 2.2 2.5 5 2.5s5-1.3 5-2.5v-4"/></svg></span><h3 style="margin-top:14px">Vous êtes interne</h3><p>Repérez les formations qui comptent. Trouvez un premier remplacement ou un poste d'adjoint.</p></li>
-        <li class="lp-profil"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 19c.6-3.2 3-5 6-5s5.4 1.8 6 5"/><path d="M15.5 14.2c2.6.2 4.5 1.9 5 4.8"/></svg></span><h3 style="margin-top:14px">Vous êtes collaborateur</h3><p>Comparez les conditions pratiquées ailleurs. Préparez une association.</p></li>
-        <li class="lp-profil"><span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M12 8v3M10.5 9.5h3"/></svg></span><h3 style="margin-top:14px">Vous exercez en libéral</h3><p>Choisissez votre équipement sur des fiches comparables. Publiez vos annonces de recrutement.</p></li>
+        <li class="lp-profil lp-echelon lp-u-formations" style="--i:0"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-4 9 4-9 4-9-4z"/><path d="M7 11v4c0 1.2 2.2 2.5 5 2.5s5-1.3 5-2.5v-4"/></svg></span><h3 style="margin-top:14px">Vous êtes interne</h3><p>Repérez les formations qui comptent. Trouvez un premier remplacement ou un poste d'adjoint.</p></li>
+        <li class="lp-profil lp-echelon lp-u-emploi" style="--i:1"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3.5 13h17M12 12v2"/></svg></span><h3 style="margin-top:14px">Vous êtes collaborateur</h3><p>Comparez les conditions pratiquées ailleurs. Préparez une association.</p></li>
+        <li class="lp-profil lp-echelon lp-u-produits" style="--i:2"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5c2 0 3 .9 5 .9s3-.9 5-.9c2.6 0 3.7 2.5 3.1 5.4-.4 2-1.4 3.4-1.8 5.4-.4 2.2-.6 6.2-2.4 6.2-1.6 0-1.4-3.8-2.3-5.2-.4-.6-1-.7-1.6-.7s-1.2.1-1.6.7c-.9 1.4-.7 5.2-2.3 5.2-1.8 0-2-4-2.4-6.2-.4-2-1.4-3.4-1.8-5.4C3.3 6 4.4 3.5 7 3.5z"/></svg></span><h3 style="margin-top:14px">Vous exercez en libéral</h3><p>Choisissez votre équipement sur des fiches comparables. Publiez vos annonces de recrutement.</p></li>
       </ul>
     </div>
+    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#0F2B4D" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
   </section>
 
-  <section class="lp-section lp-apparait">
+  <section class="lp-section lp-fond-navy lp-apparait">
     <div class="container">
       <div class="lp-coeur">
-        <span class="lp-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span>
-        <div>
+        <div class="lp-echelon" style="--i:0">
           <h2>Dites ce qui vous intéresse</h2>
           <p>Un cœur sur une formation ou un produit signale votre intérêt. Les demandes sont regroupées : nous pouvons ainsi négocier de meilleures conditions auprès des fournisseurs et des organismes.</p>
         </div>
+        <div class="lp-coeur-illus" aria-hidden="true">
+          <span class="lp-anneau" style="left:48px;top:23px;width:124px;height:124px"></span>
+          <span class="lp-anneau" style="left:70px;top:45px;width:80px;height:80px"></span>
+          <span class="lp-orbite" style="left:43.0px;top:42.0px;width:18px;height:18px;background:#00B8C8;--x:26px;--y:16px"></span><span class="lp-orbite" style="left:159.0px;top:38.0px;width:14px;height:14px;background:#8A7BE6;--x:-24px;--y:18px"></span><span class="lp-orbite" style="left:172.0px;top:87.0px;width:16px;height:16px;background:#34B27B;--x:-28px;--y:-4px"></span><span class="lp-orbite" style="left:37.0px;top:96.0px;width:14px;height:14px;background:#F07A62;--x:30px;--y:-8px"></span><span class="lp-orbite" style="left:74.0px;top:131.0px;width:12px;height:12px;background:#8A7BE6;--x:12px;--y:-22px"></span><span class="lp-orbite" style="left:140.0px;top:129.0px;width:12px;height:12px;background:#00B8C8;--x:-14px;--y:-22px"></span>
+          <span class="lp-coeur-battement"><svg viewBox="0 0 60 52" focusable="false"><path d="M30 50S0 32.4 0 10a16 16 0 0 1 30-8.6A16 16 0 0 1 60 10c0 22.4-30 40-30 40z" fill="#F07A62"/><path d="M12 9a9 9 0 0 1 8-7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/></svg></span>
+        </div>
       </div>
     </div>
+    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#FFFFFF" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
   </section>
 
-  <section class="lp-section lp-apparait">
+  <section class="lp-section lp-fond-blanc lp-apparait" style="padding-bottom:0">
     <div class="container">
-      <p class="lp-marques">Vous êtes une marque ou un organisme de formation ?
+      <p class="lp-marques lp-echelon">Vous êtes une marque ou un organisme de formation ?
         <a href="mailto:contact@orthoconnect.fr?subject=Partenariat%20OrthoConnect">Écrivez-nous</a></p>
     </div>
   </section>
 
-  <section class="lp-section lp-apparait">
+  <section class="lp-section lp-fond-blanc lp-apparait">
     <div class="container">
-      <div class="lp-final">
+      <div class="lp-final lp-echelon">
         <h2>L'orthodontie, ensemble.</h2>
         <p class="landing-visiteur">Gratuit pour les praticiens et les internes en ODF.</p>
         <div class="lp-final-boutons">
@@ -2941,6 +3077,7 @@
         </div>
       </div>
     </div>
+    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#0F2B4D" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
   </section>
 
   <footer>
@@ -2954,7 +3091,7 @@
             <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
           </div>
         </div>
-        <p>Formations, matériel et postes en orthopédie dento-faciale. Réservé aux praticiens et internes en spécialité.</p>
+        <p>Formations, produits et postes en ODF. Réservé aux praticiens et internes en spécialité.</p>
       </div>
       <div class="footer-col">
         <h4>Ressources</h4>
@@ -10908,11 +11045,37 @@ function lpProduits() {
 }
 
 const LP_FORMATS = { presentiel: 'Présentiel', distanciel: 'Distanciel', hybride: 'Hybride' };
+const LP_MOIS_COURTS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+const LP_PICTOS = {
+  congres: '<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="M8.5 14h2M13.5 14h2M8.5 17h2"/>',
+  formations: '<path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5-.7 1.5-1.5z"/><path d="M6.5 8h2.5M6.5 11h2.5M15 8h2.5M15 11h2.5"/>',
+  produits: '<path d="M7 3.5c2 0 3 .9 5 .9s3-.9 5-.9c2.6 0 3.7 2.5 3.1 5.4-.4 2-1.4 3.4-1.8 5.4-.4 2.2-.6 6.2-2.4 6.2-1.6 0-1.4-3.8-2.3-5.2-.4-.6-1-.7-1.6-.7s-1.2.1-1.6.7c-.9 1.4-.7 5.2-2.3 5.2-1.8 0-2-4-2.4-6.2-.4-2-1.4-3.4-1.8-5.4C3.3 6 4.4 3.5 7 3.5z"/>'
+};
+
+function lpPicto(univers) {
+  return '<span class="lp-picto" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+    + 'stroke-linecap="round" stroke-linejoin="round">' + LP_PICTOS[univers] + '</svg></span>';
+}
+
+// Les initiales d'un organisme ou d'un fournisseur, à la place de tout
+// logo : deux lettres au plus, prises sur les deux premiers mots.
+function lpMonogramme(nom) {
+  const mots = String(nom || '').replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(Boolean);
+  const init = (mots.length > 1 ? mots[0][0] + mots[1][0] : (mots[0] || '').slice(0, 2)).toLocaleUpperCase('fr-FR');
+  return init ? `<span class="lp-mono" aria-hidden="true">${esc(init)}</span>` : '';
+}
+
+function lpTuileDate(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || '');
+  if (!m) return '';
+  return `<span class="lp-date" aria-hidden="true"><span class="lp-date-jour">${+m[3]}</span><span class="lp-date-mois">${LP_MOIS_COURTS[+m[2] - 1]}</span></span>`;
+}
 
 function lpCarteCongres(c) {
   const lieu = [c.ville, c.pays].filter(Boolean).join(', ');
-  return `<a class="lp-carte" href="/congres" onclick="return lienInterne(event, () => showPage('congres'))">
-      ${c.sigle ? `<span class="lp-carte-sur">${esc(c.sigle)}</span>` : ''}
+  return `<a class="lp-carte lp-u-congres" href="/congres" onclick="return lienInterne(event, () => showPage('congres'))">
+      <span class="lp-carte-tete">${lpPicto('congres')}${lpTuileDate(c.date_debut)}</span>
+      ${c.sigle ? `<span class="lp-pastille">${esc(c.sigle)}</span>` : ''}
       <span class="lp-carte-titre">${esc(c.nom)}</span>
       <span class="lp-carte-ligne">${esc(formatPeriodeCongres(c.date_debut, c.date_fin))}</span>
       ${lieu ? `<span class="lp-carte-ligne">${esc(lieu)}</span>` : ''}
@@ -10920,11 +11083,13 @@ function lpCarteCongres(c) {
 }
 
 function lpCarteFormation({ f, s }) {
-  const format = [LP_FORMATS[f.format] || '', f.duree || ''].filter(Boolean).join(' · ');
-  return `<a class="lp-carte" href="${esc(cheminFormation(f))}" onclick="return lienInterne(event, () => ouvrirFormation(${Number(f.id)}))">
-      ${nomOrganisme(f) ? `<span class="lp-carte-sur">${esc(nomOrganisme(f))}</span>` : ''}
+  const organisme = nomOrganisme(f);
+  return `<a class="lp-carte lp-u-formations" href="${esc(cheminFormation(f))}" onclick="return lienInterne(event, () => ouvrirFormation(${Number(f.id)}))">
+      <span class="lp-carte-tete">${lpPicto('formations')}${lpMonogramme(organisme)}</span>
+      ${LP_FORMATS[f.format] ? `<span class="lp-pastille">${esc(LP_FORMATS[f.format])}</span>` : ''}
       <span class="lp-carte-titre">${esc(f.titre)}</span>
-      ${format ? `<span class="lp-carte-ligne">${esc(format)}</span>` : ''}
+      ${organisme ? `<span class="lp-carte-ligne">${esc(organisme)}</span>` : ''}
+      ${f.duree ? `<span class="lp-carte-ligne">${esc(f.duree)}</span>` : ''}
       ${s ? `<span class="lp-carte-bas">Prochaine session : ${esc(formatDate(s.date_debut))}${s.ville ? ' · ' + esc(s.ville) : ''}</span>` : ''}
     </a>`;
 }
@@ -10932,8 +11097,9 @@ function lpCarteFormation({ f, s }) {
 function lpCarteProduit(p) {
   const cat = categorieProduit(p.categorie);
   const fournisseur = p.fournisseurs && p.fournisseurs.nom;
-  return `<a class="lp-carte" href="${esc(cheminProduit(p))}" onclick="return lienInterne(event, () => ouvrirProduit(${esc(JSON.stringify(String(p.id)))}))">
-      ${cat || p.categorie ? `<span class="lp-carte-sur">${esc(cat ? cat.libelle : p.categorie)}</span>` : ''}
+  return `<a class="lp-carte lp-u-produits" href="${esc(cheminProduit(p))}" onclick="return lienInterne(event, () => ouvrirProduit(${esc(JSON.stringify(String(p.id)))}))">
+      <span class="lp-carte-tete">${lpPicto('produits')}${lpMonogramme(fournisseur)}</span>
+      ${cat || p.categorie ? `<span class="lp-pastille">${esc(cat ? cat.libelle : p.categorie)}</span>` : ''}
       <span class="lp-carte-titre">${esc(p.nom || '')}</span>
       ${fournisseur ? `<span class="lp-carte-ligne">${esc(fournisseur)}</span>` : ''}
       ${p.accroche ? `<span class="lp-carte-accroche">${esc(p.accroche)}</span>` : ''}
@@ -10956,7 +11122,9 @@ async function remplirRangee(nom) {
   // Vide ou en erreur : la rangée disparaît, sans message.
   if (!cartes.length) { rangee.hidden = true; return; }
   const piste = rangee.querySelector('.lp-piste');
-  piste.innerHTML = cartes.join('');
+  // Entrée échelonnée, 60 ms d'une carte à l'autre (rien en mouvement réduit).
+  piste.innerHTML = cartes.map((html, i) => LP_MOUVEMENT_REDUIT.matches ? html
+    : html.replace('class="lp-carte ', `style="--i:${i}" class="lp-carte lp-entree `)).join('');
   piste.scrollLeft = 0;
   majFlechesRangee(piste);
 }
@@ -11006,21 +11174,47 @@ async function remplirChiffresLanding() {
   ]);
   const valeurs = { annuaire, formations, produits, congres };
   let affiches = 0;
+  const aCompter = [];
   document.querySelectorAll('#lpChiffres li[data-chiffre]').forEach(li => {
     const n = valeurs[li.dataset.chiffre];
     const minimum = li.dataset.chiffre === 'annuaire' ? 1 : 3;
     if (!Number.isFinite(n) || n < minimum) { li.hidden = true; return; }
-    li.querySelector('.lp-chiffre').textContent = n.toLocaleString('fr-FR');
+    const el = li.querySelector('.lp-chiffre');
+    el.textContent = n.toLocaleString('fr-FR');
     if (n === 1) li.querySelector('.lp-chiffre-libelle').textContent = li.dataset.un;
+    aCompter.push([el, n]);
     affiches++;
   });
-  document.getElementById('lpChiffres').hidden = affiches < 2;
+  const ligne = document.getElementById('lpChiffres');
+  ligne.hidden = affiches < 2;
+  if (!ligne.hidden && !LP_MOUVEMENT_REDUIT.matches && 'IntersectionObserver' in window) {
+    aCompter.forEach(([el]) => { el.textContent = '0'; });
+    const obs = new IntersectionObserver((entrees) => {
+      if (!entrees.some(e => e.isIntersecting)) return;
+      obs.disconnect();
+      compterJusqua(aCompter);
+    }, { threshold: 0.3 });
+    obs.observe(ligne);
+  }
 
   // La phrase d'appui du champ de recherche reprend le total, s'il est lu.
   if (Number.isFinite(annuaire) && annuaire > 0) {
     document.getElementById('lpAppui').textContent = "Votre fiche existe peut-être déjà : l'annuaire référence "
       + annuaire.toLocaleString('fr-FR') + (annuaire > 1 ? ' orthodontistes.' : ' orthodontiste.');
   }
+}
+
+// De 0 à la valeur en 800 ms, décélération en fin de course. La valeur
+// finale est posée à la dernière image, quoi qu'il arrive.
+function compterJusqua(cibles) {
+  const debut = performance.now();
+  const etape = (t) => {
+    const p = Math.min(1, (t - debut) / 800);
+    const k = 1 - Math.pow(1 - p, 3);
+    cibles.forEach(([el, n]) => { el.textContent = Math.round(n * k).toLocaleString('fr-FR'); });
+    if (p < 1) requestAnimationFrame(etape);
+  };
+  requestAnimationFrame(etape);
 }
 
 // Les trois mini-cartes du hero, sur grand écran seulement : le premier
@@ -11057,6 +11251,18 @@ function allerRechercheLanding() {
 function ouvrirLanding() {
   if (lpPrete) return;
   lpPrete = true;
+
+  // Les boucles (hero, cœur) ne tournent que si leur bloc est à l'écran
+  // et l'onglet visible.
+  document.addEventListener('visibilitychange', () => {
+    document.documentElement.classList.toggle('lp-onglet-cache', document.hidden);
+  });
+  if ('IntersectionObserver' in window) {
+    const obsBoucles = new IntersectionObserver((entrees) => entrees.forEach(e => {
+      e.target.classList.toggle('lp-pause', !e.isIntersecting);
+    }));
+    document.querySelectorAll('#page-landing .lp-hero, #page-landing .lp-fond-navy').forEach(b => obsBoucles.observe(b));
+  }
   remplirChiffresLanding();
   if (window.matchMedia('(min-width: 900px)').matches) remplirApercuLanding();
 
