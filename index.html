@@ -2441,6 +2441,14 @@
   .cab-slot .slot-partenaire { display: none; }
   .cab-slot.slot-actif .slot-partenaire { display: inline; }
   @keyframes cabOnde { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(2.6); opacity: 0; } }
+  /* Mobile : une onde par ville au plus, sur 5 villes espacées (Paris, Lyon, Bordeaux, Marseille,
+     Strasbourg), rayon proportionnel à la carte (diamètre maximal 21 unités de scène, la carte en fait
+     168 et les villes gardées sont à 36 unités au moins l'une de l'autre) : aucune onde ne se chevauche. */
+  @media (max-width: 960px) {
+    .cab-onde { width: 0.62%; margin: -0.31% 0 0 -0.31%; border-width: 1px; animation-name: cabOndeMobile; }
+    .cab-onde[data-ville="Toulouse"], .cab-onde[data-ville="Lille"], .cab-onde[data-ville="Nantes"] { display: none; }
+  }
+  @keyframes cabOndeMobile { from { transform: scale(0.5); opacity: 0.9; } to { transform: scale(2.1); opacity: 0; } }
   .cab-page-calendrier { position: absolute; left: 40.75%; top: 13.8%; width: 12.5%; height: 23.8%; border-radius: 12px; background: #fff;
     box-shadow: 0 4px 10px rgba(91,58,26,0.15); transform-origin: 50% 0; opacity: 0; }
   .cab-page-calendrier::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 18%; border-radius: 12px 12px 0 0; background: var(--lp-corail); }
@@ -3223,7 +3231,7 @@
             <div class="cab-calque cab-calque-avant" aria-hidden="true">
               <span class="cab-page-calendrier"></span>
               <span class="cab-lueur"></span>
-              <span class="cab-onde" style="left:83.125%;top:44.922%;--d:0.00s"></span><span class="cab-onde" style="left:84.669%;top:49.867%;--d:0.35s"></span><span class="cab-onde" style="left:82.494%;top:53.344%;--d:0.70s"></span><span class="cab-onde" style="left:81.219%;top:51.289%;--d:1.05s"></span><span class="cab-onde" style="left:83.544%;top:42.078%;--d:1.40s"></span><span class="cab-onde" style="left:85.069%;top:53.811%;--d:1.75s"></span><span class="cab-onde" style="left:80.719%;top:47.411%;--d:2.10s"></span><span class="cab-onde" style="left:86.350%;top:45.222%;--d:2.45s"></span>
+              <span class="cab-onde" data-ville="Paris" style="left:83.125%;top:44.922%;--d:0.00s"></span><span class="cab-onde" data-ville="Lyon" style="left:84.669%;top:49.867%;--d:0.35s"></span><span class="cab-onde" data-ville="Toulouse" style="left:82.494%;top:53.344%;--d:0.70s"></span><span class="cab-onde" data-ville="Bordeaux" style="left:81.219%;top:51.289%;--d:1.05s"></span><span class="cab-onde" data-ville="Lille" style="left:83.544%;top:42.078%;--d:1.40s"></span><span class="cab-onde" data-ville="Marseille" style="left:85.069%;top:53.811%;--d:1.75s"></span><span class="cab-onde" data-ville="Nantes" style="left:80.719%;top:47.411%;--d:2.10s"></span><span class="cab-onde" data-ville="Strasbourg" style="left:86.350%;top:45.222%;--d:2.45s"></span>
               <div class="cab-plante"><svg viewBox="0 0 160 260" class="cab-plante-svg" aria-hidden="true" focusable="false">
       <g id="cab-plante">
         <path d="M80 190 C 70 140 40 120 20 70 C 50 90 72 120 82 170Z" fill="#34B27B"/>
@@ -11480,6 +11488,10 @@ const CAB_HASHS = { produits: '#cabinet-produits', formations: '#cabinet-formati
 // Boîtes des objets dans le repère 1600 x 900 de la scène.
 const CAB_BOITES = { fenetre: [50, 90, 320, 400], emploi: [350, 160, 270, 270], congres: [640, 96, 224, 250],
   produits: [330, 430, 860, 370], annuaire: [1160, 340, 400, 440], formations: [1374, 100, 190, 260] };
+// Sur mobile (960 px et moins), cadrage serré sur l'objet lui-même : l'écran
+// du bureau avec son cadre, et le plateau avec la caméra et la boîte. Le zoom
+// est alors calculé sur la hauteur réelle de la feuille (voir cabTransformPour).
+const CAB_BOITES_MOBILE = { annuaire: [1176, 356, 260, 170], produits: [322, 418, 346, 110] };
 const CAB_TEXTES = {
   produits: ['Produits', 'Aligneurs, caméras intra-orales, brackets : les fiches techniques, comparables d\'un système à l\'autre.', '/produits', 'produits'],
   formations: ['Formations', 'Les formations publiées, avec leur organisme, leur format et leur prochaine session.', '/formations', 'formations'],
@@ -11494,7 +11506,7 @@ let cabPrete = false;
 
 function cabSection() { return document.getElementById('cabinet'); }
 
-function cabTransformPour(boite, panneau) {
+function cabTransformPour(boite, panneau, serre) {
   const cadre = document.getElementById('cabCadre');
   const camera = document.getElementById('cabCamera');
   const W = cadre.clientWidth, H = cadre.clientHeight;
@@ -11506,9 +11518,19 @@ function cabTransformPour(boite, panneau) {
   const libreW = W - largeurPanneau;
   // Sur mobile, la feuille peut monter jusqu'à 70 % de l'écran : l'objet
   // doit tenir dans la bande visible entre la barre fixe et la feuille.
-  const libreH = mobile && panneau ? Math.max(H * 0.3, Math.min(H, window.innerHeight * 0.3 - 76)) : H;
-  let echelle = Math.min(libreW * 0.82 / (w * k), libreH * 0.86 / (h * k));
-  echelle = Math.max(mobile && panneau ? 1.1 : 1.3, Math.min(3.2, echelle));
+  let libreH = mobile && panneau ? Math.max(H * 0.3, Math.min(H, window.innerHeight * 0.3 - 76)) : H;
+  let echelle;
+  if (serre) {
+    // Cadrage serré : la bande visible va du haut du cadre (76 px sous la
+    // barre fixe) au haut réel de la feuille. offsetHeight ignore la
+    // translation d'ouverture, donc la mesure vaut aussi pendant l'animation.
+    const feuille = document.getElementById('cabPanneau').offsetHeight;
+    libreH = Math.max(H * 0.3, Math.min(H, window.innerHeight - 76 - feuille));
+    echelle = Math.max(1.1, Math.min(libreW * 0.9 / (w * k), (libreH - 8) / (h * k)));
+  } else {
+    echelle = Math.min(libreW * 0.82 / (w * k), libreH * 0.86 / (h * k));
+    echelle = Math.max(mobile && panneau ? 1.1 : 1.3, Math.min(3.2, echelle));
+  }
   const cx = (x + w / 2) * k, cy = (y + h / 2) * k;
   const Px = libreW / 2, Py = libreH / 2;
   // Le bord droit de la scène peut passer sous le panneau : seule la zone
@@ -11520,7 +11542,7 @@ function cabTransformPour(boite, panneau) {
     tx = Math.min(-decalX, Math.max(libreW - decalX - echelle * camW, Px - decalX - echelle * cx));
     ty = Math.min(0, Math.max(H - echelle * camH, Py - echelle * cy));
     const oy = ty + echelle * cy;
-    if ((oy > 8 && oy < libreH - 8) || echelle >= 3.2) break;
+    if (serre || (oy > 8 && oy < libreH - 8) || echelle >= 3.2) break;
     echelle = Math.min(3.2, echelle + 0.1);
   }
   // Où l'objet se retrouve dans le cadre : centre du projecteur du voile.
@@ -11661,7 +11683,8 @@ async function cabRemplir(cle) {
 
 function cabAppliquerZoom(cle) {
   const sec = cabSection(), camera = document.getElementById('cabCamera');
-  const z = cabTransformPour(CAB_BOITES[cle], true);
+  const serre = ECRAN_MOBILE.matches && CAB_BOITES_MOBILE[cle];
+  const z = cabTransformPour(serre || CAB_BOITES[cle], true, !!serre);
   sec.style.setProperty('--fx', z.fx + '%');
   sec.style.setProperty('--fy', z.fy + '%');
   camera.style.transform = z.t;
@@ -11685,7 +11708,10 @@ function ouvrirCabinet(cle, options) {
   cabAppliquerZoom(cle);
   sec.classList.add('cab-zoom', 'cab-ouvert');
   if (ECRAN_MOBILE.matches) bloquerPage();
-  cabRemplir(cle);
+  const remplissage = cabRemplir(cle);
+  // Cadrage serré mobile : recalculé une fois la feuille remplie (contenu
+  // déjà en mémoire, donc avant l'image suivante), sur sa hauteur réelle.
+  if (ECRAN_MOBILE.matches && CAB_BOITES_MOBILE[cle]) remplissage.then(() => { if (cabOuvert === cle && ECRAN_MOBILE.matches) cabAppliquerZoom(cle); });
   setTimeout(() => {
     if (cabOuvert !== cle) return;
     document.getElementById('cabPanneauTitre').focus({ preventScroll: true });
