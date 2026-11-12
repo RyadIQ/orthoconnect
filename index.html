@@ -2199,7 +2199,7 @@
   .lp-sep { position: absolute; left: 0; bottom: -1px; width: 100%; height: 48px; display: block; pointer-events: none; }
   .lp-sep path { fill: currentColor; }
   /* Cibles de « Découvrir » et « Retrouvez votre fiche » : sous la barre fixe. */
-  #lpRangees, #lpRecherche { scroll-margin-top: 76px; }
+  #lpRecherche { scroll-margin-top: 76px; }
   .lp-titre { font-size: 28px; font-weight: 800; color: var(--navy); letter-spacing: -0.3px; margin-bottom: 8px; }
   .lp-intro { font-size: 15px; color: var(--text-secondary); line-height: 1.6; max-width: 640px; margin-bottom: 28px; }
   .lp-icone { width: 52px; height: 52px; border-radius: 50%; background: var(--u-clair, var(--turquoise-light)); color: var(--u-texte, var(--navy));
@@ -2216,7 +2216,7 @@
       radial-gradient(circle at 52% 96%, rgba(240,122,98,0.16), transparent 38%);
     animation: lpFond 20s ease-in-out infinite alternate; will-change: transform; }
   @keyframes lpFond { from { transform: translate3d(-5%, -3%, 0) rotate(0deg) scale(1); } to { transform: translate3d(5%, 4%, 0) rotate(10deg) scale(1.08); } }
-  .lp-hero-grille { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 56px; align-items: center; }
+  .lp-hero-grille { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 56px; align-items: center; }
   /* Chaque dent est un élément HTML : ses animations restent sur le
      compositeur, sans repeindre la page à chaque image. */
   .lp-dents { position: relative; display: flex; gap: 1.365%; width: 293px; max-width: 100%; aspect-ratio: 293 / 36; margin: 0 0 20px; }
@@ -2267,24 +2267,8 @@
   .lp-chiffre .lp-squelette { width: 72px; height: 30px; margin-top: 3px; }
   .lp-chiffre-libelle { font-size: 14px; color: var(--text-secondary); }
 
-  /* ── Rangées ── */
-  .lp-rangee + .lp-rangee { margin-top: 52px; }
-  .lp-rangee[hidden] { display: none; }
-  .lp-rangee-tete { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
-  .lp-rangee-tete .lp-icone { width: 44px; height: 44px; }
-  .lp-rangee-tete .lp-icone svg { width: 22px; height: 22px; }
-  .lp-rangee-tete h2 { font-size: 22px; font-weight: 800; color: var(--navy); margin-right: auto; }
-  .lp-voir-tout { font-size: 14px; font-weight: 700; color: var(--u-texte, #007C87); text-decoration: none; min-height: 44px; min-width: 44px; justify-content: center; display: inline-flex; align-items: center; }
-  .lp-voir-tout:hover { text-decoration: underline; }
-  .lp-fleches { display: none; gap: 8px; }
-  .lp-fleche { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--grey-border); background: var(--white);
-    color: var(--u-texte, var(--navy)); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease; }
-  .lp-fleche svg { width: 18px; height: 18px; }
-  .lp-fleche:hover:not(:disabled) { transform: scale(1.06); border-color: var(--u, var(--turquoise)); }
-  .lp-fleche:disabled { opacity: 0.35; cursor: default; }
-  .lp-piste { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
-    padding: 8px 6px 22px; margin: -8px -6px 0; scroll-padding-inline: 6px; min-height: 300px; scrollbar-width: thin; scroll-behavior: smooth; }
-  .lp-piste:focus-visible, .lp-carte:focus-visible, .lp-fleche:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+  /* Pistes de cartes : seules les cartes servent encore, dans les panneaux de la visite. */
+  .lp-carte:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
   .lp-carte { position: relative; isolation: isolate; flex: 0 0 280px; scroll-snap-align: start; min-height: 270px;
     display: flex; flex-direction: column; gap: 6px; background: var(--white); border: 1px solid var(--grey-border);
     border-top: 6px solid var(--u, var(--turquoise)); border-radius: 16px; padding: 16px 20px 18px;
@@ -2324,9 +2308,12 @@
   .lp-etape-num { font-size: 13px; font-weight: 700; color: var(--u-texte); margin: 0 0 4px; }
   .lp-etape h3, .lp-profil h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
   .lp-etape p, .lp-profil p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-  .lp-coeur { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 32px; align-items: center; }
-  .lp-coeur h2 { font-size: 28px; font-weight: 800; color: var(--white); margin-bottom: 10px; }
-  .lp-coeur p { font-size: 16px; color: rgba(255,255,255,0.88); line-height: 1.65; max-width: 640px; }
+  .lp-interet { display: flex; align-items: center; gap: 20px; margin-top: 20px; background: var(--lp-fond-chaud);
+    border-radius: 16px; padding: 14px 22px 14px 14px; }
+  .lp-interet p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; }
+  .lp-interet strong { color: var(--navy); }
+  .lp-interet-illus { flex: none; width: 132px; height: 102px; position: relative; border-radius: 12px; background: var(--navy); overflow: hidden; }
+  .lp-interet-illus .lp-coeur-illus { position: absolute; left: 0; top: 0; transform: scale(0.6); transform-origin: 0 0; }
   .lp-coeur-illus { position: relative; width: 220px; height: 170px; justify-self: center; flex: none; }
   .lp-anneau { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.07); }
   .lp-orbite { position: absolute; border-radius: 50%; animation: lpRapproche 6s ease-in-out infinite alternate; }
@@ -2342,6 +2329,17 @@
   .lp-final::before { content: ''; position: absolute; inset: -40%; z-index: -1; pointer-events: none;
     background: radial-gradient(circle at 20% 30%, rgba(0,184,200,0.28), transparent 40%), radial-gradient(circle at 85% 80%, rgba(138,123,230,0.22), transparent 40%); }
   .lp-final h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .lp-final-marques { margin: 22px 0 0 !important; font-size: 14px !important; color: rgba(255,255,255,0.85) !important; }
+  .lp-final-marques a { color: #fff; font-weight: 700; text-decoration: underline; min-height: 44px; display: inline-flex; align-items: center; margin-left: 6px; }
+  .lp-rubriques { max-width: 1200px; margin: 24px auto 0; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 4px 22px; }
+  .lp-rubriques a { color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 600; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+  .lp-rubriques a:hover { color: #fff; text-decoration: underline; }
+  /* Formations | Congrès : deux pages reliées par des onglets, routes inchangées. */
+  .onglets-rubrique { display: inline-flex; gap: 4px; padding: 4px; border-radius: 24px; background: rgba(255,255,255,0.12); margin-bottom: 18px; }
+  .onglet-rubrique { min-height: 44px; display: inline-flex; align-items: center; padding: 0 18px; border-radius: 20px;
+    color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; }
+  .onglet-rubrique.actif { background: #fff; color: var(--navy); }
+  .onglet-rubrique:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
   .lp-final p { color: rgba(255,255,255,0.88); font-size: 15px; margin-bottom: 22px; }
   .lp-final-boutons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .lp-final-boutons .btn { min-height: 44px; }
@@ -2372,7 +2370,6 @@
     .lp-carte, .lp-carte:hover, .lp-fleche:hover:not(:disabled) { transition: none; transform: none; }
     .lp-carte::after { transition: none; }
   }
-  @media (hover: hover) and (min-width: 961px) { .lp-fleches { display: flex; } }
   @media (max-width: 960px) {
     .lp-hero-grille { grid-template-columns: minmax(0, 1fr); }
     .lp-chiffres-liste { grid-template-columns: repeat(2, 1fr); row-gap: 20px; }
@@ -2387,14 +2384,31 @@
     .lp-sep { height: 28px; }
     .lp-hero { padding: 36px 0 76px; }
     .lp-dents { width: 230px; margin-bottom: 14px; }
-    .lp-coeur-illus { order: -1; }
     .lp-hero h1 { font-size: 34px; }
     .lp-hero-sous { font-size: 16px; }
     .lp-recherche { padding: 16px; }
     .lp-etapes, .lp-profils { grid-template-columns: minmax(0, 1fr); }
-    .lp-carte { flex-basis: 85%; }
-    .lp-coeur { grid-template-columns: minmax(0, 1fr); }
-    .lp-titre, .lp-coeur h2, .lp-final h2 { font-size: 24px; }
+    .lp-section { padding: 32px 0 64px; }
+    .lp-hero { padding: 28px 0 64px; }
+    .lp-chiffres-liste { padding: 22px 0 4px; row-gap: 14px; }
+    .lp-chiffre { font-size: 26px; min-height: 30px; }
+    .lp-chiffres { padding-bottom: 36px; }
+    .lp-rubriques { gap: 0 14px; margin-top: 16px; }
+    .lp-rubriques a { font-size: 13px; }
+    .lp-intro { margin-bottom: 18px; }
+    .lp-etapes { gap: 12px; }
+    .lp-etape { display: grid; grid-template-columns: 72px minmax(0, 1fr); column-gap: 14px; padding: 16px; align-items: start; }
+    .lp-etape .lp-illus { grid-row: 1 / span 3; width: 72px; height: 54px; margin: 0; }
+    .lp-etape > :not(.lp-illus) { grid-column: 2; }
+    .lp-etape-num { margin: 0; }
+    .lp-etape h3 { font-size: 16px; margin-bottom: 2px; }
+    .lp-interet { gap: 14px; padding: 12px; margin-top: 12px; }
+    .lp-interet-illus { width: 88px; height: 68px; }
+    .lp-interet-illus .lp-coeur-illus { transform: scale(0.4); }
+    .lp-interet p { font-size: 14px; }
+    .lp-final { padding: 30px 18px; }
+    .lp-final p { margin-bottom: 16px; }
+    .lp-titre, .lp-final h2 { font-size: 24px; }
   }
 
 
@@ -2465,6 +2479,14 @@
   .cab-contenu { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
   .cab-contenu:empty { display: none; }
   .cab-contenu .lp-carte { flex: none; width: 100%; min-height: 0; }
+  .cab-liste { display: flex; flex-direction: column; gap: 12px; }
+  .cab-puces { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; overscroll-behavior-x: contain;
+    margin: 0 -20px 2px; padding: 2px 20px 8px; scrollbar-width: none; }
+  .cab-puces::-webkit-scrollbar { display: none; }
+  .cab-puce { flex: none; scroll-snap-align: start; min-height: 44px; padding: 0 16px; border-radius: 22px; cursor: pointer;
+    border: 1.5px solid var(--grey-border); background: #fff; color: var(--navy); font: 600 14px 'Inter', sans-serif; white-space: nowrap; }
+  .cab-puce.actif { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .cab-puce:focus-visible { outline: 3px solid var(--lp-turquoise); outline-offset: 2px; }
   .cab-contenu .lp-carte.lp-squelette { height: 120px; }
   .cab-voir-tout { min-height: 44px; }
   .cab-recherche input { font-size: 16px; min-height: 48px; }
@@ -2473,7 +2495,9 @@
 
   @media (max-width: 960px) {
     .cab-cadre { aspect-ratio: 16 / 10; }
-    .cab-camera { width: 111.112%; left: -5.556%; }
+    /* Recadrage mobile : seule la gauche (fenêtre) est rognée, l'étagère reste entière. */
+    .cab-camera { width: 111.112%; left: -11.112%; }
+    .cab-pastille { width: 16px; height: 16px; margin: -8px 0 0 -8px; border-width: 2px; }
     .cab-barre { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
     .cab-barre-bouton { display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: none; cursor: pointer;
       font: 600 12px 'Inter', sans-serif; color: var(--navy); padding: 0; min-width: 0; }
@@ -2958,8 +2982,6 @@
       <li><a href="/produits" onclick="showPage('produits')" id="nav-produits">Produits</a></li>
       <li><a href="/carte" onclick="showPage('carte')" id="nav-carte">Carte</a></li>
       <li><a href="/emploi" onclick="showPage('emploi')" id="nav-emploi">Emploi</a></li>
-      <li><a href="/congres" onclick="showPage('congres')" id="nav-congres">Congrès</a></li>
-      <li><a href="/actualites" onclick="requireAuth('actus')" id="nav-actu">Actualités</a></li>
       <li id="navLoginItem"><a href="#" class="nav-cta btn nav-login-btn" onclick="openAuth('signup')">Espace praticien</a></li>
       <li>
         <div class="nav-user" id="navUser">
@@ -2983,13 +3005,10 @@
 </nav>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a href="/" onclick="showPage('landing'); toggleMenu()">Accueil</a>
   <a href="/formations" onclick="showPage('formations'); toggleMenu()">Formations</a>
   <a href="/produits" onclick="showPage('produits'); toggleMenu()">Produits</a>
   <a href="/carte" onclick="showPage('carte'); toggleMenu()">Carte</a>
   <a href="/emploi" onclick="showPage('emploi'); toggleMenu()">Emploi</a>
-  <a href="/congres" onclick="showPage('congres'); toggleMenu()">Congrès</a>
-  <a href="/actualites" onclick="requireAuth('actus'); toggleMenu()">Actualités</a>
   <div class="mobile-menu-sep"></div>
   <a href="#" id="mobLogin" onclick="openAuth('signup'); toggleMenu()" style="color:var(--turquoise); font-weight:600">Espace praticien</a>
   <a href="/mon-espace" id="mobDash" onclick="showPage('dashboard'); toggleMenu()" style="display:none; color:var(--navy); font-weight:600">Mon espace</a>
@@ -3021,18 +3040,16 @@
             <input type="search" id="lpRechercheNom" placeholder="Votre nom" autocomplete="off"
                    oninput="saisirRechercheAnnuaire('lpRechercheNom', 'lpResultats')">
           </div>
-          <p class="lp-appui" id="lpAppui">Votre fiche existe peut-être déjà dans l'annuaire des orthodontistes.</p>
+          <p class="lp-appui" id="lpAppui">Votre fiche existe peut-être déjà.</p>
           <div class="lp-resultats" id="lpResultats" aria-live="polite"></div>
         </div>
         <div class="lp-hero-liens">
           <a class="btn btn-turquoise landing-visiteur" href="/" onclick="event.preventDefault(); openAuth('signup')">Créer un compte</a>
           <a class="btn btn-turquoise landing-connecte" href="/mon-espace" onclick="return lienInterne(event, () => showPage('dashboard'))">Aller à mon espace</a>
           <a class="btn btn-outline-white" href="#cabinet" onclick="event.preventDefault(); allerCabinet()">Visiter le cabinet</a>
-          <a class="btn btn-outline-white" href="#lpRangees" onclick="event.preventDefault(); decouvrirLanding()">Découvrir</a>
         </div>
       </div>
       <div class="lp-hero-apercu" id="lpApercu" aria-hidden="true">
-        <div class="lp-mini lp-u-congres" id="lpMiniCongres"><span class="lp-squelette" style="height:60px"></span></div>
         <div class="lp-mini lp-u-formations" id="lpMiniFormation"><span class="lp-squelette" style="height:60px"></span></div>
         <div class="lp-mini lp-u-produits" id="lpMiniProduit"><span class="lp-squelette" style="height:60px"></span></div>
       </div>
@@ -3040,7 +3057,19 @@
     <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#FFFFFF" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
   </section>
 
-  <section class="lp-section lp-fond-blanc cab" id="cabinet" aria-labelledby="cabTitre">
+  <section class="lp-chiffres" aria-label="OrthoConnect en chiffres" id="lpChiffres">
+    <div class="container">
+      <ul class="lp-chiffres-liste">
+        <li data-chiffre="annuaire" data-un="orthodontiste référencé"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">orthodontistes référencés</span></li>
+        <li class="lp-u-formations" data-chiffre="formations" data-un="formation publiée"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">formations publiées</span></li>
+        <li class="lp-u-produits" data-chiffre="produits" data-un="produit comparable"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">produits comparables</span></li>
+        <li class="lp-u-congres" data-chiffre="congres" data-un="congrès à venir"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">congrès à venir</span></li>
+      </ul>
+    </div>
+    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#F0FAFB" aria-hidden="true" focusable="false"><path d="M0 48 L1440 6 L1440 48 Z"/></svg>
+  </section>
+
+  <section class="lp-section lp-fond-turquoise cab" id="cabinet" aria-labelledby="cabTitre">
     <div class="container">
       <h2 class="lp-titre" id="cabTitre">Visitez le cabinet</h2>
       <p class="lp-intro">Cliquez sur un objet du cabinet : la plateforme s'ouvre là où vous en avez besoin.</p>
@@ -3122,20 +3151,21 @@
       <path d="M760 520 L 940 580 C 960 586 968 610 950 624 L 930 640 L 760 588 C 732 578 734 512 760 520Z" fill="url(#cbAssise)"/>
       <path d="M930 600 L 1120 600 C 1150 600 1156 640 1126 646 L 920 650 C 896 650 900 600 930 600Z" fill="url(#cbAssise)"/>
       <path d="M1100 604 C 1140 600 1166 620 1170 660 L 1176 700 C 1178 716 1156 720 1150 704 L 1136 660 C 1130 640 1114 636 1100 636Z" fill="url(#cbAssise)"/>
+      <ellipse cx="944" cy="608" rx="34" ry="26" fill="url(#cbAssise)"/><ellipse cx="770" cy="532" rx="22" ry="28" fill="url(#cbAssise)" transform="rotate(20 770 532)"/>
       <path d="M690 492 C 700 488 716 490 728 496" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".45" fill="none"/>
       <path d="M790 540 L 920 584" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".4"/>
       <path d="M950 612 L 1100 612" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".4"/>
       <path d="M880 572 L 1000 572" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round"/><path d="M990 572 L 990 600" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
       <path d="M676 500 C 690 490 712 492 728 502" stroke="#7FE0E8" stroke-width="12" stroke-linecap="round" fill="none"/>
-      <path d="M872 680 L 640 640 L 560 520" stroke="#C9D3DE" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M872 680 L 640 640 L 500 534" stroke="#C9D3DE" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       <circle cx="640" cy="640" r="9" fill="#0F2B4D"/>
-      <rect x="440" y="496" width="230" height="26" rx="10" fill="#FFFFFF" stroke="#C9D3DE" stroke-width="2"/>
+      <g transform="translate(490 520) scale(1.4) translate(-550 -520)"><rect x="440" y="496" width="230" height="26" rx="10" fill="#FFFFFF" stroke="#C9D3DE" stroke-width="2"/>
       <rect x="452" y="470" width="110" height="18" rx="9" fill="#8A7BE6" transform="rotate(-8 506 479)"/><circle cx="460" cy="488" r="8" fill="#0F2B4D"/>
       <rect x="470" y="473" width="46" height="5" rx="2.5" fill="#FFFFFF" opacity=".6" transform="rotate(-8 506 479)"/>
       <path d="M584 496 C 584 462 638 462 638 496" fill="#FFFFFF" fill-opacity=".8" stroke="#6FCBD5" stroke-width="4"/>
       <path d="M597 496 C 597 476 625 476 625 496" fill="none" stroke="#6FCBD5" stroke-width="3"/>
       <path d="M610 498 C 610 470 664 470 664 498" fill="#FFFFFF" fill-opacity=".7" stroke="#A796F2" stroke-width="4"/>
-      <path d="M623 498 C 623 482 651 482 651 498" fill="none" stroke="#A796F2" stroke-width="3"/>
+      <path d="M623 498 C 623 482 651 482 651 498" fill="none" stroke="#A796F2" stroke-width="3"/></g>
     </g><g id="cab-ecran" data-hotspot="annuaire">
       <rect x="1170" y="566" width="370" height="20" rx="6" fill="#C9A27A"/><rect x="1170" y="584" width="370" height="8" fill="#A97E55" opacity=".6"/>
       <rect x="1188" y="592" width="14" height="182" rx="4" fill="#A97E55"/><rect x="1508" y="592" width="14" height="182" rx="4" fill="#A97E55"/>
@@ -3143,8 +3173,7 @@
       <rect x="1296" y="520" width="20" height="48" rx="4" fill="#0F2B4D"/><rect x="1262" y="560" width="88" height="10" rx="5" fill="#0F2B4D"/>
       <rect x="1176" y="356" width="260" height="170" rx="14" fill="#0F2B4D"/>
       <rect x="1188" y="368" width="236" height="146" rx="6" fill="url(#cbEcran)"/>
-      <path d="M1290 384 L1318 388 L1340 404 L1356 400 L1372 416 L1366 440 L1376 462 L1358 488 L1328 498 L1306 492 L1282 500 L1258 488 L1262 466 L1246 448 L1250 424 L1270 416 L1278 396Z" fill="#BCE7ED" stroke="#00B8C8" stroke-width="2"/>
-      <circle cx="1312" cy="420" r="5" fill="#00B8C8"/><circle cx="1336" cy="456" r="5" fill="#00B8C8"/><circle cx="1288" cy="470" r="5" fill="#00B8C8"/><circle cx="1350" cy="430" r="4" fill="#F07A62"/><circle cx="1300" cy="444" r="4" fill="#00B8C8"/>
+      <path d="M1323.5 378.0 L1332.6 384.5 L1345.6 389.7 L1356.0 393.6 L1365.1 400.1 L1375.5 405.3 L1382.0 411.8 L1378.1 422.2 L1376.8 431.3 L1371.6 439.1 L1372.9 446.9 L1379.4 456.0 L1375.5 465.1 L1380.7 472.9 L1382.0 482.0 L1369.0 488.5 L1356.0 491.1 L1344.3 487.2 L1333.9 492.4 L1327.4 501.5 L1323.5 506.7 L1310.5 502.8 L1296.2 498.9 L1281.9 498.9 L1283.2 489.8 L1285.8 478.1 L1283.2 466.4 L1279.3 457.3 L1275.4 450.8 L1278.0 444.3 L1270.2 439.1 L1261.1 436.5 L1253.3 430.0 L1252.0 423.5 L1259.8 419.6 L1268.9 418.3 L1276.7 422.2 L1283.2 418.3 L1284.5 409.2 L1287.1 402.7 L1291.0 406.6 L1297.5 410.5 L1306.6 406.6 L1311.8 397.5 L1317.0 388.4Z" fill="#BCE7ED" stroke="#00B8C8" stroke-width="2" stroke-linejoin="round"/><path d="M1387.2 489.8 C1392.4 487.2 1393.7 500.2 1388.5 506.7 C1384.6 501.5 1384.6 493.7 1387.2 489.8Z" fill="#BCE7ED" stroke="#00B8C8" stroke-width="2" stroke-linejoin="round"/><circle cx="1317.0" cy="413.1" r="5" fill="#00B8C8"/><circle cx="1323.5" cy="387.1" r="4" fill="#00B8C8"/><circle cx="1280.6" cy="443.0" r="4" fill="#00B8C8"/><circle cx="1291.0" cy="469.0" r="4" fill="#00B8C8"/><circle cx="1350.8" cy="456.0" r="5" fill="#00B8C8"/><circle cx="1310.5" cy="487.2" r="5" fill="#00B8C8"/><circle cx="1356.0" cy="487.2" r="4" fill="#F07A62"/>
       <rect x="1196" y="376" width="44" height="18" rx="9" fill="#FFFFFF"/><circle cx="1206" cy="385" r="4" fill="none" stroke="#0F2B4D" stroke-width="2"/><rect x="1213" y="383" width="20" height="4" rx="2" fill="#C9D3DE"/>
       <rect x="1214" y="548" width="120" height="14" rx="5" fill="#C9D3DE"/><rect x="1352" y="548" width="26" height="14" rx="7" fill="#C9D3DE"/>
       <rect x="1450" y="530" width="26" height="34" rx="6" fill="#F07A62"/><path d="M1476 538 c12 0 12 16 0 16" stroke="#F07A62" stroke-width="4" fill="none"/>
@@ -3152,7 +3181,7 @@
             <div class="cab-calque cab-calque-avant" aria-hidden="true">
               <span class="cab-page-calendrier"></span>
               <span class="cab-lueur"></span>
-              <span class="cab-onde" style="left:82.000%;top:46.667%;--d:0.0s"></span><span class="cab-onde" style="left:83.500%;top:50.667%;--d:0.7s"></span><span class="cab-onde" style="left:80.500%;top:52.222%;--d:1.4s"></span><span class="cab-onde" style="left:84.375%;top:47.778%;--d:2.1s"></span><span class="cab-onde" style="left:81.250%;top:49.333%;--d:2.8s"></span>
+              <span class="cab-onde" style="left:82.312%;top:45.900%;--d:0.0s"></span><span class="cab-onde" style="left:84.425%;top:50.667%;--d:0.7s"></span><span class="cab-onde" style="left:81.906%;top:54.133%;--d:1.4s"></span><span class="cab-onde" style="left:80.688%;top:52.111%;--d:2.1s"></span><span class="cab-onde" style="left:82.719%;top:43.011%;--d:2.8s"></span>
               <div class="cab-plante"><svg viewBox="0 0 160 260" class="cab-plante-svg" aria-hidden="true" focusable="false">
       <g id="cab-plante">
         <path d="M80 190 C 70 140 40 120 20 70 C 50 90 72 120 82 170Z" fill="#34B27B"/>
@@ -3164,7 +3193,7 @@
       </g></svg></div>
               <span class="cab-grain" style="left:13.8%;top:30.6%;--t:10.9s;--d:-0.7s;--dx:1px"></span><span class="cab-grain" style="left:14.8%;top:24.1%;--t:10.0s;--d:-0.4s;--dx:-2px"></span><span class="cab-grain" style="left:7.7%;top:26.3%;--t:9.5s;--d:-8.3s;--dx:-11px"></span><span class="cab-grain" style="left:11.4%;top:63.9%;--t:12.7s;--d:-5.8s;--dx:-3px"></span><span class="cab-grain" style="left:29.4%;top:23.3%;--t:12.2s;--d:-2.9s;--dx:-10px"></span><span class="cab-grain" style="left:8.8%;top:41.6%;--t:11.9s;--d:-1.8s;--dx:2px"></span><span class="cab-grain" style="left:21.3%;top:46.1%;--t:10.3s;--d:-0.6s;--dx:-12px"></span><span class="cab-grain" style="left:10.9%;top:67.6%;--t:9.6s;--d:-3.1s;--dx:2px"></span><span class="cab-grain" style="left:16.9%;top:41.0%;--t:11.8s;--d:-7.0s;--dx:-7px"></span><span class="cab-grain" style="left:19.8%;top:56.8%;--t:12.3s;--d:-7.3s;--dx:-6px"></span><span class="cab-grain" style="left:29.5%;top:28.3%;--t:9.5s;--d:-7.6s;--dx:-10px"></span><span class="cab-grain" style="left:17.7%;top:22.7%;--t:11.0s;--d:-7.6s;--dx:2px"></span><span class="cab-grain" style="left:27.0%;top:42.0%;--t:11.2s;--d:-5.9s;--dx:2px"></span><span class="cab-grain" style="left:16.9%;top:78.8%;--t:12.7s;--d:-4.7s;--dx:5px"></span><span class="cab-grain" style="left:7.5%;top:69.1%;--t:10.9s;--d:-9.9s;--dx:9px"></span><span class="cab-grain" style="left:12.8%;top:47.0%;--t:11.0s;--d:-0.2s;--dx:-1px"></span>
             </div>
-            <div class="cab-points"><button type="button" class="cab-point lp-u-emploi" data-cle="emploi" aria-label="Emploi : voir les offres du tableau d'annonces" style="left:21.875%;top:17.778%;width:16.875%;height:30.000%;--px:50.00%;--py:49.26%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Emploi</span></button><button type="button" class="cab-point lp-u-congres" data-cle="congres" aria-label="Congrès : ouvrir le calendrier" style="left:40.000%;top:10.667%;width:14.000%;height:27.778%;--px:50.00%;--py:54.40%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Congrès</span></button><button type="button" class="cab-point lp-u-produits" data-cle="produits" aria-label="Produits : voir le fauteuil et le plateau" style="left:26.875%;top:48.889%;width:47.500%;height:40.000%;--px:61.84%;--py:33.33%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Produits</span></button><button type="button" class="cab-point lp-u-formations" data-cle="annuaire" aria-label="Retrouvez votre fiche : chercher votre nom dans l'annuaire" style="left:72.500%;top:37.778%;width:25.000%;height:48.889%;--px:36.50%;--py:22.95%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Retrouvez votre fiche</span></button><button type="button" class="cab-point lp-u-formations" data-cle="formations" aria-label="Formations : voir l'étagère" style="left:85.875%;top:11.111%;width:11.875%;height:28.889%;--px:48.95%;--py:50.00%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Formations</span></button></div>
+            <div class="cab-points"><button type="button" class="cab-point lp-u-emploi" data-cle="emploi" aria-label="Emploi : voir les offres du tableau d'annonces" style="left:21.875%;top:17.778%;width:16.875%;height:30.000%;--px:50.00%;--py:49.26%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Emploi</span></button><button type="button" class="cab-point lp-u-congres" data-cle="congres" aria-label="Congrès : ouvrir le calendrier" style="left:40.000%;top:10.667%;width:14.000%;height:27.778%;--px:50.00%;--py:54.40%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Congrès</span></button><button type="button" class="cab-point lp-u-produits" data-cle="produits" aria-label="Produits : voir le fauteuil et le plateau" style="left:20.625%;top:47.778%;width:53.750%;height:41.111%;--px:66.28%;--py:35.14%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Produits</span></button><button type="button" class="cab-point lp-u-formations" data-cle="annuaire" aria-label="Retrouvez votre fiche : chercher votre nom dans l'annuaire" style="left:72.500%;top:37.778%;width:25.000%;height:48.889%;--px:64.50%;--py:7.27%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Retrouvez votre fiche</span></button><button type="button" class="cab-point lp-u-formations" data-cle="formations" aria-label="Formations : voir l'étagère" style="left:85.875%;top:11.111%;width:11.875%;height:28.889%;--px:48.95%;--py:50.00%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Formations</span></button></div>
           </div>
           <div class="cab-voile" aria-hidden="true"></div>
         </div>
@@ -3179,61 +3208,10 @@
       <div class="cab-barre" role="group" aria-label="Ouvrir une partie du cabinet"><button type="button" class="cab-barre-bouton lp-u-produits" data-cle="produits"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5c2 0 3 .9 5 .9s3-.9 5-.9c2.6 0 3.7 2.5 3.1 5.4-.4 2-1.4 3.4-1.8 5.4-.4 2.2-.6 6.2-2.4 6.2-1.6 0-1.4-3.8-2.3-5.2-.4-.6-1-.7-1.6-.7s-1.2.1-1.6.7c-.9 1.4-.7 5.2-2.3 5.2-1.8 0-2-4-2.4-6.2-.4-2-1.4-3.4-1.8-5.4C3.3 6 4.4 3.5 7 3.5z"/></svg></span><span>Produits</span></button><button type="button" class="cab-barre-bouton lp-u-formations" data-cle="formations"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5-.7 1.5-1.5z"/></svg></span><span>Formations</span></button><button type="button" class="cab-barre-bouton lp-u-congres" data-cle="congres"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span><span>Congrès</span></button><button type="button" class="cab-barre-bouton lp-u-emploi" data-cle="emploi"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3.5 13h17"/></svg></span><span>Emploi</span></button><button type="button" class="cab-barre-bouton lp-u-formations" data-cle="annuaire"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><span>Fiche</span></button></div>
       <div class="cab-fond-feuille" id="cabFondFeuille" onclick="fermerCabinet()"></div>
     </div>
-  </section>
-
-  <section class="lp-chiffres" aria-label="OrthoConnect en chiffres" id="lpChiffres">
-    <div class="container">
-      <ul class="lp-chiffres-liste">
-        <li data-chiffre="annuaire" data-un="orthodontiste référencé"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">orthodontistes référencés</span></li>
-        <li class="lp-u-formations" data-chiffre="formations" data-un="formation publiée"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">formations publiées</span></li>
-        <li class="lp-u-produits" data-chiffre="produits" data-un="produit comparable"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">produits comparables</span></li>
-        <li class="lp-u-congres" data-chiffre="congres" data-un="congrès à venir"><span class="lp-chiffre"><span class="lp-squelette"></span></span><span class="lp-chiffre-libelle">congrès à venir</span></li>
-      </ul>
-    </div>
-    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#F0FAFB" aria-hidden="true" focusable="false"><path d="M0 48 L1440 6 L1440 48 Z"/></svg>
-  </section>
-
-  <section class="lp-section lp-fond-turquoise" id="lpRangees">
-    <div class="container">
-      <div class="lp-rangee lp-u-congres" id="lpRangeeCongres" data-rangee="congres">
-        <div class="lp-rangee-tete">
-          <span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="M8.5 14h2M13.5 14h2M8.5 17h2"/></svg></span>
-          <h2>Prochains congrès</h2>
-          <a class="lp-voir-tout" href="/congres" onclick="return lienInterne(event, () => showPage('congres'))">Voir tout</a>
-          <div class="lp-fleches">
-            <button type="button" class="lp-fleche" data-sens="-1" aria-label="Prochains congrès : précédent" onclick="defilerRangee(this, -1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
-            <button type="button" class="lp-fleche" data-sens="1" aria-label="Prochains congrès : suivant" onclick="defilerRangee(this, 1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
-          </div>
-        </div>
-        <div class="lp-piste" tabindex="0" role="region" aria-label="Prochains congrès" onkeydown="toucheRangee(event, this)"><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div></div>
-      </div>
-      <div class="lp-rangee lp-u-formations" id="lpRangeeFormations" data-rangee="formations">
-        <div class="lp-rangee-tete">
-          <span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5-.7 1.5-1.5z"/><path d="M6.5 8h2.5M6.5 11h2.5M15 8h2.5M15 11h2.5"/></svg></span>
-          <h2>Formations à venir</h2>
-          <a class="lp-voir-tout" href="/formations" onclick="return lienInterne(event, () => showPage('formations'))">Voir tout</a>
-          <div class="lp-fleches">
-            <button type="button" class="lp-fleche" data-sens="-1" aria-label="Formations à venir : précédent" onclick="defilerRangee(this, -1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
-            <button type="button" class="lp-fleche" data-sens="1" aria-label="Formations à venir : suivant" onclick="defilerRangee(this, 1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
-          </div>
-        </div>
-        <div class="lp-piste" tabindex="0" role="region" aria-label="Formations à venir" onkeydown="toucheRangee(event, this)"><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div></div>
-      </div>
-      <div class="lp-rangee lp-u-produits" id="lpRangeeProduits" data-rangee="produits">
-        <div class="lp-rangee-tete">
-          <span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5c2 0 3 .9 5 .9s3-.9 5-.9c2.6 0 3.7 2.5 3.1 5.4-.4 2-1.4 3.4-1.8 5.4-.4 2.2-.6 6.2-2.4 6.2-1.6 0-1.4-3.8-2.3-5.2-.4-.6-1-.7-1.6-.7s-1.2.1-1.6.7c-.9 1.4-.7 5.2-2.3 5.2-1.8 0-2-4-2.4-6.2-.4-2-1.4-3.4-1.8-5.4C3.3 6 4.4 3.5 7 3.5z"/></svg></span>
-          <h2>Produits à comparer</h2>
-          <a class="lp-voir-tout" href="/produits" onclick="return lienInterne(event, () => showPage('produits'))">Voir tout</a>
-          <div class="lp-fleches">
-            <button type="button" class="lp-fleche" data-sens="-1" aria-label="Produits à comparer : précédent" onclick="defilerRangee(this, -1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
-            <button type="button" class="lp-fleche" data-sens="1" aria-label="Produits à comparer : suivant" onclick="defilerRangee(this, 1)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
-          </div>
-        </div>
-        <div class="lp-piste" tabindex="0" role="region" aria-label="Produits à comparer" onkeydown="toucheRangee(event, this)"><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div><div class="lp-carte lp-squelette" aria-hidden="true"></div></div>
-      </div>
-    </div>
     <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#FFFFFF" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
   </section>
+
+
 
   <section class="lp-section lp-fond-blanc lp-apparait">
     <div class="container">
@@ -3259,46 +3237,20 @@
             <path d="M62 34c-5 0-8 3.6-8 7.6 0 6 8 12.4 8 12.4s8-6.4 8-12.4c0-4-3-7.6-8-7.6z" fill="#00B8C8"/><circle cx="62" cy="41.5" r="3" fill="#fff"/>
             <path d="M86 22c-4 0-6.4 2.9-6.4 6.1 0 4.8 6.4 9.9 6.4 9.9s6.4-5.1 6.4-9.9c0-3.2-2.4-6.1-6.4-6.1z" fill="#8A7BE6"/><circle cx="86" cy="28" r="2.4" fill="#fff"/></svg><div class="lp-etape-num">Étape 3</div><h3>Accédez à tout</h3><p>Carte des cabinets, comparatifs, tarifs préférentiels, annonces.</p></li>
       </ol>
-    </div>
-    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#FFF6EF" aria-hidden="true" focusable="false"><path d="M0 48 L1440 6 L1440 48 Z"/></svg>
-  </section>
-
-  <section class="lp-section lp-fond-chaud lp-apparait">
-    <div class="container">
-      <h2 class="lp-titre" style="margin-bottom:24px">Selon où vous en êtes</h2>
-      <ul class="lp-profils">
-        <li class="lp-profil lp-echelon lp-u-formations" style="--i:0"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-4 9 4-9 4-9-4z"/><path d="M7 11v4c0 1.2 2.2 2.5 5 2.5s5-1.3 5-2.5v-4"/></svg></span><h3 style="margin-top:14px">Vous êtes interne</h3><p>Repérez les formations qui comptent. Trouvez un premier remplacement ou un poste d'adjoint.</p></li>
-        <li class="lp-profil lp-echelon lp-u-emploi" style="--i:1"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3.5 13h17M12 12v2"/></svg></span><h3 style="margin-top:14px">Vous êtes collaborateur</h3><p>Comparez les conditions pratiquées ailleurs. Préparez une association.</p></li>
-        <li class="lp-profil lp-echelon lp-u-produits" style="--i:2"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5c2 0 3 .9 5 .9s3-.9 5-.9c2.6 0 3.7 2.5 3.1 5.4-.4 2-1.4 3.4-1.8 5.4-.4 2.2-.6 6.2-2.4 6.2-1.6 0-1.4-3.8-2.3-5.2-.4-.6-1-.7-1.6-.7s-1.2.1-1.6.7c-.9 1.4-.7 5.2-2.3 5.2-1.8 0-2-4-2.4-6.2-.4-2-1.4-3.4-1.8-5.4C3.3 6 4.4 3.5 7 3.5z"/></svg></span><h3 style="margin-top:14px">Vous exercez en libéral</h3><p>Choisissez votre équipement sur des fiches comparables. Publiez vos annonces de recrutement.</p></li>
-      </ul>
-    </div>
-    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#0F2B4D" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
-  </section>
-
-  <section class="lp-section lp-fond-navy lp-apparait">
-    <div class="container">
-      <div class="lp-coeur">
-        <div class="lp-echelon" style="--i:0">
-          <h2>Dites ce qui vous intéresse</h2>
-          <p>Un cœur sur une formation ou un produit signale votre intérêt. Les demandes sont regroupées : nous pouvons ainsi négocier de meilleures conditions auprès des fournisseurs et des organismes.</p>
-        </div>
-        <div class="lp-coeur-illus" aria-hidden="true">
+      <div class="lp-interet lp-echelon" style="--i:3">
+        <div class="lp-interet-illus"><div class="lp-coeur-illus" aria-hidden="true">
           <span class="lp-anneau" style="left:48px;top:23px;width:124px;height:124px"></span>
           <span class="lp-anneau" style="left:70px;top:45px;width:80px;height:80px"></span>
           <span class="lp-orbite" style="left:43.0px;top:42.0px;width:18px;height:18px;background:#00B8C8;--x:26px;--y:16px"></span><span class="lp-orbite" style="left:159.0px;top:38.0px;width:14px;height:14px;background:#8A7BE6;--x:-24px;--y:18px"></span><span class="lp-orbite" style="left:172.0px;top:87.0px;width:16px;height:16px;background:#34B27B;--x:-28px;--y:-4px"></span><span class="lp-orbite" style="left:37.0px;top:96.0px;width:14px;height:14px;background:#F07A62;--x:30px;--y:-8px"></span><span class="lp-orbite" style="left:74.0px;top:131.0px;width:12px;height:12px;background:#8A7BE6;--x:12px;--y:-22px"></span><span class="lp-orbite" style="left:140.0px;top:129.0px;width:12px;height:12px;background:#00B8C8;--x:-14px;--y:-22px"></span>
           <span class="lp-coeur-battement"><svg viewBox="0 0 60 52" focusable="false"><path d="M30 50S0 32.4 0 10a16 16 0 0 1 30-8.6A16 16 0 0 1 60 10c0 22.4-30 40-30 40z" fill="#F07A62"/><path d="M12 9a9 9 0 0 1 8-7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/></svg></span>
-        </div>
+        </div></div>
+        <p><strong>Dites ce qui vous intéresse.</strong> Un cœur sur une formation ou un produit : nous regroupons les demandes pour négocier de meilleures conditions.</p>
       </div>
     </div>
-    <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#FFFFFF" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
   </section>
 
-  <section class="lp-section lp-fond-blanc lp-apparait" style="padding-bottom:0">
-    <div class="container">
-      <p class="lp-marques lp-echelon">Vous êtes une marque ou un organisme de formation ?
-        <a href="mailto:contact@orthoconnect.fr?subject=Partenariat%20OrthoConnect">Écrivez-nous</a></p>
-    </div>
-  </section>
+
+
 
   <section class="lp-section lp-fond-blanc lp-apparait">
     <div class="container">
@@ -3310,6 +3262,8 @@
           <a class="btn btn-outline-white landing-visiteur" href="/" onclick="event.preventDefault(); openAuth('signup')">Créer un compte</a>
           <a class="btn btn-turquoise landing-connecte" href="/mon-espace" onclick="return lienInterne(event, () => showPage('dashboard'))">Aller à mon espace</a>
         </div>
+        <p class="lp-final-marques">Vous êtes une marque ou un organisme de formation ?
+          <a href="mailto:contact@orthoconnect.fr?subject=Partenariat%20OrthoConnect">Écrivez-nous</a></p>
       </div>
     </div>
     <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#0F2B4D" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
@@ -3340,6 +3294,7 @@
         <a href="mailto:contact@orthoconnect.fr">Contact</a>
       </div>
     </div>
+    <div class="lp-rubriques" role="navigation" aria-label="Rubriques"><a href="/formations" onclick="return lienInterne(event, () => showPage('formations'))">Formations</a><a href="/congres" onclick="return lienInterne(event, () => showPage('congres'))">Congrès</a><a href="/produits" onclick="return lienInterne(event, () => showPage('produits'))">Produits</a><a href="/carte" onclick="return lienInterne(event, () => showPage('carte'))">Carte</a><a href="/emploi" onclick="return lienInterne(event, () => showPage('emploi'))">Emploi</a></div>
     <div class="footer-bottom">
       <span>© 2026 OrthoConnect · orthoconnect.fr</span>
       <span>Indépendant de tout syndicat et de toute société savante</span>
@@ -3353,6 +3308,10 @@
 <div class="page" id="page-formations">
   <section class="page-hero">
     <div class="container">
+      <div class="onglets-rubrique" role="navigation" aria-label="Formations et congrès">
+        <a href="/formations" class="onglet-rubrique actif" aria-current="page" onclick="return lienInterne(event, () => showPage('formations'))">Formations</a>
+        <a href="/congres" class="onglet-rubrique" onclick="return lienInterne(event, () => showPage('congres'))">Congrès</a>
+      </div>
       <h1>Catalogue des formations</h1>
       <p>Formations DPC éligibles, certifiantes et continues pour les orthodontistes</p>
       <div class="page-hero-meta">
@@ -3529,6 +3488,10 @@
 <div class="page" id="page-congres">
   <section class="page-hero">
     <div class="container">
+      <div class="onglets-rubrique" role="navigation" aria-label="Formations et congrès">
+        <a href="/formations" class="onglet-rubrique" onclick="return lienInterne(event, () => showPage('formations'))">Formations</a>
+        <a href="/congres" class="onglet-rubrique actif" aria-current="page" onclick="return lienInterne(event, () => showPage('congres'))">Congrès</a>
+      </div>
       <h1>Congrès et salons</h1>
       <p>Les rendez-vous de l'orthodontie, avec leurs dates, leurs lieux et leurs sites officiels</p>
     </div>
@@ -11264,12 +11227,15 @@ function lpSessions() {
 // Les formations qui ont une session à venir d'abord, par date ; les
 // autres ensuite, dans l'ordre du catalogue.
 async function lpFormations() {
+  return (await lpFormationsToutes()).slice(0, LP_PAR_RANGEE);
+}
+
+async function lpFormationsToutes() {
   const prochaine = await lpSessions();
   return formationsDB
     .map((f, i) => ({ f, s: prochaine.get(f.id) || null, i }))
     .sort((a, b) => (a.s && b.s) ? a.s.date_debut.localeCompare(b.s.date_debut)
-      : (a.s ? -1 : b.s ? 1 : a.i - b.i))
-    .slice(0, LP_PAR_RANGEE);
+      : (a.s ? -1 : b.s ? 1 : a.i - b.i));
 }
 
 function lpProduits() {
@@ -11341,58 +11307,9 @@ function lpCarteProduit(p) {
     </a>`;
 }
 
-async function remplirRangee(nom) {
-  const rangee = document.querySelector('.lp-rangee[data-rangee="' + nom + '"]');
-  if (!rangee || rangee.dataset.remplie) return;
-  rangee.dataset.remplie = '1';
-  let cartes = [];
-  try {
-    if (nom === 'congres') cartes = (await lpCongres()).map(lpCarteCongres);
-    else if (nom === 'formations') cartes = (await lpFormations()).map(lpCarteFormation);
-    else if (nom === 'produits') cartes = lpProduits().map(lpCarteProduit);
-  } catch (e) {
-    console.warn('Accueil, rangée ' + nom + ' :', e);
-    cartes = [];
-  }
-  // Vide ou en erreur : la rangée disparaît, sans message.
-  if (!cartes.length) { rangee.hidden = true; return; }
-  const piste = rangee.querySelector('.lp-piste');
-  // Entrée échelonnée, 60 ms d'une carte à l'autre (rien en mouvement réduit).
-  piste.innerHTML = cartes.map((html, i) => LP_MOUVEMENT_REDUIT.matches ? html
-    : html.replace('class="lp-carte ', `style="--i:${i}" class="lp-carte lp-entree `)).join('');
-  piste.scrollLeft = 0;
-  majFlechesRangee(piste);
-}
 
-function majFlechesRangee(piste) {
-  const rangee = piste.closest('.lp-rangee');
-  const [prec, suiv] = rangee.querySelectorAll('.lp-fleche');
-  // Quelques pixels de tolérance : l'alignement des cartes laisse
-  // parfois la piste à 1 ou 4 px de son bord.
-  prec.disabled = piste.scrollLeft <= 6;
-  suiv.disabled = piste.scrollLeft + piste.clientWidth >= piste.scrollWidth - 6;
-}
 
-function defilerRangee(bouton, sens) {
-  const piste = bouton.closest('.lp-rangee').querySelector('.lp-piste');
-  const carte = piste.querySelector('.lp-carte');
-  const pas = carte ? carte.getBoundingClientRect().width + 16 : piste.clientWidth * 0.8;
-  piste.scrollBy({ left: sens * pas, behavior: LP_MOUVEMENT_REDUIT.matches ? 'auto' : 'smooth' });
-}
 
-// Au clavier, sur la piste : flèches gauche et droite, Début et Fin.
-function toucheRangee(e, piste) {
-  if (e.target !== piste) return;
-  const carte = piste.querySelector('.lp-carte');
-  const pas = carte ? carte.getBoundingClientRect().width + 16 : 300;
-  const comportement = LP_MOUVEMENT_REDUIT.matches ? 'auto' : 'smooth';
-  if (e.key === 'ArrowRight') piste.scrollBy({ left: pas, behavior: comportement });
-  else if (e.key === 'ArrowLeft') piste.scrollBy({ left: -pas, behavior: comportement });
-  else if (e.key === 'Home') piste.scrollTo({ left: 0, behavior: comportement });
-  else if (e.key === 'End') piste.scrollTo({ left: piste.scrollWidth, behavior: comportement });
-  else return;
-  e.preventDefault();
-}
 
 // Les quatre chiffres, comptés en base. Le total de l'annuaire s'affiche
 // dès qu'il est lu ; formations, produits et congrès à partir de 3
@@ -11432,11 +11349,6 @@ async function remplirChiffresLanding() {
     obs.observe(ligne);
   }
 
-  // La phrase d'appui du champ de recherche reprend le total, s'il est lu.
-  if (Number.isFinite(annuaire) && annuaire > 0) {
-    document.getElementById('lpAppui').textContent = "Votre fiche existe peut-être déjà : l'annuaire référence "
-      + annuaire.toLocaleString('fr-FR') + (annuaire > 1 ? ' orthodontistes.' : ' orthodontiste.');
-  }
 }
 
 // De 0 à la valeur en 800 ms, décélération en fin de course. La valeur
@@ -11452,9 +11364,10 @@ function compterJusqua(cibles) {
   requestAnimationFrame(etape);
 }
 
-// Les trois mini-cartes du hero, sur grand écran seulement : le premier
-// congrès à venir, la première formation, le premier produit.
-async function remplirApercuLanding() {
+// Les deux mini-cartes du hero, sur grand écran seulement : la première
+// formation et le premier produit des catalogues déjà en mémoire. Aucune
+// lecture de plus au chargement.
+function remplirApercuLanding() {
   const mini = (id, type, titre, ligne) => {
     const el = document.getElementById(id);
     if (!titre) { el.hidden = true; return false; }
@@ -11462,18 +11375,12 @@ async function remplirApercuLanding() {
       + (ligne ? `<div class="lp-mini-ligne">${esc(ligne)}</div>` : '');
     return true;
   };
-  const [congres, formations] = await Promise.all([lpCongres(), lpFormations()]);
-  const c = congres[0], f = formations[0], p = lpProduits()[0];
+  const f = formationsDB[0], p = lpProduits()[0];
   const montres = [
-    mini('lpMiniCongres', 'Congrès', c && c.nom, c && [formatPeriodeCongres(c.date_debut, c.date_fin), c.ville].filter(Boolean).join(' · ')),
-    mini('lpMiniFormation', 'Formation', f && f.f.titre, f && (f.s ? 'Prochaine session : ' + formatDate(f.s.date_debut) : nomOrganisme(f.f))),
+    mini('lpMiniFormation', 'Formation', f && f.titre, f && nomOrganisme(f)),
     mini('lpMiniProduit', 'Produit', p && p.nom, p && p.fournisseurs && p.fournisseurs.nom)
   ];
   if (!montres.some(Boolean)) document.getElementById('lpApercu').hidden = true;
-}
-
-function decouvrirLanding() {
-  document.getElementById('lpRangees').scrollIntoView({ behavior: LP_MOUVEMENT_REDUIT.matches ? 'auto' : 'smooth', block: 'start' });
 }
 
 function allerRechercheLanding() {
@@ -11497,27 +11404,13 @@ function ouvrirLanding() {
     const obsBoucles = new IntersectionObserver((entrees) => entrees.forEach(e => {
       e.target.classList.toggle('lp-pause', !e.isIntersecting);
     }));
-    document.querySelectorAll('#page-landing .lp-hero, #page-landing .lp-fond-navy, #page-landing .cab-cadre').forEach(b => obsBoucles.observe(b));
+    document.querySelectorAll('#page-landing .lp-hero, #page-landing .lp-interet, #page-landing .cab-cadre').forEach(b => obsBoucles.observe(b));
   }
   remplirChiffresLanding();
   if (window.matchMedia('(min-width: 900px)').matches) remplirApercuLanding();
 
-  const rangees = document.querySelectorAll('.lp-rangee');
   const sections = document.querySelectorAll('#page-landing .lp-apparait');
-  rangees.forEach(r => {
-    const piste = r.querySelector('.lp-piste');
-    piste.addEventListener('scroll', () => majFlechesRangee(piste), { passive: true });
-  });
-  if (!('IntersectionObserver' in window)) {
-    rangees.forEach(r => remplirRangee(r.dataset.rangee));
-    return;
-  }
-  const obsRangees = new IntersectionObserver((entrees) => entrees.forEach(e => {
-    if (!e.isIntersecting) return;
-    obsRangees.unobserve(e.target);
-    remplirRangee(e.target.dataset.rangee);
-  }), { rootMargin: '200px 0px' });
-  rangees.forEach(r => obsRangees.observe(r));
+  if (!('IntersectionObserver' in window)) return;
 
   // Apparition douce, jamais avec un mouvement réduit.
   if (LP_MOUVEMENT_REDUIT.matches) return;
@@ -11544,7 +11437,7 @@ const CAB_HASH_DEPART = location.hash;
 const CAB_HASHS = { produits: '#cabinet-produits', formations: '#cabinet-formations', congres: '#cabinet-congres', emploi: '#cabinet-emploi', annuaire: '#cabinet-fiche' };
 // Boîtes des objets dans le repère 1600 x 900 de la scène.
 const CAB_BOITES = { fenetre: [50, 90, 320, 400], emploi: [350, 160, 270, 270], congres: [640, 96, 224, 250],
-  produits: [430, 440, 760, 360], annuaire: [1160, 340, 400, 440], formations: [1374, 100, 190, 260] };
+  produits: [330, 430, 860, 370], annuaire: [1160, 340, 400, 440], formations: [1374, 100, 190, 260] };
 const CAB_TEXTES = {
   produits: ['Produits', 'Aligneurs, caméras intra-orales, brackets : les fiches techniques, comparables d\'un système à l\'autre.', '/produits', 'produits'],
   formations: ['Formations', 'Les formations publiées, avec leur organisme, leur format et leur prochaine session.', '/formations', 'formations'],
@@ -11623,19 +11516,105 @@ function cabCartes(cle) {
   return Promise.resolve([]);
 }
 
+// Groupes du panneau : catégories de produits ayant au moins un produit
+// visible, thématiques de formations s'il y en a au moins deux. Tout vient
+// des catalogues déjà chargés.
+function cabGroupesProduits() {
+  const parCat = new Map();
+  produitsDB.slice().sort((a, b) => (Number.isFinite(a.ordre) ? a.ordre : Infinity) - (Number.isFinite(b.ordre) ? b.ordre : Infinity)
+      || String(a.nom || '').localeCompare(String(b.nom || ''), 'fr'))
+    .forEach(p => { if (!p.categorie) return; if (!parCat.has(p.categorie)) parCat.set(p.categorie, []); parCat.get(p.categorie).push(p); });
+  const ordre = categoriesProduits.map(c => c.code);
+  const rang = (code) => { const i = ordre.indexOf(code); return i < 0 ? 999 : i; };
+  return [...parCat.entries()].sort((a, b) => rang(a[0]) - rang(b[0])).map(([code, liste]) => {
+    const c = categorieProduit(code);
+    return { cle: code, libelle: c ? (c.libelle_pluriel || c.libelle || code) : code, elements: liste };
+  });
+}
+
+async function cabGroupesFormations() {
+  const liste = await lpFormationsToutes();
+  const parTheme = new Map();
+  liste.forEach(x => { const t = String(x.f.thematique || '').trim(); if (!t) return; if (!parTheme.has(t)) parTheme.set(t, []); parTheme.get(t).push(x); });
+  if (parTheme.size < 2) return { tout: liste, groupes: [] };
+  return { tout: liste, groupes: [...parTheme.entries()].sort((a, b) => a[0].localeCompare(b[0], 'fr')).map(([t, el]) => ({ cle: t, libelle: t, elements: el })) };
+}
+
+// « Tout » : huit cartes au plus, en piochant tour à tour dans chaque groupe.
+function cabAlterner(groupes, max) {
+  const out = [];
+  for (let i = 0; out.length < max; i++) {
+    let ajoute = false;
+    groupes.forEach(g => { if (out.length < max && g.elements[i]) { out.push(g.elements[i]); ajoute = true; } });
+    if (!ajoute) break;
+  }
+  return out;
+}
+
+let cabGroupes = null;
+
+function cabPuces(groupes, total) {
+  return `<div class="cab-puces" role="tablist" aria-label="Filtrer le panneau">
+      <button type="button" role="tab" class="cab-puce actif" aria-selected="true" data-filtre="">Tout</button>
+      ${groupes.map(g => `<button type="button" role="tab" class="cab-puce" aria-selected="false" data-filtre="${esc(g.cle)}">${esc(g.libelle)} (${g.elements.length})</button>`).join('')}
+    </div><div class="cab-liste" id="cabListe"></div>`;
+}
+
+function cabAfficherFiltre(cle, filtre) {
+  const liste = document.getElementById('cabListe');
+  if (!liste || !cabGroupes) return;
+  const carte = cle === 'produits' ? lpCarteProduit : lpCarteFormation;
+  const g = cabGroupes.groupes.find(x => x.cle === filtre);
+  const elements = g ? g.elements : (cle === 'produits' ? cabAlterner(cabGroupes.groupes, LP_PAR_RANGEE) : cabGroupes.tout.slice(0, LP_PAR_RANGEE));
+  liste.innerHTML = elements.map(carte).join('');
+  // « Voir tout » emmène sur la catégorie choisie, que la page Produits sait filtrer.
+  if (cle === 'produits') document.getElementById('cabVoirTout').dataset.filtre = g ? g.cle : '';
+}
+
 async function cabRemplir(cle) {
   const [titre, accroche, lien, page] = CAB_TEXTES[cle];
   document.getElementById('cabPanneauTitre').textContent = titre;
   document.getElementById('cabAccroche').textContent = accroche;
   const voir = document.getElementById('cabVoirTout');
   voir.setAttribute('href', lien);
-  voir.onclick = (e) => lienInterne(e, () => showPage(page));
+  voir.dataset.filtre = '';
+  voir.onclick = (e) => lienInterne(e, () => {
+    const filtre = voir.dataset.filtre;
+    showPage(page);
+    if (page === 'produits' && filtre) {
+      const bouton = [...document.querySelectorAll('#produitsFiltres .filter-btn')]
+        .find(b => (b.getAttribute('onclick') || '').includes("'" + filtre + "'"));
+      if (bouton) filterProduits(filtre, bouton);
+    }
+  });
   const zone = document.getElementById('cabContenu');
   zone.innerHTML = cle === 'annuaire' ? '' : '<div class="lp-carte lp-squelette" aria-hidden="true"></div>'.repeat(2);
-  let cartes = [];
-  try { cartes = await cabCartes(cle); } catch (e) { console.warn('Cabinet, ' + cle + ' :', e); }
-  // Panneau vide ou en erreur : l'accroche et « Voir tout » seulement.
-  if (cabOuvert === cle) zone.innerHTML = cartes.join('');
+  cabGroupes = null;
+  try {
+    if (cle === 'produits') {
+      const groupes = cabGroupesProduits();
+      cabGroupes = { groupes, tout: [] };
+      if (cabOuvert !== cle) return;
+      zone.innerHTML = groupes.length ? cabPuces(groupes) : '';
+      if (groupes.length) cabAfficherFiltre(cle, '');
+      return;
+    }
+    if (cle === 'formations') {
+      const r = await cabGroupesFormations();
+      if (cabOuvert !== cle) return;
+      cabGroupes = r;
+      if (!r.tout.length) { zone.innerHTML = ''; return; }
+      zone.innerHTML = r.groupes.length ? cabPuces(r.groupes) : '<div class="cab-liste" id="cabListe"></div>';
+      cabAfficherFiltre(cle, '');
+      return;
+    }
+    const cartes = await cabCartes(cle);
+    // Panneau vide ou en erreur : l'accroche et « Voir tout » seulement.
+    if (cabOuvert === cle) zone.innerHTML = cartes.join('');
+  } catch (e) {
+    console.warn('Cabinet, ' + cle + ' :', e);
+    if (cabOuvert === cle) zone.innerHTML = '';
+  }
 }
 
 function cabAppliquerZoom(cle) {
@@ -11739,6 +11718,15 @@ function preparerCabinet() {
   const sec = cabSection();
   sec.classList.add('cab-actif');
   sec.querySelectorAll('.cab-point, .cab-barre-bouton').forEach(b => b.addEventListener('click', () => ouvrirCabinet(b.dataset.cle, { pousser: true, declencheur: b })));
+
+  document.getElementById('cabPanneau').addEventListener('click', (e) => {
+    const puce = e.target.closest('.cab-puce');
+    if (!puce || !cabOuvert) return;
+    const puces = puce.parentElement;
+    puces.querySelectorAll('.cab-puce').forEach(b => { const a = b === puce; b.classList.toggle('actif', a); b.setAttribute('aria-selected', String(a)); });
+    cabAfficherFiltre(cabOuvert, puce.dataset.filtre);
+    puces.scrollTo({ left: puce.offsetLeft - (puces.clientWidth - puce.offsetWidth) / 2, behavior: LP_MOUVEMENT_REDUIT.matches ? 'auto' : 'smooth' });
+  });
 
   // Un lien du panneau mène ailleurs : le panneau se ferme d'abord, sans
   // retour d'historique qui défairait la navigation.
@@ -14733,7 +14721,8 @@ function showPage(page, chemin) {
   const el = document.getElementById('page-' + page);
   if (el) el.classList.add('active');
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-  const navEl = document.getElementById('nav-' + page);
+  // Les congrès n'ont plus d'entrée à eux : ils s'ouvrent depuis Formations.
+  const navEl = document.getElementById('nav-' + (page === 'congres' ? 'formations' : page));
   if (navEl) navEl.classList.add('active');
 
   // L'adresse suit la vue réellement affichée : quand la garde renvoie
