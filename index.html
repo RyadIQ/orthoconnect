@@ -977,17 +977,49 @@
   }
   .auth-close {
     position: absolute;
-    top: 14px; right: 16px;
-    background: none; border: none;
-    font-size: 24px; color: var(--text-light);
+    top: 6px; right: 6px;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; border-radius: 50%;
+    font-size: 28px; color: var(--text-light);
     cursor: pointer; line-height: 1;
   }
+  .auth-close:hover { background: var(--grey-bg, #F1F5F9); color: var(--navy); }
   .auth-logo { text-align: center; margin-bottom: 8px; }
   .auth-box h3 { font-size: 21px; font-weight: 800; text-align: center; margin-bottom: 6px; }
   .auth-box .auth-sub { text-align: center; color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
   .auth-field { margin-bottom: 16px; }
   .auth-field label { font-size: 13px; }
-  .auth-hint { font-size: 11px; color: var(--text-light); margin-top: 5px; }
+  .auth-hint { font-size: 12px; line-height: 1.45; color: var(--text-secondary); margin-top: 5px; }
+  .auth-box input { min-height: 44px; }
+  .auth-label { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 7px; }
+  /* Boutons de la fenêtre : pleine largeur, libellé sur plusieurs lignes
+     si besoin (compte à rebours compris), 44 px de cible au moins. */
+  .auth-bouton { width: 100%; justify-content: center; margin-top: 8px; min-height: 48px; white-space: normal; text-align: center; }
+  .auth-bouton:disabled { opacity: 0.6; cursor: not-allowed; }
+  .auth-bouton + .auth-bouton { margin-top: 10px; }
+  /* Liens d'action : de vrais boutons, atteignables au clavier. */
+  .auth-lien { background: none; border: 0; padding: 0 4px; min-height: 44px; font: inherit; font-weight: 600;
+    color: var(--turquoise-dark, #007A86); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .auth-lien:hover { color: var(--navy); }
+  .auth-close:focus-visible, .auth-lien:focus-visible, .statut-btn:focus-visible { outline: 3px solid var(--turquoise); outline-offset: 2px; }
+  .auth-oubli { text-align: right; margin: -10px 0 4px; font-size: 13px; }
+  .auth-actions { display: flex; flex-wrap: wrap; gap: 0 16px; margin-top: 4px; }
+  .auth-error .auth-lien { color: inherit; padding: 0; }
+  .auth-toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 2100; max-width: calc(100% - 32px); width: max-content;
+    background: var(--navy); color: #fff; font-size: 14px; font-weight: 500; line-height: 1.45; padding: 12px 18px; border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(15,43,77,0.25); opacity: 0; transform: translate(-50%, 12px); pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s; }
+  .auth-toast.show { opacity: 1; transform: translate(-50%, 0); }
+  @media (max-width: 480px) {
+    .auth-overlay { padding: 12px; }
+    .auth-box { padding: 28px 18px 22px; }
+  }
+  /* Page d'attente de /mon-espace. */
+  .verif-texte { font-size: 15px; line-height: 1.6; margin-bottom: 18px; max-width: 640px; }
+  .verif-suite { background: var(--white); border: 1px solid var(--grey-border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; max-width: 640px; }
+  .verif-suite-titre { font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+  .verif-etapes { margin: 0; padding-left: 22px; display: grid; gap: 8px; font-size: 14px; line-height: 1.5; color: var(--text-main); }
   .auth-error {
     display: none;
     background: #FEF2F2; border: 1px solid #FECACA;
@@ -1010,10 +1042,11 @@
   }
 
 
-  .statut-choice { display: flex; gap: 6px; }
+  .statut-choice { display: flex; flex-wrap: wrap; gap: 6px; }
   .statut-btn {
-    flex: 1;
-    padding: 9px 6px;
+    flex: 1 1 auto;
+    min-height: 44px;
+    padding: 9px 12px;
     border: 1.5px solid var(--grey-border);
     background: var(--white);
     border-radius: var(--radius-sm);
@@ -2829,7 +2862,7 @@
 <!-- ==================== -->
 <div class="auth-overlay" id="authOverlay" onclick="if(event.target===this) closeAuth()">
   <div class="auth-box">
-    <button class="auth-close" onclick="closeAuth()">&times;</button>
+    <button type="button" class="auth-close" onclick="closeAuth()" aria-label="Fermer">&times;</button>
 
     <!-- INSCRIPTION -->
     <div id="authSignup">
@@ -2839,60 +2872,62 @@
         </div>
       </div>
       <h3>Rejoindre OrthoConnect</h3>
-      <p class="auth-sub">Gratuit, sans engagement. Accès immédiat.</p>
+      <p class="auth-sub">L'inscription est gratuite. L'accès complet est ouvert après vérification de votre identité professionnelle.</p>
 
-      <div class="auth-badge">
-        <span>🔒</span>
-        <span>Réservé aux orthodontistes et internes en ODF. Vos identifiants professionnels restent confidentiels.</span>
-      </div>
+      <div class="auth-badge">Réservé aux orthodontistes et aux internes en ODF. Vos identifiants professionnels restent confidentiels.</div>
 
-      <div class="auth-error" id="signupError"></div>
+      <div class="auth-error" id="signupError" role="alert"></div>
 
-      <div class="auth-field">
-        <label>Votre statut</label>
-        <div class="statut-choice">
-          <button type="button" class="statut-btn active" data-statut="liberal" onclick="setStatut('liberal', this)">Libéral</button>
-          <button type="button" class="statut-btn" data-statut="collaborateur" onclick="setStatut('collaborateur', this)">Collaborateur</button>
-          <button type="button" class="statut-btn" data-statut="interne" onclick="setStatut('interne', this)">Interne</button>
+      <form novalidate onsubmit="event.preventDefault(); doSignup()">
+        <div class="auth-field">
+          <span class="auth-label" id="suStatutLabel">Votre statut</span>
+          <div class="statut-choice" role="group" aria-labelledby="suStatutLabel">
+            <button type="button" class="statut-btn active" data-statut="liberal" aria-pressed="true" onclick="setStatut('liberal', this)">Libéral</button>
+            <button type="button" class="statut-btn" data-statut="collaborateur" aria-pressed="false" onclick="setStatut('collaborateur', this)">Collaborateur</button>
+            <button type="button" class="statut-btn" data-statut="interne" aria-pressed="false" onclick="setStatut('interne', this)">Interne</button>
+          </div>
+          <div class="auth-hint">Il indique ce que nous vérifions : votre numéro RPPS, ou votre faculté si vous êtes interne.</div>
         </div>
-      </div>
 
-      <div class="auth-field">
-        <label for="suPrenom">Prénom et nom</label>
-        <input type="text" id="suPrenom" placeholder="Marie Dupont">
-      </div>
-      <div class="auth-field">
-        <label for="suEmail">Email</label>
-        <input type="email" id="suEmail" placeholder="marie.dupont@cabinet.fr">
-      </div>
+        <div class="auth-field">
+          <label for="suPrenom">Prénom et nom</label>
+          <input type="text" id="suPrenom" placeholder="Marie Dupont" autocomplete="name">
+          <div class="auth-hint">Pour vérifier votre identité professionnelle et vous accueillir dans votre espace.</div>
+        </div>
+        <div class="auth-field">
+          <label for="suEmail">Adresse e-mail</label>
+          <input type="email" id="suEmail" placeholder="marie.dupont@cabinet.fr" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false">
+          <div class="auth-hint">Pour vous connecter et recevoir le lien qui confirme votre adresse.</div>
+        </div>
 
-      <div class="auth-field" id="fieldRpps">
-        <label for="suRpps">Numéro RPPS</label>
-        <input type="text" id="suRpps" placeholder="10001234567" maxlength="11">
-        <div class="auth-hint">11 chiffres, figure sur votre carte CPS</div>
-      </div>
+        <div class="auth-field" id="fieldRpps">
+          <label for="suRpps">Numéro RPPS</label>
+          <input type="text" id="suRpps" placeholder="10001234567" maxlength="11" inputmode="numeric" autocomplete="off">
+          <div class="auth-hint">11 chiffres, inscrits sur votre carte CPS. Il prouve que vous êtes orthodontiste.</div>
+        </div>
 
-      <div class="auth-field" id="fieldFac" style="display:none">
-        <label for="suFac">Faculté de rattachement</label>
-        <input type="text" id="suFac" placeholder="Université de Lyon 1">
-        <div class="auth-hint">Votre accès sera confirmé sous 48 h</div>
-      </div>
+        <div class="auth-field" id="fieldFac" style="display:none">
+          <label for="suFac">Faculté de rattachement</label>
+          <input type="text" id="suFac" placeholder="Université de Lyon 1">
+          <div class="auth-hint">Pour vérifier votre statut d'interne. Votre accès est confirmé sous 48 h en général.</div>
+        </div>
 
-      <div class="auth-field">
-        <label for="suVille" id="labelVille">Ville d'exercice</label>
-        <input type="text" id="suVille" placeholder="Lyon">
-      </div>
-      <div class="auth-field">
-        <label for="suPassword">Mot de passe</label>
-        <input type="password" id="suPassword" placeholder="8 caractères minimum">
-      </div>
+        <div class="auth-field">
+          <label for="suVille" id="labelVille">Ville d'exercice</label>
+          <input type="text" id="suVille" placeholder="Lyon" autocomplete="address-level2">
+          <div class="auth-hint">Elle nous aide à vérifier votre exercice professionnel.</div>
+        </div>
+        <div class="auth-field">
+          <label for="suPassword">Mot de passe</label>
+          <input type="password" id="suPassword" placeholder="8 caractères minimum" autocomplete="new-password">
+          <div class="auth-hint">8 caractères au moins. Il protège l'accès à votre espace.</div>
+        </div>
 
-      <button class="btn btn-turquoise" id="signupBtn" style="width:100%; justify-content:center; margin-top:8px" onclick="doSignup()">
-        Créer mon compte
-      </button>
+        <button type="submit" class="btn btn-turquoise auth-bouton" id="signupBtn">Créer mon compte</button>
+      </form>
 
       <div class="auth-switch">
-        Déjà inscrit ? <a onclick="switchAuth('login')">Se connecter</a>
+        Déjà inscrit ? <button type="button" class="auth-lien" onclick="switchAuth('login')">Se connecter</button>
       </div>
     </div>
 
@@ -2908,23 +2943,25 @@
 
       <div class="rev-identite" id="revIdentite"></div>
 
-      <div class="auth-error" id="revError"></div>
+      <div class="auth-error" id="revError" role="alert"></div>
 
-      <div class="auth-field">
-        <label for="revEmail">Email</label>
-        <input type="email" id="revEmail" placeholder="marie.dupont@cabinet.fr">
-      </div>
-      <div class="auth-field">
-        <label for="revPassword">Mot de passe</label>
-        <input type="password" id="revPassword" placeholder="8 caractères minimum">
-      </div>
+      <form novalidate onsubmit="event.preventDefault(); doSignupRevendication()">
+        <div class="auth-field">
+          <label for="revEmail">Adresse e-mail</label>
+          <input type="email" id="revEmail" placeholder="marie.dupont@cabinet.fr" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false">
+          <div class="auth-hint">Pour vous connecter et suivre votre demande.</div>
+        </div>
+        <div class="auth-field">
+          <label for="revPassword">Mot de passe</label>
+          <input type="password" id="revPassword" placeholder="8 caractères minimum" autocomplete="new-password">
+          <div class="auth-hint">8 caractères au moins. Il protège l'accès à votre espace.</div>
+        </div>
 
-      <button class="btn btn-turquoise" id="revSignupBtn" style="width:100%; justify-content:center; margin-top:8px" onclick="doSignupRevendication()">
-        Créer mon compte
-      </button>
+        <button type="submit" class="btn btn-turquoise auth-bouton" id="revSignupBtn">Créer mon compte</button>
+      </form>
 
       <div class="auth-switch">
-        Déjà inscrit ? <a onclick="switchAuth('login')">Se connecter</a>
+        Déjà inscrit ? <button type="button" class="auth-lien" onclick="switchAuth('login')">Se connecter</button>
       </div>
     </div>
 
@@ -2937,7 +2974,54 @@
       </div>
       <h3 id="revIssueTitre"></h3>
       <p class="auth-sub" id="revIssueTexte"></p>
-      <button class="btn btn-turquoise" style="width:100%; justify-content:center; margin-top:8px" onclick="fermerIssueRevendication()">Fermer</button>
+      <button type="button" class="btn btn-turquoise auth-bouton" onclick="fermerIssueRevendication()">Fermer</button>
+    </div>
+
+    <!-- APRÈS L'INSCRIPTION : CONFIRMATION DE L'ADRESSE (réglage « Confirm email » actif) -->
+    <div id="authVerifMail" style="display:none">
+      <div class="auth-logo">
+        <div class="logo-oc" style="font-size:38px; justify-content:center">
+          <span class="lo">O</span><span class="lc">C</span>
+        </div>
+      </div>
+      <h3>Vérifiez votre boîte mail</h3>
+      <p class="auth-sub">Nous avons envoyé un lien de confirmation à <strong id="verifMailAdresse"></strong>. Cliquez sur ce lien pour activer votre compte.</p>
+      <div class="auth-badge">L'e-mail peut mettre quelques minutes à arriver. S'il n'est pas dans votre boîte de réception, regardez dans les courriers indésirables.</div>
+
+      <div class="auth-error" id="verifMailMessage" role="status"></div>
+
+      <button type="button" class="btn btn-turquoise auth-bouton" id="renvoyerMailBtn" data-libelle="Renvoyer l'e-mail" onclick="renvoyerMailConfirmation()">Renvoyer l'e-mail</button>
+
+      <div class="auth-switch">
+        <button type="button" class="auth-lien" onclick="modifierAdresse()">Modifier mon adresse</button>
+      </div>
+    </div>
+
+    <!-- LIEN DE L'E-MAIL EXPIRÉ OU DÉJÀ UTILISÉ -->
+    <div id="authLienInvalide" style="display:none">
+      <div class="auth-logo">
+        <div class="logo-oc" style="font-size:38px; justify-content:center">
+          <span class="lo">O</span><span class="lc">C</span>
+        </div>
+      </div>
+      <h3>Ce lien n'est plus valable</h3>
+      <p class="auth-sub">Il a expiré ou il a déjà servi. Si vous avez déjà confirmé votre adresse, connectez-vous. Sinon, demandez un nouvel e-mail de confirmation.</p>
+
+      <div class="auth-error" id="lienMessage" role="status"></div>
+
+      <form novalidate onsubmit="event.preventDefault(); renvoyerDepuisLien()">
+        <div class="auth-field">
+          <label for="lienEmail">Adresse e-mail</label>
+          <input type="email" id="lienEmail" placeholder="marie.dupont@cabinet.fr" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false">
+          <div class="auth-hint">Celle que vous avez utilisée pour vous inscrire.</div>
+        </div>
+        <button type="submit" class="btn btn-turquoise auth-bouton" id="renvoyerLienBtn" data-libelle="Recevoir un nouvel e-mail">Recevoir un nouvel e-mail</button>
+      </form>
+      <button type="button" class="btn btn-outline auth-bouton" onclick="switchAuth('login')">Se connecter</button>
+
+      <div class="auth-switch">
+        <button type="button" class="auth-lien" onclick="ouvrirOubli()">Mot de passe oublié ?</button>
+      </div>
     </div>
 
     <!-- CONNEXION -->
@@ -2950,28 +3034,86 @@
       <h3>Se connecter</h3>
       <p class="auth-sub">Retrouvez votre espace praticien.</p>
 
-      <div class="auth-error" id="loginError"></div>
+      <div class="auth-error" id="loginError" role="alert"></div>
 
-      <div class="auth-field">
-        <label for="liEmail">Email</label>
-        <input type="email" id="liEmail" placeholder="marie.dupont@cabinet.fr">
-      </div>
-      <div class="auth-field">
-        <label for="liPassword">Mot de passe</label>
-        <input type="password" id="liPassword" placeholder="Votre mot de passe">
-      </div>
+      <form novalidate onsubmit="event.preventDefault(); doLogin()">
+        <div class="auth-field">
+          <label for="liEmail">Adresse e-mail</label>
+          <input type="email" id="liEmail" placeholder="marie.dupont@cabinet.fr" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="auth-field">
+          <label for="liPassword">Mot de passe</label>
+          <input type="password" id="liPassword" placeholder="Votre mot de passe" autocomplete="current-password">
+        </div>
+        <div class="auth-oubli">
+          <button type="button" class="auth-lien" onclick="ouvrirOubli()">Mot de passe oublié ?</button>
+        </div>
 
-      <button class="btn btn-primary" id="loginBtn" style="width:100%; justify-content:center; margin-top:8px" onclick="doLogin()">
-        Se connecter
-      </button>
+        <button type="submit" class="btn btn-primary auth-bouton" id="loginBtn">Se connecter</button>
+      </form>
 
       <div class="auth-switch">
-        Pas encore de compte ? <a onclick="switchAuth('signup')">Créer mon espace</a>
+        Pas encore de compte ? <button type="button" class="auth-lien" onclick="switchAuth('signup')">Créer mon espace</button>
       </div>
+    </div>
+
+    <!-- MOT DE PASSE OUBLIÉ -->
+    <div id="authOubli" style="display:none">
+      <div class="auth-logo">
+        <div class="logo-oc" style="font-size:38px; justify-content:center">
+          <span class="lo">O</span><span class="lc">C</span>
+        </div>
+      </div>
+      <h3>Mot de passe oublié</h3>
+      <p class="auth-sub">Indiquez l'adresse e-mail de votre compte. Nous vous envoyons un lien pour choisir un nouveau mot de passe.</p>
+
+      <div class="auth-error" id="oubliMessage" role="status"></div>
+
+      <form novalidate onsubmit="event.preventDefault(); envoyerOubli()">
+        <div class="auth-field">
+          <label for="oubliEmail">Adresse e-mail</label>
+          <input type="email" id="oubliEmail" placeholder="marie.dupont@cabinet.fr" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false">
+        </div>
+        <button type="submit" class="btn btn-turquoise auth-bouton" id="oubliBtn" data-libelle="Recevoir le lien">Recevoir le lien</button>
+      </form>
+
+      <div class="auth-switch">
+        <button type="button" class="auth-lien" onclick="switchAuth('login')">Retour à la connexion</button>
+      </div>
+    </div>
+
+    <!-- NOUVEAU MOT DE PASSE (retour du lien de réinitialisation) -->
+    <div id="authNouveauMdp" style="display:none">
+      <div class="auth-logo">
+        <div class="logo-oc" style="font-size:38px; justify-content:center">
+          <span class="lo">O</span><span class="lc">C</span>
+        </div>
+      </div>
+      <h3>Nouveau mot de passe</h3>
+      <p class="auth-sub">Choisissez le mot de passe que vous utiliserez désormais pour vous connecter.</p>
+
+      <div class="auth-error" id="nouveauMdpMessage" role="alert"></div>
+
+      <form novalidate onsubmit="event.preventDefault(); enregistrerNouveauMdp()">
+        <div class="auth-field">
+          <label for="nmMdp">Nouveau mot de passe</label>
+          <input type="password" id="nmMdp" placeholder="8 caractères minimum" autocomplete="new-password">
+          <div class="auth-hint">8 caractères au moins.</div>
+        </div>
+        <div class="auth-field">
+          <label for="nmMdp2">Confirmez le mot de passe</label>
+          <input type="password" id="nmMdp2" autocomplete="new-password">
+          <div class="auth-hint">Saisissez-le une seconde fois pour éviter une faute de frappe.</div>
+        </div>
+        <button type="submit" class="btn btn-turquoise auth-bouton" id="nouveauMdpBtn">Enregistrer le mot de passe</button>
+      </form>
     </div>
 
   </div>
 </div>
+
+<!-- Message bref après la confirmation de l'adresse e-mail -->
+<div class="auth-toast" id="authToast" role="status" aria-live="polite"></div>
 
 <div class="topbar"></div>
 
@@ -4065,7 +4207,11 @@
   </section>
   <section class="dash-body">
     <div class="container">
-      <p id="verifTexte" style="font-size:15px; margin-bottom:10px"></p>
+      <p id="verifTexte" class="verif-texte"></p>
+      <div id="verifSuite" class="verif-suite" style="display:none">
+        <div class="verif-suite-titre">Ce qui se passe ensuite</div>
+        <ol class="verif-etapes" id="verifEtapes"></ol>
+      </div>
       <p style="font-size:14px; color:var(--text-secondary); margin-bottom:22px">
         Pour toute question : <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>
       </p>
@@ -5901,7 +6047,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
 <script>
 // ═══════════════════════════════════════════════
 // CONFIGURATION SUPABASE
@@ -5911,7 +6057,36 @@
 const SUPABASE_URL = 'https://uiotjxqpitikkkiihupu.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_R3VGuKb1o9QD07TWEa00SA_Yl4xsnMu';
 
+// Retour d'un lien envoyé par e-mail ({{ .ConfirmationURL }} : confirmation
+// d'inscription, mot de passe oublié). Supabase renvoie ici avec le jeton
+// dans le hash (#access_token=...&type=signup|recovery), ou avec une erreur
+// (#error=access_denied&error_code=otp_expired...) quand le lien a expiré
+// ou a déjà servi. Lu avant la création du client, qui consomme le hash.
+const RETOUR_AUTH = (function () {
+  const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const q = new URLSearchParams(location.search);
+  const lire = (k) => h.get(k) || q.get(k) || '';
+  const r = { type: lire('type'), erreur: lire('error'), code: lire('error_code'), description: lire('error_description'), jeton: h.has('access_token') };
+  return (r.jeton || r.erreur || r.code) ? r : null;
+})();
+
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// PASSWORD_RECOVERY est émis pendant que le client lit le lien, avant la
+// fin du démarrage : l'écoute est posée tout de suite, l'écran du nouveau
+// mot de passe s'ouvre une fois la page prête (voir init).
+let recuperationMdp = !!(RETOUR_AUTH && RETOUR_AUTH.jeton && RETOUR_AUTH.type === 'recovery');
+let initAuthTerminee = false;
+// Un lien d'e-mail ouvert dans un onglet déjà sur le site (adresse collée)
+// ne change que le hash, sans recharger : on recharge pour le traiter.
+window.addEventListener('hashchange', () => {
+  if (/(^|[#&])(access_token|error_code|error_description)=/.test(location.hash)) location.reload();
+});
+sb.auth.onAuthStateChange((event) => {
+  if (event !== 'PASSWORD_RECOVERY') return;
+  recuperationMdp = true;
+  if (initAuthTerminee) setTimeout(() => ouvrirNouveauMdp(), 0);
+});
 </script>
 <script>
 // ═══════════════════════════════════════════════
@@ -5945,6 +6120,7 @@ let jetonTotauxInterets = 0;
 // même pour un compte non validé, contrairement à currentUser.
 let sessionUtilisateur = null;
 let maRevendicationEnCours = false;
+let etatRevendication = null;   // dernière demande de fiche du compte : en_attente, refusee, traitee ou null
 let ficheVoulue = null;        // fiche choisie depuis l'écran « C'est ma fiche »
 let ficheInscription = null;   // la ligne de recherche correspondante
 const revendicationsTentees = new Set();
@@ -6211,50 +6387,349 @@ async function loadCatalogues() {
 // ═══════════════════════════════════════════════
 // AUTHENTIFICATION
 // ═══════════════════════════════════════════════
+// Les écrans de la fenêtre d'authentification : un seul visible à la fois.
+const PANNEAUX_AUTH = ['authSignup', 'authLogin', 'authRevendication', 'authRevendicationOk',
+  'authVerifMail', 'authLienInvalide', 'authOubli', 'authNouveauMdp'];
+const MESSAGES_AUTH = ['signupError', 'loginError', 'revError', 'verifMailMessage', 'lienMessage', 'oubliMessage', 'nouveauMdpMessage'];
+
+function montrerPanneauAuth(id) {
+  document.getElementById('authOverlay').classList.add('open');
+  PANNEAUX_AUTH.forEach(p => { document.getElementById(p).style.display = p === id ? 'block' : 'none'; });
+  const boite = document.querySelector('.auth-box');
+  if (boite) boite.scrollTop = 0;
+  majBoutonsEnvoi();
+}
+
 function openAuth(mode) {
   // Une inscription ou une connexion ordinaire ne revendique rien.
   ficheVoulue = null;
   // Déjà inscrit : les invitations à créer un compte mènent à son message.
   if (compteNonValide) { showPage('dashboard'); return; }
-  document.getElementById('authOverlay').classList.add('open');
   switchAuth(mode || 'signup');
 }
 function closeAuth() {
   document.getElementById('authOverlay').classList.remove('open');
-  clearMessage('signupError');
-  clearMessage('loginError');
+  MESSAGES_AUTH.forEach(clearMessage);
 }
 function switchAuth(mode) {
-  document.getElementById('authSignup').style.display = mode === 'signup' ? 'block' : 'none';
-  document.getElementById('authLogin').style.display = mode === 'login' ? 'block' : 'none';
-  document.getElementById('authRevendication').style.display = 'none';
-  document.getElementById('authRevendicationOk').style.display = 'none';
+  montrerPanneauAuth(mode === 'login' ? 'authLogin' : 'authSignup');
   clearMessage('signupError');
   clearMessage('loginError');
 }
-function showError(id, msg) {
+
+// Un encart de message, avec au besoin des actions (« Se connecter »,
+// « Renvoyer l'e-mail »...). Le texte passe par textContent : rien de ce
+// qui vient de la saisie ou du serveur n'est interprété comme du HTML.
+function afficherMessageAuth(id, msg, actions, ton) {
   const el = document.getElementById(id);
   el.textContent = msg;
-  el.classList.remove('notice');
+  el.classList.toggle('notice', ton === 'notice');
   el.classList.add('show');
+  if (actions && actions.length) {
+    const zone = document.createElement('div');
+    zone.className = 'auth-actions';
+    actions.forEach(a => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'auth-lien';
+      b.textContent = a.libelle;
+      b.addEventListener('click', a.action);
+      zone.appendChild(b);
+    });
+    el.appendChild(zone);
+  }
 }
+function showError(id, msg) { afficherMessageAuth(id, msg); }
 // Même encart, ton neutre : le compte a bien été créé, ce n'est pas une erreur.
-function showNotice(id, msg) {
-  const el = document.getElementById(id);
-  el.textContent = msg;
-  el.classList.add('notice', 'show');
-}
+function showNotice(id, msg) { afficherMessageAuth(id, msg, null, 'notice'); }
 function clearMessage(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('show', 'notice');
 }
 
+// Les erreurs de Supabase Auth, en français. Le code (error.code) est lu
+// d'abord, le texte anglais en repli. Le détail technique part dans la
+// console, jamais à l'écran.
+function erreurAuth(error) {
+  const code = String((error && error.code) || '').toLowerCase();
+  const texte = String((error && (error.message || error.error_description)) || '').toLowerCase();
+  const statut = error && error.status;
+  const a = (...motifs) => motifs.some(m => code === m || texte.includes(m));
+  const secondes = (texte.match(/after (\d+) seconds?/) || [])[1];
+  if ((error && (error.name === 'AuthRetryableFetchError' || error.name === 'TypeError')) || statut === 0
+      || a('failed to fetch', 'networkerror', 'load failed', 'network request failed')) {
+    return { cle: 'reseau', message: "Connexion impossible. Vérifiez votre accès à Internet, puis réessayez." };
+  }
+  if (a('email_not_confirmed', 'email not confirmed')) {
+    return { cle: 'non_confirme', message: "Votre adresse e-mail n'est pas encore confirmée. Cliquez sur le lien reçu à l'inscription, ou demandez un nouvel e-mail." };
+  }
+  if (a('invalid_credentials', 'invalid login credentials')) {
+    return { cle: 'identifiants', message: "Adresse e-mail ou mot de passe incorrect." };
+  }
+  if (a('user_already_exists', 'email_exists', 'already registered', 'already been registered')) {
+    return { cle: 'existe', message: "Cette adresse a déjà un compte. Connectez-vous, ou réinitialisez votre mot de passe si vous l'avez oublié." };
+  }
+  if (a('same_password', 'should be different from the old')) {
+    return { cle: 'meme_mdp', message: "Choisissez un mot de passe différent de l'ancien." };
+  }
+  if (a('weak_password', 'weak', 'password should be', 'password is too', 'password should contain')) {
+    return { cle: 'mdp_court', message: "Mot de passe trop court ou trop simple. Choisissez-en un d'au moins 8 caractères." };
+  }
+  if (statut === 429 || secondes || a('over_email_send_rate_limit', 'over_request_rate_limit', 'rate limit', 'too many requests', 'for security purposes')) {
+    return { cle: 'limite', secondes: secondes ? Number(secondes) : DELAI_RENVOI,
+      message: secondes ? `Trop de tentatives. Réessayez dans ${secondes} secondes.` : "Trop de tentatives. Patientez une minute, puis réessayez." };
+  }
+  if (a('email_address_invalid', 'unable to validate email address', 'invalid format')) {
+    return { cle: 'email_invalide', message: "Cette adresse e-mail n'est pas valide. Vérifiez-la." };
+  }
+  if (a('signup_disabled', 'signups not allowed', 'email_provider_disabled')) {
+    return { cle: 'ferme', message: "Les inscriptions sont momentanément fermées. Écrivez-nous à contact@orthoconnect.fr." };
+  }
+  if (a('otp_expired', 'session_not_found', 'session_expired', 'auth session missing', 'refresh_token_not_found', 'flow_state_expired', 'bad_jwt')) {
+    return { cle: 'lien', message: "Votre lien a expiré. Demandez-en un nouveau." };
+  }
+  return { cle: 'inconnu', message: "Une erreur est survenue. Réessayez dans quelques instants." };
+}
+
+function emailValide(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+
+// Dernière adresse saisie, pour préremplir les écrans « lien expiré » et
+// « mot de passe oublié ». Reste sur l'appareil.
+const CLE_DERNIER_EMAIL = 'oc_dernier_email';
+function memoriserEmail(email) { try { localStorage.setItem(CLE_DERNIER_EMAIL, email); } catch (e) { /* stockage indisponible */ } }
+function emailMemorise() { try { return localStorage.getItem(CLE_DERNIER_EMAIL) || ''; } catch (e) { return ''; } }
+
+// Délai entre deux envois d'e-mail, par adresse et par type d'e-mail.
+// Les boutons concernés portent data-envoi (la clé) et data-libelle.
+const DELAI_RENVOI = 60;
+const prochainsEnvois = new Map();
+let minuterieEnvois = null;
+function cleEnvoi(type, email) { return type + ':' + String(email || '').toLowerCase(); }
+function secondesAvantEnvoi(cle) { return Math.max(0, Math.ceil(((prochainsEnvois.get(cle) || 0) - Date.now()) / 1000)); }
+function attendreAvantEnvoi(cle, secondes) {
+  prochainsEnvois.set(cle, Date.now() + secondes * 1000);
+  majBoutonsEnvoi();
+}
+function majBoutonsEnvoi() {
+  let actif = false;
+  document.querySelectorAll('[data-libelle]').forEach(b => {
+    if (b.dataset.occupe === '1') return;
+    const s = b.dataset.envoi ? secondesAvantEnvoi(b.dataset.envoi) : 0;
+    b.disabled = s > 0;
+    b.textContent = s > 0 ? `${b.dataset.libelle} (${s} s)` : b.dataset.libelle;
+    if (s > 0) actif = true;
+  });
+  if (actif && !minuterieEnvois) minuterieEnvois = setInterval(majBoutonsEnvoi, 1000);
+  if (!actif && minuterieEnvois) { clearInterval(minuterieEnvois); minuterieEnvois = null; }
+}
+function boutonOccupe(b, occupe) {
+  if (occupe) { b.dataset.occupe = '1'; b.disabled = true; b.textContent = 'Envoi en cours...'; }
+  else { delete b.dataset.occupe; majBoutonsEnvoi(); }
+}
+
+// Supabase, réglage « Confirm email » actif, répond à une inscription sur
+// une adresse déjà enregistrée par un faux utilisateur sans identité, sans
+// erreur et sans envoyer d'e-mail.
+function compteDejaExistant(data) {
+  return !!(data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0);
+}
+function afficherCompteExistant(id, email, complement) {
+  afficherMessageAuth(id, "Cette adresse a déjà un compte. Connectez-vous, ou réinitialisez votre mot de passe si vous l'avez oublié." + (complement || ''), [
+    { libelle: 'Se connecter', action: () => { switchAuth('login'); document.getElementById('liEmail').value = email; } },
+    { libelle: 'Réinitialiser mon mot de passe', action: () => ouvrirOubli(email) }
+  ]);
+}
+function afficherErreurInscription(id, error, email, complement) {
+  console.warn('Inscription :', error);
+  const e = erreurAuth(error);
+  if (e.cle === 'existe') return afficherCompteExistant(id, email, complement);
+  showError(id, e.message);
+}
+
+// ─────────── Confirmation de l'adresse e-mail ───────────
+let inscriptionEnCours = null;   // { email, retour } : l'écran « Vérifiez votre boîte mail »
+
+function afficherVerifMail(email, retour) {
+  inscriptionEnCours = { email, retour };
+  memoriserEmail(email);
+  document.getElementById('verifMailAdresse').textContent = email;
+  document.getElementById('renvoyerMailBtn').dataset.envoi = cleEnvoi('signup', email);
+  clearMessage('verifMailMessage');
+  montrerPanneauAuth('authVerifMail');
+}
+
+// Renvoie l'e-mail de confirmation ; true si Supabase l'a accepté.
+async function envoyerConfirmation(email, bouton, idMessage) {
+  const cle = cleEnvoi('signup', email);
+  bouton.dataset.envoi = cle;
+  if (secondesAvantEnvoi(cle) > 0) { majBoutonsEnvoi(); return false; }
+  boutonOccupe(bouton, true);
+  try {
+    const { error } = await sb.auth.resend({ type: 'signup', email, options: { emailRedirectTo: window.location.origin } });
+    if (error) {
+      console.warn('Renvoi de la confirmation :', error);
+      const e = erreurAuth(error);
+      if (e.cle === 'limite') attendreAvantEnvoi(cle, e.secondes);
+      showError(idMessage, e.message);
+      return false;
+    }
+    attendreAvantEnvoi(cle, DELAI_RENVOI);
+    showNotice(idMessage, "Un nouvel e-mail vient de partir à " + email + ". Pensez à regarder dans les courriers indésirables.");
+    return true;
+  } catch (err) {
+    console.warn('Renvoi de la confirmation :', err);
+    showError(idMessage, erreurAuth(err).message);
+    return false;
+  } finally {
+    boutonOccupe(bouton, false);
+  }
+}
+
+function renvoyerMailConfirmation() {
+  if (!inscriptionEnCours) return switchAuth('signup');
+  envoyerConfirmation(inscriptionEnCours.email, document.getElementById('renvoyerMailBtn'), 'verifMailMessage');
+}
+
+function modifierAdresse() {
+  const retour = (inscriptionEnCours && inscriptionEnCours.retour) || 'authSignup';
+  montrerPanneauAuth(retour);
+  const champ = document.getElementById({ authSignup: 'suEmail', authRevendication: 'revEmail', authLogin: 'liEmail' }[retour] || 'suEmail');
+  if (champ) { champ.focus(); champ.select(); }
+}
+
+function afficherLienInvalide() {
+  document.getElementById('lienEmail').value = emailMemorise();
+  document.getElementById('renvoyerLienBtn').dataset.envoi = '';
+  clearMessage('lienMessage');
+  montrerPanneauAuth('authLienInvalide');
+}
+
+async function renvoyerDepuisLien() {
+  const email = document.getElementById('lienEmail').value.trim();
+  if (!emailValide(email)) return showError('lienMessage', "Indiquez une adresse e-mail valide.");
+  memoriserEmail(email);
+  await envoyerConfirmation(email, document.getElementById('renvoyerLienBtn'), 'lienMessage');
+}
+
+// Connexion refusée faute de confirmation : l'écran d'attente, avec un
+// nouvel e-mail tout de suite.
+function renvoyerDepuisConnexion(email) {
+  afficherVerifMail(email, 'authLogin');
+  renvoyerMailConfirmation();
+}
+
+// ─────────── Mot de passe oublié ───────────
+function ouvrirOubli(email) {
+  const champ = document.getElementById('oubliEmail');
+  champ.value = (typeof email === 'string' && email) || document.getElementById('liEmail').value.trim() || emailMemorise();
+  const b = document.getElementById('oubliBtn');
+  b.dataset.envoi = champ.value ? cleEnvoi('recovery', champ.value) : '';
+  clearMessage('oubliMessage');
+  montrerPanneauAuth('authOubli');
+}
+
+async function envoyerOubli() {
+  const email = document.getElementById('oubliEmail').value.trim();
+  if (!emailValide(email)) return showError('oubliMessage', "Indiquez une adresse e-mail valide.");
+  memoriserEmail(email);
+  const b = document.getElementById('oubliBtn');
+  const cle = cleEnvoi('recovery', email);
+  b.dataset.envoi = cle;
+  if (secondesAvantEnvoi(cle) > 0) return majBoutonsEnvoi();
+  boutonOccupe(b, true);
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+    if (error) {
+      console.warn('Mot de passe oublié :', error);
+      const e = erreurAuth(error);
+      if (e.cle === 'limite') attendreAvantEnvoi(cle, e.secondes);
+      return showError('oubliMessage', e.message);
+    }
+    attendreAvantEnvoi(cle, DELAI_RENVOI);
+    b.dataset.libelle = 'Renvoyer le lien';
+    // Même réponse que l'adresse ait un compte ou non : l'écran ne dit
+    // pas qui est inscrit.
+    showNotice('oubliMessage', "Si un compte existe pour " + email + ", un e-mail vient de partir avec un lien pour choisir un nouveau mot de passe. Pensez à regarder dans les courriers indésirables.");
+  } catch (err) {
+    console.warn('Mot de passe oublié :', err);
+    showError('oubliMessage', erreurAuth(err).message);
+  } finally {
+    boutonOccupe(b, false);
+  }
+}
+
+function ouvrirNouveauMdp() {
+  document.getElementById('nmMdp').value = '';
+  document.getElementById('nmMdp2').value = '';
+  clearMessage('nouveauMdpMessage');
+  montrerPanneauAuth('authNouveauMdp');
+}
+
+async function enregistrerNouveauMdp() {
+  const mdp = document.getElementById('nmMdp').value;
+  const mdp2 = document.getElementById('nmMdp2').value;
+  if (!mdp || mdp.length < 8) return showError('nouveauMdpMessage', "Choisissez un mot de passe d'au moins 8 caractères.");
+  if (mdp !== mdp2) return showError('nouveauMdpMessage', "Les deux mots de passe ne sont pas identiques.");
+  const b = document.getElementById('nouveauMdpBtn');
+  const lienExpire = () => afficherMessageAuth('nouveauMdpMessage', "Votre lien a expiré. Demandez-en un nouveau.",
+    [{ libelle: 'Recevoir un nouveau lien', action: () => ouvrirOubli() }]);
+  b.disabled = true;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return lienExpire();
+    const { error } = await sb.auth.updateUser({ password: mdp });
+    if (error) {
+      console.warn('Nouveau mot de passe :', error);
+      const e = erreurAuth(error);
+      return e.cle === 'lien' ? lienExpire() : showError('nouveauMdpMessage', e.message);
+    }
+    recuperationMdp = false;
+    showNotice('nouveauMdpMessage', "Votre mot de passe est modifié. Vous allez être redirigé vers votre espace.");
+    setTimeout(() => { closeAuth(); apresConnexion(); }, 1500);
+  } catch (err) {
+    console.warn('Nouveau mot de passe :', err);
+    showError('nouveauMdpMessage', erreurAuth(err).message);
+  } finally {
+    b.disabled = false;
+  }
+}
+
+// Message bref, en haut de l'écran.
+let minuterieToast = null;
+function afficherToast(texte) {
+  const t = document.getElementById('authToast');
+  t.textContent = texte;
+  t.classList.add('show');
+  clearTimeout(minuterieToast);
+  minuterieToast = setTimeout(() => t.classList.remove('show'), 6000);
+}
+
+// Appelée une fois la page prête, si l'adresse portait le retour d'un
+// lien e-mail. L'adresse est déjà nettoyée à ce stade (voir init).
+function traiterRetourAuth() {
+  const r = RETOUR_AUTH;
+  if (r.erreur || r.code) {
+    console.warn('Lien e-mail :', r.code || r.erreur, r.description);
+    // Déjà connecté dans ce navigateur : le lien a simplement servi deux fois.
+    if (sessionUtilisateur) { afficherToast("Ce lien a déjà servi. Vous êtes connecté."); showPage('dashboard'); return; }
+    afficherLienInvalide();
+    return;
+  }
+  if (recuperationMdp) { ouvrirNouveauMdp(); return; }
+  if (!sessionUtilisateur) { afficherLienInvalide(); return; }
+  afficherToast("Votre adresse e-mail est confirmée. Bienvenue sur OrthoConnect.");
+  // L'issue d'une demande de fiche, si elle s'affiche, garde la main.
+  if (!document.getElementById('authOverlay').classList.contains('open')) showPage('dashboard');
+}
+
+
 let statutChoisi = 'liberal';
 
 function setStatut(s, btn) {
   statutChoisi = s;
-  document.querySelectorAll('.statut-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.statut-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
   btn.classList.add('active');
+  btn.setAttribute('aria-pressed', 'true');
 
   const estInterne = s === 'interne';
   document.getElementById('fieldRpps').style.display = estInterne ? 'none' : 'block';
@@ -6272,7 +6747,7 @@ async function doSignup() {
   const estInterne = statutChoisi === 'interne';
 
   if (!nom) return showError('signupError', "Indiquez votre prénom et nom.");
-  if (!email || !email.includes('@')) return showError('signupError', "Indiquez un email valide.");
+  if (!emailValide(email)) return showError('signupError', "Indiquez une adresse e-mail valide.");
   if (!estInterne && !/^\d{11}$/.test(rpps)) return showError('signupError', "Le numéro RPPS doit contenir exactement 11 chiffres.");
   if (estInterne && !fac) return showError('signupError', "Indiquez votre faculté de rattachement.");
   if (!ville) return showError('signupError', estInterne ? "Indiquez votre ville d'internat." : "Indiquez votre ville d'exercice.");
@@ -6291,10 +6766,12 @@ async function doSignup() {
     // Le profil n'est plus inséré ici : ces métadonnées sont lues par le
     // trigger handle_new_user (voir trigger_profil.sql), qui crée la
     // ligne dans praticiens au moment de l'inscription.
+    memoriserEmail(email);
     const { data, error } = await sb.auth.signUp({
       email,
       password: mdp,
       options: {
+        emailRedirectTo: window.location.origin,
         data: {
           nom,
           ville,
@@ -6307,10 +6784,7 @@ async function doSignup() {
 
     if (error) {
       resetBtn();
-      if (error.message.includes('already registered')) {
-        return showError('signupError', "Cet email est déjà utilisé. Connectez-vous.");
-      }
-      return showError('signupError', error.message);
+      return afficherErreurInscription('signupError', error, email);
     }
 
     if (!data || !data.user) {
@@ -6318,11 +6792,18 @@ async function doSignup() {
       return showError('signupError', "Le compte n'a pas pu être créé. Réessayez dans quelques instants.");
     }
 
-    // Sans session, l'insertion dans praticiens partirait sans identité
-    // authentifiée et serait rejetée : on s'arrête avant d'essayer.
+    if (compteDejaExistant(data)) {
+      resetBtn();
+      return afficherCompteExistant('signupError', email);
+    }
+
+    // « Confirm email » actif : pas de session tant que l'adresse n'est pas
+    // confirmée. Le profil est créé par le trigger, la suite se fait au
+    // retour du lien (traiterRetourAuth).
     if (!data.session) {
       resetBtn();
-      return showNotice('signupError', "Votre compte est créé. Confirmez votre adresse via le lien envoyé à " + email + ", puis connectez-vous pour compléter votre fiche praticien. Inutile de refaire une inscription.");
+      attendreAvantEnvoi(cleEnvoi('signup', email), DELAI_RENVOI);
+      return afficherVerifMail(email, 'authSignup');
     }
 
     // refreshAuthUI lit le profil créé par le trigger et, s'il manque,
@@ -6342,7 +6823,7 @@ async function doSignup() {
   } catch (e) {
     resetBtn();
     console.error('Inscription:', e);
-    showError('signupError', "Une erreur est survenue. Réessayez.");
+    showError('signupError', erreurAuth(e).message);
   }
 }
 
@@ -6350,18 +6831,34 @@ async function doLogin() {
   const email = document.getElementById('liEmail').value.trim();
   const mdp = document.getElementById('liPassword').value;
 
-  if (!email || !mdp) return showError('loginError', "Renseignez votre email et votre mot de passe.");
+  if (!email || !mdp) return showError('loginError', "Renseignez votre adresse e-mail et votre mot de passe.");
 
   const btn = document.getElementById('loginBtn');
   btn.disabled = true;
   btn.textContent = 'Connexion...';
+  memoriserEmail(email);
 
-  const { error } = await sb.auth.signInWithPassword({ email, password: mdp });
+  let error = null;
+  try {
+    ({ error } = await sb.auth.signInWithPassword({ email, password: mdp }));
+  } catch (e) {
+    error = e;
+  }
 
   btn.disabled = false;
   btn.textContent = 'Se connecter';
 
-  if (error) return showError('loginError', "Email ou mot de passe incorrect.");
+  if (error) {
+    console.warn('Connexion :', error);
+    const e = erreurAuth(error);
+    if (e.cle === 'non_confirme') {
+      return afficherMessageAuth('loginError', e.message, [{ libelle: "Renvoyer l'e-mail de confirmation", action: () => renvoyerDepuisConnexion(email) }]);
+    }
+    if (e.cle === 'identifiants') {
+      return afficherMessageAuth('loginError', e.message, [{ libelle: 'Mot de passe oublié ?', action: () => ouvrirOubli(email) }]);
+    }
+    return showError('loginError', e.message);
+  }
 
   closeAuth();
   await refreshAuthUI();
@@ -6427,22 +6924,61 @@ function etatValidation(profil) {
   return profil.validation === 'refuse' ? 'refuse' : 'en_attente';
 }
 
+// La page de /mon-espace d'un compte non validé : où en est la
+// vérification, ce qui se passe ensuite, et un recours en cas de refus.
+// Un compte validé n'arrive jamais ici : il a son espace complet.
 function renderCompteNonValide() {
-  const messages = {
-    en_attente: ['Compte en cours de vérification',
-      "Votre inscription est bien enregistrée. Nous vérifions votre compte avant d'ouvrir l'accès à l'espace praticien."],
-    refuse: ['Compte non validé',
-      "Votre compte n'a pas été validé. L'espace praticien ne vous est pas accessible."],
+  const contenus = {
+    revendication_en_attente: ['Votre demande est en cours de vérification',
+      "Vous avez demandé à reprendre une fiche de l'annuaire. Avant d'ouvrir votre espace, nous vérifions qu'elle est bien la vôtre.",
+      ['Votre demande est enregistrée.',
+       "Nous vérifions votre identité par téléphone, en général sous 48 h.",
+       "Vous recevez un e-mail dès que c'est validé : votre espace praticien et votre fiche vous sont alors ouverts."]],
+    revendication_refusee: ["Votre demande de fiche n'a pas abouti",
+      "Nous n'avons pas pu confirmer que cette fiche est la vôtre. Votre compte reste en cours de vérification. Écrivez-nous pour que nous regardions votre situation ensemble.",
+      []],
+    revendication_traitee: ['Votre compte est en cours de vérification',
+      "Votre demande de fiche a été traitée. Nous terminons la vérification de votre compte avant d'ouvrir votre espace praticien.",
+      ["Vous recevez un e-mail dès que votre accès est ouvert."]],
+    en_attente: ['Votre compte est en cours de vérification',
+      "Votre inscription est bien enregistrée. Avant d'ouvrir l'accès complet, nous vérifions votre identité professionnelle.",
+      ['Votre inscription est enregistrée.',
+       "Nous vérifions votre numéro RPPS, ou votre faculté si vous êtes interne, en général sous 48 h.",
+       "Vous recevez un e-mail dès que votre accès est ouvert."]],
+    refuse: ["Votre compte n'a pas été validé",
+      "Nous n'avons pas pu vérifier votre identité professionnelle : l'espace praticien ne vous est donc pas ouvert. Si vous pensez qu'il s'agit d'une erreur, écrivez-nous en indiquant votre numéro RPPS, nous regarderons votre situation.",
+      []],
     indisponible: ['Vérification impossible pour le moment',
-      "Le statut de votre compte n'a pas pu être lu. Rechargez la page dans quelques instants."]
+      "Le statut de votre compte n'a pas pu être lu. Rechargez la page dans quelques instants.",
+      []]
   };
-  const [titre, texte] = messages[compteNonValide];
+  const cle = compteNonValide === 'en_attente' && etatRevendication ? 'revendication_' + etatRevendication : compteNonValide;
+  const [titre, texte, etapes] = contenus[cle] || contenus.indisponible;
   document.getElementById('verifTitre').textContent = titre;
-  document.getElementById('verifTexte').textContent =
-    compteNonValide === 'en_attente' && maRevendicationEnCours ? MESSAGE_REVENDICATION : texte;
+  document.getElementById('verifTexte').textContent = texte;
+  const liste = document.getElementById('verifEtapes');
+  liste.replaceChildren(...etapes.map(t => { const li = document.createElement('li'); li.textContent = t; return li; }));
+  document.getElementById('verifSuite').style.display = etapes.length ? 'block' : 'none';
 }
 
-async function refreshAuthUI() {
+// Un seul rafraîchissement à la fois : init et onAuthStateChange peuvent
+// se croiser (retour d'un lien e-mail, onglet revenu au premier plan). Un
+// appel pendant un rafraîchissement en relance un seul après lui.
+let rafraichissementAuth = null;
+let rafraichissementAuthARejouer = false;
+function refreshAuthUI() {
+  if (rafraichissementAuth) { rafraichissementAuthARejouer = true; return rafraichissementAuth; }
+  rafraichissementAuth = (async () => {
+    try {
+      do { rafraichissementAuthARejouer = false; await rafraichirAuthUI(); } while (rafraichissementAuthARejouer);
+    } finally {
+      rafraichissementAuth = null;
+    }
+  })();
+  return rafraichissementAuth;
+}
+
+async function rafraichirAuthUI() {
   const { data: { session } } = await sb.auth.getSession();
   // Le profil est lu avant de poser currentUser : tant que la validation
   // n'est pas connue, aucune source réservée ne doit être interrogée. Un
@@ -9535,13 +10071,15 @@ function oublierFicheLocale() {
 // La base les écrit sans accents ni majuscules : la comparaison ignore
 // les deux, et la ponctuation. Un message inconnu s'affiche tel quel.
 const MESSAGES_BASE = [
-  [['connexion requise'], 'Connectez-vous pour continuer.'],
-  [['fiche introuvable', 'profil introuvable'], 'Cette fiche est introuvable.'],
+  // Les erreurs levées par demander_revendication, une par une.
+  [['connexion requise'], 'Votre session a expiré. Connectez-vous pour continuer.'],
+  [['fiche introuvable'], "Cette fiche est introuvable dans l'annuaire. Recherchez de nouveau votre nom."],
+  [['profil introuvable'], "Votre profil praticien n'est pas encore prêt. Rechargez la page dans quelques instants, puis réessayez."],
   [['fiche deja revendiquee', 'fiche deja attribuee a un autre compte'],
-    "Cette fiche est déjà revendiquée. Si c'est la vôtre, écrivez-nous à contact@orthoconnect.fr."],
-  [['trop de demandes en attente'], 'Vous avez déjà plusieurs demandes en attente.'],
-  [['ce compte est deja valide avec un autre rpps'], 'Ce compte est déjà rattaché à un autre praticien.'],
-  [['compte non valide'], "Votre compte n'a pas été validé."],
+    "Cette fiche est déjà revendiquée par un autre compte. Si c'est la vôtre, écrivez-nous à contact@orthoconnect.fr."],
+  [['trop de demandes en attente'], "Vous avez déjà plusieurs demandes en cours de vérification. Attendez notre réponse avant d'en faire une nouvelle."],
+  [['ce compte est deja valide avec un autre rpps'], "Votre compte est déjà rattaché à un autre praticien. Si cette fiche est bien la vôtre, écrivez-nous à contact@orthoconnect.fr."],
+  [['compte non valide'], "Votre compte n'a pas été validé, vous ne pouvez donc pas revendiquer de fiche. Si vous pensez qu'il s'agit d'une erreur, écrivez-nous à contact@orthoconnect.fr."],
   [['presentation trop longue'], 'La présentation dépasse 1200 caractères.'],
   [['horaires trop longs'], 'Les horaires sont trop longs. Raccourcissez-les.'],
   [['telephone trop long'], 'Le numéro de téléphone est trop long.'],
@@ -9566,21 +10104,25 @@ function normaliserMessageBase(t) {
 function messageBase(error) {
   const texte = normaliserMessageBase(error && error.message);
   const trouve = MESSAGES_BASE.find(([motifs]) => motifs.some(m => texte.includes(normaliserMessageBase(m))));
-  return trouve ? trouve[1] : String((error && error.message) || 'Erreur inconnue.');
+  if (trouve) return trouve[1];
+  // Message inconnu : jamais affiché brut.
+  console.warn('Message de la base non traduit :', error);
+  if (error && /fetch|network|load failed/i.test(String(error.message || ''))) return "Connexion impossible. Vérifiez votre accès à Internet, puis réessayez.";
+  return "L'action n'a pas pu aboutir. Réessayez dans quelques instants.";
 }
 
+// demander_revendication renvoie toujours 'en_attente', même quand la
+// demande existait déjà (on conflict do nothing) ou avait été refusée :
+// sa réponse ne dit rien de l'état réel. Seule une erreur compte ici,
+// l'état se lit ensuite dans revendications (revendiquerEtLire).
 async function envoyerRevendication(ficheId) {
   try {
-    const { data, error } = await sb.rpc('demander_revendication', { p_fiche: ficheId });
+    const { error } = await sb.rpc('demander_revendication', { p_fiche: ficheId });
     if (error) {
       console.error('demander_revendication :', error);
-      return { ok: false, message: messageBase(error) };
+      const refuse = normaliserMessageBase(error.message).includes('compte non valide');
+      return { ok: false, message: messageBase(error), compteRefuse: refuse, titre: refuse ? 'Compte non validé' : undefined };
     }
-    if (data !== 'en_attente') {
-      console.error('demander_revendication, retour inattendu :', data);
-      return { ok: false, message: "La demande n'a pas pu être confirmée. Réessayez dans quelques instants." };
-    }
-    maRevendicationEnCours = true;
     return { ok: true };
   } catch (e) {
     console.error('demander_revendication :', e);
@@ -9588,16 +10130,76 @@ async function envoyerRevendication(ficheId) {
   }
 }
 
-// Appelée par refreshAuthUI une fois le profil lu ou créé. Une seule
-// tentative par compte et par fiche dans la session, même si deux
-// rafraîchissements se croisent (inscription et onAuthStateChange).
+// Ce que l'écran d'issue dit d'une fiche, d'après la ligne lue en base.
+// deja : la demande existait avant ce clic.
+function issueDeLaFiche(lignes, fiche, deja) {
+  const ligne = (lignes || []).filter(l => !('fiche_id' in l) || String(l.fiche_id) === String(fiche));
+  const etat = etatDesRevendications(ligne);
+  if (deja && etat === 'en_attente') return { ok: true, titre: 'Demande déjà en cours',
+    message: "Vous avez déjà demandé cette fiche. Nous vérifions votre identité par téléphone sous 48 h et nous vous écrivons dès que c'est validé." };
+  if (etat === 'refusee') return { ok: false, titre: 'Demande déjà refusée',
+    message: "Votre demande pour cette fiche a déjà été examinée et n'a pas abouti. Écrivez-nous à contact@orthoconnect.fr pour que nous regardions votre situation." };
+  if (etat === 'traitee') return { ok: false, titre: 'Demande déjà traitée',
+    message: "Votre demande pour cette fiche a déjà été traitée. Écrivez-nous à contact@orthoconnect.fr pour en savoir plus." };
+  return { ok: true };
+}
+
+// Envoie la demande, puis relit la base pour afficher l'état réel. Un
+// compte refusé (« compte non valide ») bascule sur sa page de refus.
+async function revendiquerEtLire(userId, fiche) {
+  // Une demande existe déjà pour cette fiche : un nouvel appel ne la
+  // changerait pas, même refusée. On affiche son état sans rien envoyer.
+  const avant = await lireRevendications(userId);
+  if (avant && avant.some(l => 'fiche_id' in l && String(l.fiche_id) === String(fiche))) {
+    etatRevendication = etatDesRevendications(avant);
+    maRevendicationEnCours = etatRevendication === 'en_attente';
+    return { issue: issueDeLaFiche(avant, fiche, true), lignes: avant };
+  }
+  const r = await envoyerRevendication(String(fiche));
+  if (r.compteRefuse && compteNonValide) { compteNonValide = 'refuse'; renderCompteNonValide(); }
+  const lignes = await lireRevendications(userId);
+  if (lignes !== null) {
+    etatRevendication = etatDesRevendications(lignes);
+    maRevendicationEnCours = etatRevendication === 'en_attente';
+  }
+  if (!r.ok) return { issue: r, lignes };
+  // Lecture impossible : l'appel a réussi, la demande est au moins reçue.
+  return { issue: lignes === null ? { ok: true } : issueDeLaFiche(lignes, fiche), lignes };
+}
+
+// Les demandes de fiche déjà enregistrées pour ce compte. fiche_id et
+// statut sont les colonnes que lit l'espace admin ; si fiche_id n'était
+// pas lisible côté praticien, le statut seul suffit. null : lecture
+// impossible.
+async function lireRevendications(userId) {
+  let r = await sb.from('revendications').select('fiche_id, statut').eq('praticien_id', userId);
+  if (r.error) r = await sb.from('revendications').select('statut').eq('praticien_id', userId);
+  if (r.error) { console.warn('Revendications indisponibles :', r.error.message); return null; }
+  return Array.isArray(r.data) ? r.data : [];
+}
+
+// Seul « en_attente » est un statut connu du code ; les autres sont posés
+// par l'administration. Un refus se reconnaît à son libellé.
+function etatDesRevendications(lignes) {
+  if (!lignes || !lignes.length) return null;
+  if (lignes.some(l => l.statut === 'en_attente')) return 'en_attente';
+  return lignes.some(l => /refus/i.test(String(l.statut || ''))) ? 'refusee' : 'traitee';
+}
+
+// Appelée par refreshAuthUI une fois le profil lu ou créé. La demande
+// part une seule fois : la base dit d'abord si elle existe déjà (seule
+// source fiable d'un onglet ou d'un appareil à l'autre), la mémoire et
+// sessionStorage évitent un second envoi pendant que la première réponse
+// est en route.
 async function suivreRevendication(session, profil) {
   maRevendicationEnCours = false;
+  etatRevendication = null;
   if (!session || !profil) return;
   const user = session.user;
 
   // Fiche choisie à l'instant (écran « C'est ma fiche » puis connexion),
-  // ou reprise des métadonnées pour un compte en attente.
+  // ou reprise des métadonnées pour un compte en attente : c'est le cas
+  // de la première session après la confirmation de l'adresse.
   const choisie = !!ficheVoulue;
   let fiche = ficheVoulue;
   if (!fiche && compteNonValide === 'en_attente') {
@@ -9609,28 +10211,40 @@ async function suivreRevendication(session, profil) {
   }
   ficheVoulue = null;
 
+  if (!fiche && !compteNonValide) return;
+  let lignes = await lireRevendications(user.id);
+
   if (fiche) {
     const cle = 'oc_revendication_' + user.id + '_' + fiche;
     let dejaTentee = revendicationsTentees.has(cle);
     try { dejaTentee = dejaTentee || sessionStorage.getItem(cle) === '1'; } catch (e) { /* stockage indisponible */ }
-    if (!dejaTentee) {
+    // Reprise automatique : n'importe quelle demande du compte suffit.
+    // Choix explicite : une demande sur cette fiche-là.
+    const dejaEnBase = lignes === null ? null
+      : choisie ? lignes.some(l => 'fiche_id' in l && String(l.fiche_id) === String(fiche))
+      : lignes.length > 0;
+    if (dejaEnBase) {
+      // Rien à envoyer : un nouvel appel ne changerait pas une demande
+      // existante, même refusée. L'écran reflète le statut lu.
+      oublierFicheLocale();
+      if (choisie) afficherIssueRevendication(issueDeLaFiche(lignes, fiche, true));
+    } else if (!dejaTentee && (dejaEnBase === false || choisie)) {
+      // Lecture impossible (null) : la reprise automatique attend la
+      // prochaine session ; un choix explicite part quand même.
       revendicationsTentees.add(cle);
       try { sessionStorage.setItem(cle, '1'); } catch (e) { /* stockage indisponible */ }
-      const r = await envoyerRevendication(String(fiche));
-      if (r.ok) oublierFicheLocale();
-      // La reprise automatique revient à chaque session : son succès se
-      // lit sur la page des comptes en attente, seul un échec s'affiche.
-      if (choisie || !r.ok) afficherIssueRevendication(r);
+      const resultat = await revendiquerEtLire(user.id, fiche);
+      if (resultat.lignes !== null) lignes = resultat.lignes;
+      if (resultat.issue.ok) oublierFicheLocale();
+      // La reprise automatique se lit sur la page d'attente, seul un
+      // échec s'affiche par-dessus.
+      if (choisie || !resultat.issue.ok) afficherIssueRevendication(resultat.issue);
     }
   }
 
-  // La page des comptes en attente dit où en est la demande : lecture
-  // de la seule ligne du praticien, jamais de la fiche.
-  if (compteNonValide === 'en_attente' && !maRevendicationEnCours) {
-    const { data, error } = await sb.from('revendications')
-      .select('id').eq('praticien_id', user.id).eq('statut', 'en_attente').limit(1);
-    if (error) console.warn('Revendications indisponibles :', error.message);
-    maRevendicationEnCours = !error && Array.isArray(data) && data.length > 0;
+  if (lignes !== null) {
+    etatRevendication = etatDesRevendications(lignes);
+    maRevendicationEnCours = etatRevendication === 'en_attente';
   }
 }
 
@@ -9640,33 +10254,25 @@ async function cliquerMaFiche(btn) {
 
   if (sessionUtilisateur) {
     btn.disabled = true;
-    const r = await envoyerRevendication(String(l.id));
+    const { issue } = await revendiquerEtLire(sessionUtilisateur.id, l.id);
     btn.disabled = false;
-    if (r.ok && compteNonValide) renderCompteNonValide();
-    afficherIssueRevendication(r);
+    if (compteNonValide) renderCompteNonValide();
+    afficherIssueRevendication(issue);
     return;
   }
 
   ficheVoulue = String(l.id);
   ficheInscription = l;
-  document.getElementById('authOverlay').classList.add('open');
-  document.getElementById('authSignup').style.display = 'none';
-  document.getElementById('authLogin').style.display = 'none';
-  document.getElementById('authRevendicationOk').style.display = 'none';
-  document.getElementById('authRevendication').style.display = 'block';
+  montrerPanneauAuth('authRevendication');
   document.getElementById('revIdentite').textContent =
     [prenomNomFiche(l), l.specialite, l.ville].filter(Boolean).join(', ');
   clearMessage('revError');
 }
 
 function afficherIssueRevendication(r) {
-  document.getElementById('authOverlay').classList.add('open');
-  document.getElementById('authSignup').style.display = 'none';
-  document.getElementById('authLogin').style.display = 'none';
-  document.getElementById('authRevendication').style.display = 'none';
-  document.getElementById('authRevendicationOk').style.display = 'block';
-  document.getElementById('revIssueTitre').textContent = r.ok ? 'Merci' : 'Demande non envoyée';
-  document.getElementById('revIssueTexte').textContent = r.ok ? MESSAGE_REVENDICATION : r.message;
+  montrerPanneauAuth('authRevendicationOk');
+  document.getElementById('revIssueTitre').textContent = r.titre || (r.ok ? 'Merci' : 'Demande non envoyée');
+  document.getElementById('revIssueTexte').textContent = r.message || MESSAGE_REVENDICATION;
 }
 
 function fermerIssueRevendication() {
@@ -9683,7 +10289,7 @@ async function doSignupRevendication() {
   const email = document.getElementById('revEmail').value.trim();
   const mdp = document.getElementById('revPassword').value;
 
-  if (!email || !email.includes('@')) return showError('revError', "Indiquez un email valide.");
+  if (!emailValide(email)) return showError('revError', "Indiquez une adresse e-mail valide.");
   if (!mdp || mdp.length < 8) return showError('revError', "Choisissez un mot de passe d'au moins 8 caractères.");
 
   const btn = document.getElementById('revSignupBtn');
@@ -9699,10 +10305,12 @@ async function doSignupRevendication() {
   } catch (e) { /* les métadonnées suffisent */ }
 
   try {
+    memoriserEmail(email);
     const { data, error } = await sb.auth.signUp({
       email,
       password: mdp,
       options: {
+        emailRedirectTo: window.location.origin,
         data: {
           nom: prenomNomFiche(l),
           ville: l.ville || null,
@@ -9714,12 +10322,10 @@ async function doSignupRevendication() {
       }
     });
 
+    const complement = " Votre demande de fiche partira à la connexion.";
     if (error) {
       resetBtn();
-      if (error.message.includes('already registered')) {
-        return showError('revError', "Cet email est déjà utilisé. Connectez-vous : la demande partira à la connexion.");
-      }
-      return showError('revError', error.message);
+      return afficherErreurInscription('revError', error, email, complement);
     }
 
     if (!data || !data.user) {
@@ -9727,9 +10333,17 @@ async function doSignupRevendication() {
       return showError('revError', "Le compte n'a pas pu être créé. Réessayez dans quelques instants.");
     }
 
+    if (compteDejaExistant(data)) {
+      resetBtn();
+      return afficherCompteExistant('revError', email, complement);
+    }
+
+    // « Confirm email » actif : la fiche voyage dans user_metadata.fiche_id,
+    // la demande part à la première session (suivreRevendication).
     if (!data.session) {
       resetBtn();
-      return showNotice('revError', "Votre compte est créé. Confirmez votre adresse via le lien envoyé à " + email + " : la demande partira à votre première connexion. Inutile de refaire une inscription.");
+      attendreAvantEnvoi(cleEnvoi('signup', email), DELAI_RENVOI);
+      return afficherVerifMail(email, 'authRevendication');
     }
 
     // suivreRevendication, appelée par refreshAuthUI, envoie la demande
@@ -9745,7 +10359,7 @@ async function doSignupRevendication() {
   } catch (e) {
     resetBtn();
     console.error('Inscription (revendication) :', e);
-    showError('revError', "Une erreur est survenue. Réessayez.");
+    showError('revError', erreurAuth(e).message);
   }
 }
 
@@ -14851,6 +15465,14 @@ document.addEventListener('keydown', (e) => {
   brancherCommune('rcVille', 'rcVilleListe');
   brancherCommune('cabVille', 'cabVilleListe');
 
+  if (RETOUR_AUTH) {
+    // Le client lit d'abord le jeton ou l'erreur du lien (getSession attend
+    // qu'il l'ait fait), puis l'adresse est nettoyée : plus de jeton ni de
+    // paramètre d'erreur, ni dans la barre ni dans l'historique.
+    await sb.auth.getSession().catch(() => {});
+    history.replaceState(history.state, '', location.pathname);
+  }
+
   await loadCatalogues();
   await refreshAuthUI();
 
@@ -14862,6 +15484,10 @@ document.addEventListener('keydown', (e) => {
   sb.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') refreshAuthUI();
   });
+
+  initAuthTerminee = true;
+  if (RETOUR_AUTH) traiterRetourAuth();
+  else if (recuperationMdp) ouvrirNouveauMdp();
 })();
 
 </script>
