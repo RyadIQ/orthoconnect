@@ -2397,6 +2397,99 @@
     .lp-titre, .lp-coeur h2, .lp-final h2 { font-size: 24px; }
   }
 
+
+  /* ===== VISITE DU CABINET ===== */
+  .cab { padding-top: 56px; }
+  #cabinet { scroll-margin-top: 76px; }
+  /* Rognée : le panneau caché à droite ne doit pas élargir la page. */
+  .cab-zone { position: relative; overflow: hidden; border-radius: 20px; }
+  .cab-cadre { position: relative; overflow: hidden; border-radius: 20px; aspect-ratio: 16 / 9; background: #F7F2EB;
+    box-shadow: 0 14px 40px rgba(15,43,77,0.14); touch-action: pan-y; isolation: isolate;
+    /* La scène n'est peinte qu'à son approche ; sa hauteur reste réservée
+       par aspect-ratio. Posé sur le cadre seul : sur la section, ce
+       confinement ferait de celle-ci le repère de la feuille du bas fixe. */
+    content-visibility: auto; contain-intrinsic-size: auto 648px; }
+  .cab-camera { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 16 / 9; transform-origin: 0 0; will-change: transform;
+    transition: transform 0.7s cubic-bezier(.65,0,.35,1); }
+  .cab-camera.cab-intro { transition-duration: 1.4s; }
+  .cab-calque { position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+    transform: translate3d(calc(var(--cab-mx, 0) * var(--p, 0px)), calc(var(--cab-my, 0) * var(--p, 0px)), 0); transition: transform 0.4s ease-out; }
+  .cab-calque-fond { --p: 4px; } .cab-calque-milieu { --p: 8px; } .cab-calque-avant { --p: 12px; }
+  .cab-plante { position: absolute; left: 5.6%; top: 62%; width: 9.4%; transform-origin: 50% 100%; animation: cabPlante 6s ease-in-out infinite alternate; }
+  .cab-plante svg { display: block; width: 100%; height: auto; }
+  @keyframes cabPlante { from { transform: rotate(-1.8deg); } to { transform: rotate(1.8deg); } }
+  .cab-lueur { position: absolute; left: 51%; top: 24%; width: 11%; height: 9%; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255,246,205,0.95), rgba(255,246,205,0)); animation: cabLueur 5s ease-in-out infinite; }
+  @keyframes cabLueur { 0%, 100% { opacity: 0.75; } 40% { opacity: 1; } 55% { opacity: 0.85; } 70% { opacity: 1; } }
+  .cab-onde { position: absolute; width: 1.3%; aspect-ratio: 1; margin: -0.65% 0 0 -0.65%; border-radius: 50%; border: 2px solid var(--lp-turquoise);
+    opacity: 0; animation: cabOnde 2.8s ease-out infinite; animation-delay: var(--d, 0s); }
+  @keyframes cabOnde { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(2.6); opacity: 0; } }
+  .cab-page-calendrier { position: absolute; left: 40.75%; top: 13.8%; width: 12.5%; height: 23.8%; border-radius: 12px; background: #fff;
+    box-shadow: 0 4px 10px rgba(91,58,26,0.15); transform-origin: 50% 0; opacity: 0; }
+  .cab-page-calendrier::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 18%; border-radius: 12px 12px 0 0; background: var(--lp-corail); }
+  .cab.cab-vue .cab-page-calendrier { animation: cabPage 1.2s ease-in 0.8s both; }
+  @keyframes cabPage { 0% { opacity: 1; transform: perspective(600px) rotateX(0); } 100% { opacity: 0; transform: perspective(600px) rotateX(-115deg); } }
+  .cab-grain { position: absolute; width: 0.35%; aspect-ratio: 1; border-radius: 50%; background: #fff; opacity: 0;
+    animation: cabGrain var(--t, 10s) ease-in-out infinite; animation-delay: var(--d, 0s); }
+  @keyframes cabGrain { 0% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 0.8; } 70% { opacity: 0.6; } 100% { opacity: 0; transform: translate(var(--dx, 0), -60px); } }
+
+  /* Points chauds : de vrais boutons posés sur les objets. */
+  .cab-points { position: absolute; inset: 0; }
+  .cab:not(.cab-actif) .cab-points, .cab:not(.cab-actif) .cab-barre { display: none; }
+  .cab-point { position: absolute; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 18px; }
+  .cab-point::before { content: ''; position: absolute; inset: 4%; border-radius: 22px; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(255,255,255,0.55), rgba(255,255,255,0)); opacity: 0; transition: opacity 0.25s ease; }
+  .cab-point:hover::before, .cab-point:focus-visible::before { opacity: 1; }
+  .cab-point:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+  .cab-pastille { position: absolute; left: var(--px); top: var(--py); width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%;
+    background: var(--u); border: 3px solid #fff; box-shadow: 0 2px 8px rgba(15,43,77,0.3); }
+  .cab-pastille::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; border: 3px solid var(--u); animation: cabPouls 2.2s ease-out infinite; }
+  @keyframes cabPouls { from { transform: scale(1); opacity: 0.9; } to { transform: scale(2.4); opacity: 0; } }
+  .cab-etiquette { position: absolute; left: var(--px); top: var(--py); transform: translate(-50%, calc(-100% - 20px)); white-space: nowrap;
+    background: var(--navy); color: #fff; font-size: 14px; font-weight: 700; padding: 6px 12px; border-radius: 20px; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
+  .cab-point:hover .cab-etiquette, .cab-point:focus-visible .cab-etiquette { opacity: 1; }
+  .cab.cab-zoom .cab-points { visibility: hidden; }
+
+  .cab-voile { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.5s ease;
+    background: radial-gradient(circle at var(--fx, 50%) var(--fy, 50%), rgba(15,43,77,0) 0, rgba(15,43,77,0) 22%, rgba(15,43,77,0.38) 60%); }
+  .cab.cab-zoom .cab-voile { opacity: 1; }
+
+  /* Panneau : à droite sur ordinateur, feuille du bas sur mobile. */
+  .cab-panneau { position: absolute; top: 0; right: 0; bottom: 0; width: min(420px, 42%); z-index: 2; overflow-y: auto; overscroll-behavior: contain;
+    background: #fff; border-radius: 0 20px 20px 0; box-shadow: -10px 0 30px rgba(15,43,77,0.12); padding: 18px 20px 24px;
+    visibility: hidden; transform: translateX(104%); transition: transform 0.45s cubic-bezier(.2,.8,.2,1), visibility 0s linear 0.45s; }
+  .cab.cab-ouvert .cab-panneau { visibility: visible; transform: none; transition: transform 0.45s cubic-bezier(.2,.8,.2,1) 0.25s, visibility 0s; }
+  .cab-retour { border: 0; background: none; color: var(--navy); font: 600 15px 'Inter', sans-serif; min-height: 44px; padding: 0 4px; cursor: pointer; }
+  .cab-panneau-titre { font-size: 24px; font-weight: 800; color: var(--navy); margin: 6px 0 6px; outline: none; }
+  .cab-accroche { font-size: 15px; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px; }
+  .cab-contenu { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+  .cab-contenu:empty { display: none; }
+  .cab-contenu .lp-carte { flex: none; width: 100%; min-height: 0; }
+  .cab-contenu .lp-carte.lp-squelette { height: 120px; }
+  .cab-voir-tout { min-height: 44px; }
+  .cab-recherche input { font-size: 16px; min-height: 48px; }
+  .cab-fond-feuille { display: none; }
+  .cab-barre { display: none; }
+
+  @media (max-width: 960px) {
+    .cab-cadre { aspect-ratio: 16 / 10; }
+    .cab-camera { width: 111.112%; left: -5.556%; }
+    .cab-barre { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
+    .cab-barre-bouton { display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: none; cursor: pointer;
+      font: 600 12px 'Inter', sans-serif; color: var(--navy); padding: 0; min-width: 0; }
+    .cab-barre-bouton .lp-icone { width: 48px; height: 48px; }
+    .cab-barre-bouton:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; border-radius: 12px; }
+    .cab-panneau { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 70vh; z-index: 1300;
+      border-radius: 20px 20px 0 0; box-shadow: 0 -10px 30px rgba(15,43,77,0.2); padding-bottom: calc(24px + env(safe-area-inset-bottom));
+      transform: translateY(104%); }
+    .cab.cab-ouvert .cab-fond-feuille { display: block; position: fixed; inset: 0; z-index: 1290; background: rgba(15,43,77,0.35); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cab-camera, .cab-calque, .cab-panneau, .cab.cab-ouvert .cab-panneau, .cab-voile { transition: none !important; }
+    .cab-plante, .cab-lueur, .cab-onde, .cab-grain, .cab-pastille::after, .cab.cab-vue .cab-page-calendrier { animation: none !important; }
+    .cab-grain, .cab-onde { display: none; }
+  }
+
   /* Page derrière un écran plein : immobile. */
   html.ecran-bloque, html.ecran-bloque body { overflow: hidden; overscroll-behavior: contain; }
 
@@ -2934,6 +3027,7 @@
         <div class="lp-hero-liens">
           <a class="btn btn-turquoise landing-visiteur" href="/" onclick="event.preventDefault(); openAuth('signup')">Créer un compte</a>
           <a class="btn btn-turquoise landing-connecte" href="/mon-espace" onclick="return lienInterne(event, () => showPage('dashboard'))">Aller à mon espace</a>
+          <a class="btn btn-outline-white" href="#cabinet" onclick="event.preventDefault(); allerCabinet()">Visiter le cabinet</a>
           <a class="btn btn-outline-white" href="#lpRangees" onclick="event.preventDefault(); decouvrirLanding()">Découvrir</a>
         </div>
       </div>
@@ -2944,6 +3038,147 @@
       </div>
     </div>
     <svg class="lp-sep" viewBox="0 0 1440 48" preserveAspectRatio="none" style="color:#FFFFFF" aria-hidden="true" focusable="false"><path d="M0 48 C 360 4 1080 4 1440 48 Z"/></svg>
+  </section>
+
+  <section class="lp-section lp-fond-blanc cab" id="cabinet" aria-labelledby="cabTitre">
+    <div class="container">
+      <h2 class="lp-titre" id="cabTitre">Visitez le cabinet</h2>
+      <p class="lp-intro">Cliquez sur un objet du cabinet : la plateforme s'ouvre là où vous en avez besoin.</p>
+      <div class="cab-zone">
+        <div class="cab-cadre" id="cabCadre">
+          <div class="cab-camera" id="cabCamera">
+            <svg class="cab-calque cab-calque-fond" viewBox="0 0 1600 900" role="img" aria-label="Illustration d'un cabinet d'orthodontie : fenêtre, tableau d'annonces, calendrier, fauteuil de soins, bureau avec écran et étagère de livres." focusable="false"><defs>
+      <linearGradient id="cbMur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF8F3"/><stop offset="1" stop-color="#F1E9DF"/></linearGradient>
+      <linearGradient id="cbSol" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E7DAC7"/><stop offset="1" stop-color="#DCCBB3"/></linearGradient>
+      <linearGradient id="cbCiel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFEAF0"/><stop offset="1" stop-color="#EAF8F9"/></linearGradient>
+      <linearGradient id="cbRayon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".55"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
+    </defs><rect width="1600" height="660" fill="url(#cbMur)"/><rect y="660" width="1600" height="240" fill="url(#cbSol)"/><rect y="648" width="1600" height="16" fill="#E6DACB"/><path d="M-120 664 L-260 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M40 664 L-100 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M200 664 L60 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M360 664 L220 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M520 664 L380 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M680 664 L540 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M840 664 L700 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M1000 664 L860 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M1160 664 L1020 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M1320 664 L1180 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M1480 664 L1340 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M1640 664 L1500 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><path d="M1800 664 L1660 900" stroke="#D6C4AA" stroke-width="2" opacity=".35"/><rect y="520" width="1600" height="128" fill="#EFE6DA"/><path d="M0 520 H1600" stroke="#E2D5C4" stroke-width="3"/><g id="cab-fenetre">
+      <rect x="62" y="104" width="250" height="372" rx="14" fill="#FFFFFF"/>
+      <rect x="80" y="122" width="214" height="336" rx="6" fill="url(#cbCiel)"/>
+      <circle cx="232" cy="190" r="34" fill="#FFF3D1"/>
+      <path d="M80 380 C130 340 170 350 210 372 C240 388 270 360 294 350 V458 H80Z" fill="#A9DFE5"/>
+      <path d="M80 410 C120 392 160 398 200 418 C230 432 262 418 294 404 V458 H80Z" fill="#8FD3DB"/>
+      <rect x="183" y="122" width="8" height="336" fill="#FFFFFF"/><rect x="80" y="286" width="214" height="8" fill="#FFFFFF"/>
+      <rect x="50" y="470" width="274" height="16" rx="5" fill="#FFFFFF"/>
+      <path d="M312 98 C300 210 318 330 300 486 L336 486 C350 330 332 210 342 98Z" fill="#E4EDF5"/>
+      <path d="M318 120 C312 220 326 330 314 480" stroke="#D2DEEA" stroke-width="3" fill="none"/>
+      <rect x="40" y="90" width="320" height="10" rx="5" fill="#0F2B4D" opacity=".85"/>
+    </g><path d="M80 470 L294 470 L560 900 L120 900Z" fill="url(#cbRayon)" opacity=".7"/><g id="cab-tableau" data-hotspot="emploi">
+      
+      <rect x="360" y="168" width="250" height="250" rx="12" fill="#A97E55"/>
+      <rect x="372" y="180" width="226" height="226" rx="6" fill="#DDB98F"/>
+      <circle cx="380" cy="188" r="2" fill="#C49A6C" opacity=".6"/><circle cx="433" cy="225" r="2" fill="#C49A6C" opacity=".6"/><circle cx="486" cy="262" r="2" fill="#C49A6C" opacity=".6"/><circle cx="539" cy="299" r="2" fill="#C49A6C" opacity=".6"/><circle cx="382" cy="336" r="2" fill="#C49A6C" opacity=".6"/><circle cx="435" cy="373" r="2" fill="#C49A6C" opacity=".6"/><circle cx="488" cy="200" r="2" fill="#C49A6C" opacity=".6"/><circle cx="541" cy="237" r="2" fill="#C49A6C" opacity=".6"/><circle cx="384" cy="274" r="2" fill="#C49A6C" opacity=".6"/><circle cx="437" cy="311" r="2" fill="#C49A6C" opacity=".6"/><circle cx="490" cy="348" r="2" fill="#C49A6C" opacity=".6"/><circle cx="543" cy="385" r="2" fill="#C49A6C" opacity=".6"/><circle cx="386" cy="212" r="2" fill="#C49A6C" opacity=".6"/><circle cx="439" cy="249" r="2" fill="#C49A6C" opacity=".6"/><circle cx="492" cy="286" r="2" fill="#C49A6C" opacity=".6"/><circle cx="545" cy="323" r="2" fill="#C49A6C" opacity=".6"/><circle cx="388" cy="360" r="2" fill="#C49A6C" opacity=".6"/><circle cx="441" cy="397" r="2" fill="#C49A6C" opacity=".6"/><circle cx="494" cy="224" r="2" fill="#C49A6C" opacity=".6"/><circle cx="547" cy="261" r="2" fill="#C49A6C" opacity=".6"/><circle cx="390" cy="298" r="2" fill="#C49A6C" opacity=".6"/><circle cx="443" cy="335" r="2" fill="#C49A6C" opacity=".6"/><circle cx="496" cy="372" r="2" fill="#C49A6C" opacity=".6"/><circle cx="549" cy="199" r="2" fill="#C49A6C" opacity=".6"/><circle cx="392" cy="236" r="2" fill="#C49A6C" opacity=".6"/><circle cx="445" cy="273" r="2" fill="#C49A6C" opacity=".6"/>
+      <g transform="rotate(-4 428 240)"><rect x="388" y="199" width="80" height="88" rx="5" fill="#5B3A1A" opacity=".12"/><rect x="388" y="196" width="80" height="88" rx="5" fill="#FFFFFF"/>
+        <rect x="388" y="196" width="80" height="14" rx="5" fill="#34B27B"/><rect x="388" y="204" width="80" height="6" fill="#34B27B"/>
+        <rect x="398" y="222" width="52" height="6" rx="3" fill="#0F2B4D" opacity=".8"/><rect x="398" y="236" width="60" height="5" rx="2.5" fill="#C9D3DE"/>
+        <rect x="398" y="248" width="44" height="5" rx="2.5" fill="#C9D3DE"/><rect x="398" y="260" width="30" height="10" rx="5" fill="#34B27B" opacity=".25"/>
+        <circle cx="428" cy="200" r="6" fill="#F07A62"/><circle cx="426" cy="198" r="2" fill="#FFFFFF" opacity=".7"/></g><g transform="rotate(3 518 232)"><rect x="478" y="191" width="80" height="88" rx="5" fill="#5B3A1A" opacity=".12"/><rect x="478" y="188" width="80" height="88" rx="5" fill="#FFFFFF"/>
+        <rect x="478" y="188" width="80" height="14" rx="5" fill="#34B27B"/><rect x="478" y="196" width="80" height="6" fill="#34B27B"/>
+        <rect x="488" y="214" width="52" height="6" rx="3" fill="#0F2B4D" opacity=".8"/><rect x="488" y="228" width="60" height="5" rx="2.5" fill="#C9D3DE"/>
+        <rect x="488" y="240" width="44" height="5" rx="2.5" fill="#C9D3DE"/><rect x="488" y="252" width="30" height="10" rx="5" fill="#34B27B" opacity=".25"/>
+        <circle cx="518" cy="192" r="6" fill="#F07A62"/><circle cx="516" cy="190" r="2" fill="#FFFFFF" opacity=".7"/></g><g transform="rotate(2 440 344)"><rect x="400" y="303" width="80" height="88" rx="5" fill="#5B3A1A" opacity=".12"/><rect x="400" y="300" width="80" height="88" rx="5" fill="#FFFFFF"/>
+        <rect x="400" y="300" width="80" height="14" rx="5" fill="#00B8C8"/><rect x="400" y="308" width="80" height="6" fill="#00B8C8"/>
+        <rect x="410" y="326" width="52" height="6" rx="3" fill="#0F2B4D" opacity=".8"/><rect x="410" y="340" width="60" height="5" rx="2.5" fill="#C9D3DE"/>
+        <rect x="410" y="352" width="44" height="5" rx="2.5" fill="#C9D3DE"/><rect x="410" y="364" width="30" height="10" rx="5" fill="#00B8C8" opacity=".25"/>
+        <circle cx="440" cy="304" r="6" fill="#F07A62"/><circle cx="438" cy="302" r="2" fill="#FFFFFF" opacity=".7"/></g><g transform="rotate(-3 530 340)"><rect x="490" y="299" width="80" height="88" rx="5" fill="#5B3A1A" opacity=".12"/><rect x="490" y="296" width="80" height="88" rx="5" fill="#FFFFFF"/>
+        <rect x="490" y="296" width="80" height="14" rx="5" fill="#34B27B"/><rect x="490" y="304" width="80" height="6" fill="#34B27B"/>
+        <rect x="500" y="322" width="52" height="6" rx="3" fill="#0F2B4D" opacity=".8"/><rect x="500" y="336" width="60" height="5" rx="2.5" fill="#C9D3DE"/>
+        <rect x="500" y="348" width="44" height="5" rx="2.5" fill="#C9D3DE"/><rect x="500" y="360" width="30" height="10" rx="5" fill="#34B27B" opacity=".25"/>
+        <circle cx="530" cy="300" r="6" fill="#F07A62"/><circle cx="528" cy="298" r="2" fill="#FFFFFF" opacity=".7"/></g>
+    </g><g id="cab-calendrier" data-hotspot="congres">
+      <circle cx="752" cy="104" r="5" fill="#0F2B4D"/><path d="M752 104 L712 128 M752 104 L792 128" stroke="#0F2B4D" stroke-width="2"/>
+      <rect x="652" y="127" width="200" height="214" rx="12" fill="#5B3A1A" opacity=".12"/><rect x="652" y="124" width="200" height="214" rx="12" fill="#FFFFFF"/>
+      <path d="M652 136 a12 12 0 0 1 12-12 h176 a12 12 0 0 1 12 12 V164 H652Z" fill="#F07A62"/>
+      <rect x="690" y="138" width="80" height="10" rx="5" fill="#FFFFFF" opacity=".9"/><rect x="790" y="138" width="40" height="10" rx="5" fill="#FFFFFF" opacity=".6"/>
+      <rect x="672" y="174" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.9"/><rect x="696" y="174" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="720" y="174" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="744" y="174" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="768" y="174" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="792" y="174" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.9"/><rect x="816" y="174" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="672" y="200" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="696" y="200" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="720" y="200" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="744" y="200" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.9"/><rect x="768" y="200" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="792" y="200" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="816" y="200" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="672" y="226" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="696" y="226" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.9"/><rect x="720" y="226" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="744" y="226" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="768" y="226" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="792" y="226" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="816" y="226" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.9"/><rect x="672" y="252" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="696" y="252" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="720" y="252" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="744" y="252" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="768" y="252" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.9"/><rect x="792" y="252" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="816" y="252" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="672" y="278" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="696" y="278" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="720" y="278" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.9"/><rect x="744" y="278" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="768" y="278" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="792" y="278" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/><rect x="816" y="278" width="16" height="14" rx="3" fill="#C9D3DE" opacity="0.55"/>
+      <circle cx="728" cy="234" r="15" fill="none" stroke="#F07A62" stroke-width="4"/>
+      <circle cx="800" cy="286" r="15" fill="none" stroke="#8A7BE6" stroke-width="4"/>
+      <circle cx="704" cy="312" r="15" fill="none" stroke="#F07A62" stroke-width="4"/>
+    </g><g id="cab-etagere" data-hotspot="formations">
+      <rect x="1398" y="118" width="18" height="92" rx="3" fill="#0F2B4D"/><rect x="1401" y="130" width="12" height="4" rx="2" fill="#FFFFFF" opacity=".55"/><rect x="1419" y="130" width="14" height="80" rx="3" fill="#00B8C8"/><rect x="1422" y="142" width="8" height="4" rx="2" fill="#FFFFFF" opacity=".55"/><rect x="1436" y="112" width="20" height="98" rx="3" fill="#8A7BE6"/><rect x="1439" y="124" width="14" height="4" rx="2" fill="#FFFFFF" opacity=".55"/><rect x="1459" y="136" width="12" height="74" rx="3" fill="#F07A62"/><rect x="1462" y="148" width="6" height="4" rx="2" fill="#FFFFFF" opacity=".55"/><rect x="1474" y="122" width="18" height="88" rx="3" fill="#34B27B"/><rect x="1477" y="134" width="12" height="4" rx="2" fill="#FFFFFF" opacity=".55"/><rect x="1495" y="126" width="16" height="84" rx="3" fill="#F2C14E"/><rect x="1498" y="138" width="10" height="4" rx="2" fill="#FFFFFF" opacity=".55"/><rect x="1516" y="150" width="18" height="62" rx="3" fill="#00B8C8" transform="rotate(14 1525 210)"/>
+      <rect x="1384" y="210" width="166" height="12" rx="4" fill="#C9A27A"/><rect x="1384" y="220" width="166" height="5" fill="#A97E55" opacity=".6"/>
+      <rect x="1398" y="236" width="30" height="94" rx="4" fill="#0F2B4D"/><rect x="1404" y="252" width="18" height="24" rx="3" fill="#FFFFFF" opacity=".9"/><circle cx="1413" cy="310" r="5" fill="#FFFFFF" opacity=".55"/><rect x="1432" y="236" width="30" height="94" rx="4" fill="#00B8C8"/><rect x="1438" y="252" width="18" height="24" rx="3" fill="#FFFFFF" opacity=".9"/><circle cx="1447" cy="310" r="5" fill="#FFFFFF" opacity=".55"/><rect x="1466" y="236" width="30" height="94" rx="4" fill="#8A7BE6"/><rect x="1472" y="252" width="18" height="24" rx="3" fill="#FFFFFF" opacity=".9"/><circle cx="1481" cy="310" r="5" fill="#FFFFFF" opacity=".55"/><rect x="1500" y="236" width="30" height="94" rx="4" fill="#34B27B"/><rect x="1506" y="252" width="18" height="24" rx="3" fill="#FFFFFF" opacity=".9"/><circle cx="1515" cy="310" r="5" fill="#FFFFFF" opacity=".55"/>
+      <path d="M1538 330 c-6-18 2-34 14-40 c-2 16 6 28 -6 40z" fill="#34B27B"/><path d="M1532 330 c0-14 -10-22 -18-24 c2 12 8 20 14 24z" fill="#2A9468"/><rect x="1524" y="314" width="24" height="16" rx="4" fill="#F07A62"/>
+      <rect x="1384" y="330" width="166" height="12" rx="4" fill="#C9A27A"/><rect x="1384" y="340" width="166" height="5" fill="#A97E55" opacity=".6"/>
+      <path d="M1396 222 v18 M1538 222 v18 M1396 342 v18 M1538 342 v18" stroke="#A97E55" stroke-width="5" stroke-linecap="round"/>
+    </g><g id="cab-horloge"><circle cx="1150" cy="170" r="46" fill="#FFFFFF" stroke="#0F2B4D" stroke-width="8"/>
+      <rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(0 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(30 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(60 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(90 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(120 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(150 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(180 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(210 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(240 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(270 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(300 1150 170)"/><rect x="1148" y="132" width="4" height="10" rx="2" fill="#C9D3DE" transform="rotate(330 1150 170)"/>
+      <path d="M1150 170 L1150 142 M1150 170 L1170 182" stroke="#0F2B4D" stroke-width="5" stroke-linecap="round"/><circle cx="1150" cy="170" r="5" fill="#F07A62"/></g></svg>
+            <svg class="cab-calque cab-calque-milieu" viewBox="0 0 1600 900" aria-hidden="true" focusable="false"><defs>
+      <linearGradient id="cbCone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFBEA" stop-opacity=".7"/><stop offset="1" stop-color="#FFFBEA" stop-opacity="0"/></linearGradient>
+      <linearGradient id="cbAssise" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22C6D4"/><stop offset="1" stop-color="#009CAA"/></linearGradient>
+      <linearGradient id="cbEcran" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3FBFC"/><stop offset="1" stop-color="#DDF2F5"/></linearGradient>
+    </defs><ellipse cx="930" cy="790" rx="250" ry="26" fill="#BFA98C" opacity=".35"/><ellipse cx="1330" cy="780" rx="230" ry="20" fill="#BFA98C" opacity=".3"/><g id="cab-lampe">
+      <rect x="990" y="0" width="16" height="132" fill="#C9D3DE"/><circle cx="998" cy="134" r="12" fill="#0F2B4D"/>
+      <path d="M998 134 L900 228" stroke="#C9D3DE" stroke-width="14" stroke-linecap="round"/>
+      <path d="M840 250 L960 250 L900 470 Z" fill="url(#cbCone)" opacity=".85"/>
+      <rect x="836" y="214" width="128" height="40" rx="20" fill="#FFFFFF" stroke="#C9D3DE" stroke-width="3"/>
+      <rect x="852" y="244" width="96" height="12" rx="6" fill="#FFF3C4"/>
+    </g><g id="cab-fauteuil" data-hotspot="produits">
+      <ellipse cx="900" cy="772" rx="120" ry="16" fill="#0F2B4D" opacity=".9"/>
+      <rect x="866" y="640" width="68" height="130" rx="14" fill="#0F2B4D"/>
+      <rect x="878" y="652" width="12" height="104" rx="6" fill="#FFFFFF" opacity=".15"/>
+      <path d="M660 520 C 660 488 690 476 716 486 L 770 508 C 790 516 792 548 770 556 L 708 560 C 680 562 660 548 660 520Z" fill="url(#cbAssise)"/>
+      <path d="M760 520 L 940 580 C 960 586 968 610 950 624 L 930 640 L 760 588 C 732 578 734 512 760 520Z" fill="url(#cbAssise)"/>
+      <path d="M930 600 L 1120 600 C 1150 600 1156 640 1126 646 L 920 650 C 896 650 900 600 930 600Z" fill="url(#cbAssise)"/>
+      <path d="M1100 604 C 1140 600 1166 620 1170 660 L 1176 700 C 1178 716 1156 720 1150 704 L 1136 660 C 1130 640 1114 636 1100 636Z" fill="url(#cbAssise)"/>
+      <path d="M690 492 C 700 488 716 490 728 496" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".45" fill="none"/>
+      <path d="M790 540 L 920 584" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".4"/>
+      <path d="M950 612 L 1100 612" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".4"/>
+      <path d="M880 572 L 1000 572" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round"/><path d="M990 572 L 990 600" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/>
+      <path d="M676 500 C 690 490 712 492 728 502" stroke="#7FE0E8" stroke-width="12" stroke-linecap="round" fill="none"/>
+      <path d="M872 680 L 640 640 L 560 520" stroke="#C9D3DE" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="640" cy="640" r="9" fill="#0F2B4D"/>
+      <rect x="440" y="496" width="230" height="26" rx="10" fill="#FFFFFF" stroke="#C9D3DE" stroke-width="2"/>
+      <rect x="452" y="470" width="110" height="18" rx="9" fill="#8A7BE6" transform="rotate(-8 506 479)"/><circle cx="460" cy="488" r="8" fill="#0F2B4D"/>
+      <rect x="470" y="473" width="46" height="5" rx="2.5" fill="#FFFFFF" opacity=".6" transform="rotate(-8 506 479)"/>
+      <path d="M584 496 C 584 462 638 462 638 496" fill="#FFFFFF" fill-opacity=".8" stroke="#6FCBD5" stroke-width="4"/>
+      <path d="M597 496 C 597 476 625 476 625 496" fill="none" stroke="#6FCBD5" stroke-width="3"/>
+      <path d="M610 498 C 610 470 664 470 664 498" fill="#FFFFFF" fill-opacity=".7" stroke="#A796F2" stroke-width="4"/>
+      <path d="M623 498 C 623 482 651 482 651 498" fill="none" stroke="#A796F2" stroke-width="3"/>
+    </g><g id="cab-ecran" data-hotspot="annuaire">
+      <rect x="1170" y="566" width="370" height="20" rx="6" fill="#C9A27A"/><rect x="1170" y="584" width="370" height="8" fill="#A97E55" opacity=".6"/>
+      <rect x="1188" y="592" width="14" height="182" rx="4" fill="#A97E55"/><rect x="1508" y="592" width="14" height="182" rx="4" fill="#A97E55"/>
+      <rect x="1400" y="592" width="108" height="120" rx="8" fill="#FFFFFF"/><rect x="1412" y="608" width="84" height="8" rx="4" fill="#C9D3DE"/><rect x="1412" y="640" width="84" height="8" rx="4" fill="#C9D3DE"/>
+      <rect x="1296" y="520" width="20" height="48" rx="4" fill="#0F2B4D"/><rect x="1262" y="560" width="88" height="10" rx="5" fill="#0F2B4D"/>
+      <rect x="1176" y="356" width="260" height="170" rx="14" fill="#0F2B4D"/>
+      <rect x="1188" y="368" width="236" height="146" rx="6" fill="url(#cbEcran)"/>
+      <path d="M1290 384 L1318 388 L1340 404 L1356 400 L1372 416 L1366 440 L1376 462 L1358 488 L1328 498 L1306 492 L1282 500 L1258 488 L1262 466 L1246 448 L1250 424 L1270 416 L1278 396Z" fill="#BCE7ED" stroke="#00B8C8" stroke-width="2"/>
+      <circle cx="1312" cy="420" r="5" fill="#00B8C8"/><circle cx="1336" cy="456" r="5" fill="#00B8C8"/><circle cx="1288" cy="470" r="5" fill="#00B8C8"/><circle cx="1350" cy="430" r="4" fill="#F07A62"/><circle cx="1300" cy="444" r="4" fill="#00B8C8"/>
+      <rect x="1196" y="376" width="44" height="18" rx="9" fill="#FFFFFF"/><circle cx="1206" cy="385" r="4" fill="none" stroke="#0F2B4D" stroke-width="2"/><rect x="1213" y="383" width="20" height="4" rx="2" fill="#C9D3DE"/>
+      <rect x="1214" y="548" width="120" height="14" rx="5" fill="#C9D3DE"/><rect x="1352" y="548" width="26" height="14" rx="7" fill="#C9D3DE"/>
+      <rect x="1450" y="530" width="26" height="34" rx="6" fill="#F07A62"/><path d="M1476 538 c12 0 12 16 0 16" stroke="#F07A62" stroke-width="4" fill="none"/>
+    </g></svg>
+            <div class="cab-calque cab-calque-avant" aria-hidden="true">
+              <span class="cab-page-calendrier"></span>
+              <span class="cab-lueur"></span>
+              <span class="cab-onde" style="left:82.000%;top:46.667%;--d:0.0s"></span><span class="cab-onde" style="left:83.500%;top:50.667%;--d:0.7s"></span><span class="cab-onde" style="left:80.500%;top:52.222%;--d:1.4s"></span><span class="cab-onde" style="left:84.375%;top:47.778%;--d:2.1s"></span><span class="cab-onde" style="left:81.250%;top:49.333%;--d:2.8s"></span>
+              <div class="cab-plante"><svg viewBox="0 0 160 260" class="cab-plante-svg" aria-hidden="true" focusable="false">
+      <g id="cab-plante">
+        <path d="M80 190 C 70 140 40 120 20 70 C 50 90 72 120 82 170Z" fill="#34B27B"/>
+        <path d="M82 190 C 92 130 120 100 150 60 C 128 110 104 140 92 188Z" fill="#2A9468"/>
+        <path d="M80 190 C 76 120 70 70 84 20 C 96 70 92 130 88 190Z" fill="#34B27B"/>
+        <path d="M78 194 C 60 160 30 156 8 130 C 42 140 64 156 82 190Z" fill="#2A9468"/>
+        <path d="M84 192 C 100 166 128 160 156 150 C 132 172 110 182 88 196Z" fill="#34B27B"/>
+        <path d="M44 186 H118 L106 256 H56Z" fill="#F07A62"/><rect x="38" y="180" width="86" height="16" rx="6" fill="#E3654D"/>
+      </g></svg></div>
+              <span class="cab-grain" style="left:13.8%;top:30.6%;--t:10.9s;--d:-0.7s;--dx:1px"></span><span class="cab-grain" style="left:14.8%;top:24.1%;--t:10.0s;--d:-0.4s;--dx:-2px"></span><span class="cab-grain" style="left:7.7%;top:26.3%;--t:9.5s;--d:-8.3s;--dx:-11px"></span><span class="cab-grain" style="left:11.4%;top:63.9%;--t:12.7s;--d:-5.8s;--dx:-3px"></span><span class="cab-grain" style="left:29.4%;top:23.3%;--t:12.2s;--d:-2.9s;--dx:-10px"></span><span class="cab-grain" style="left:8.8%;top:41.6%;--t:11.9s;--d:-1.8s;--dx:2px"></span><span class="cab-grain" style="left:21.3%;top:46.1%;--t:10.3s;--d:-0.6s;--dx:-12px"></span><span class="cab-grain" style="left:10.9%;top:67.6%;--t:9.6s;--d:-3.1s;--dx:2px"></span><span class="cab-grain" style="left:16.9%;top:41.0%;--t:11.8s;--d:-7.0s;--dx:-7px"></span><span class="cab-grain" style="left:19.8%;top:56.8%;--t:12.3s;--d:-7.3s;--dx:-6px"></span><span class="cab-grain" style="left:29.5%;top:28.3%;--t:9.5s;--d:-7.6s;--dx:-10px"></span><span class="cab-grain" style="left:17.7%;top:22.7%;--t:11.0s;--d:-7.6s;--dx:2px"></span><span class="cab-grain" style="left:27.0%;top:42.0%;--t:11.2s;--d:-5.9s;--dx:2px"></span><span class="cab-grain" style="left:16.9%;top:78.8%;--t:12.7s;--d:-4.7s;--dx:5px"></span><span class="cab-grain" style="left:7.5%;top:69.1%;--t:10.9s;--d:-9.9s;--dx:9px"></span><span class="cab-grain" style="left:12.8%;top:47.0%;--t:11.0s;--d:-0.2s;--dx:-1px"></span>
+            </div>
+            <div class="cab-points"><button type="button" class="cab-point lp-u-emploi" data-cle="emploi" aria-label="Emploi : voir les offres du tableau d'annonces" style="left:21.875%;top:17.778%;width:16.875%;height:30.000%;--px:50.00%;--py:49.26%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Emploi</span></button><button type="button" class="cab-point lp-u-congres" data-cle="congres" aria-label="Congrès : ouvrir le calendrier" style="left:40.000%;top:10.667%;width:14.000%;height:27.778%;--px:50.00%;--py:54.40%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Congrès</span></button><button type="button" class="cab-point lp-u-produits" data-cle="produits" aria-label="Produits : voir le fauteuil et le plateau" style="left:26.875%;top:48.889%;width:47.500%;height:40.000%;--px:61.84%;--py:33.33%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Produits</span></button><button type="button" class="cab-point lp-u-formations" data-cle="annuaire" aria-label="Retrouvez votre fiche : chercher votre nom dans l'annuaire" style="left:72.500%;top:37.778%;width:25.000%;height:48.889%;--px:36.50%;--py:22.95%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Retrouvez votre fiche</span></button><button type="button" class="cab-point lp-u-formations" data-cle="formations" aria-label="Formations : voir l'étagère" style="left:85.875%;top:11.111%;width:11.875%;height:28.889%;--px:48.95%;--py:50.00%"><span class="cab-pastille" aria-hidden="true"></span><span class="cab-etiquette" aria-hidden="true">Formations</span></button></div>
+          </div>
+          <div class="cab-voile" aria-hidden="true"></div>
+        </div>
+        <aside class="cab-panneau" id="cabPanneau" aria-labelledby="cabPanneauTitre" tabindex="-1">
+          <button type="button" class="cab-retour" onclick="fermerCabinet()">&larr; Retour au cabinet</button>
+          <h2 class="cab-panneau-titre" id="cabPanneauTitre" tabindex="-1"></h2>
+          <p class="cab-accroche" id="cabAccroche"></p>
+          <div class="cab-contenu" id="cabContenu"></div>
+          <a class="btn btn-turquoise cab-voir-tout" id="cabVoirTout" href="/">Voir tout</a>
+        </aside>
+      </div>
+      <div class="cab-barre" role="group" aria-label="Ouvrir une partie du cabinet"><button type="button" class="cab-barre-bouton lp-u-produits" data-cle="produits"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5c2 0 3 .9 5 .9s3-.9 5-.9c2.6 0 3.7 2.5 3.1 5.4-.4 2-1.4 3.4-1.8 5.4-.4 2.2-.6 6.2-2.4 6.2-1.6 0-1.4-3.8-2.3-5.2-.4-.6-1-.7-1.6-.7s-1.2.1-1.6.7c-.9 1.4-.7 5.2-2.3 5.2-1.8 0-2-4-2.4-6.2-.4-2-1.4-3.4-1.8-5.4C3.3 6 4.4 3.5 7 3.5z"/></svg></span><span>Produits</span></button><button type="button" class="cab-barre-bouton lp-u-formations" data-cle="formations"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5A1.5 1.5 0 0 1 4 17.5z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5-.7 1.5-1.5z"/></svg></span><span>Formations</span></button><button type="button" class="cab-barre-bouton lp-u-congres" data-cle="congres"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span><span>Congrès</span></button><button type="button" class="cab-barre-bouton lp-u-emploi" data-cle="emploi"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3.5 13h17"/></svg></span><span>Emploi</span></button><button type="button" class="cab-barre-bouton lp-u-formations" data-cle="annuaire"><span class="lp-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><span>Fiche</span></button></div>
+      <div class="cab-fond-feuille" id="cabFondFeuille" onclick="fermerCabinet()"></div>
+    </div>
   </section>
 
   <section class="lp-chiffres" aria-label="OrthoConnect en chiffres" id="lpChiffres">
@@ -11251,6 +11486,7 @@ function allerRechercheLanding() {
 function ouvrirLanding() {
   if (lpPrete) return;
   lpPrete = true;
+  preparerCabinet();
 
   // Les boucles (hero, cœur) ne tournent que si leur bloc est à l'écran
   // et l'onglet visible.
@@ -11261,7 +11497,7 @@ function ouvrirLanding() {
     const obsBoucles = new IntersectionObserver((entrees) => entrees.forEach(e => {
       e.target.classList.toggle('lp-pause', !e.isIntersecting);
     }));
-    document.querySelectorAll('#page-landing .lp-hero, #page-landing .lp-fond-navy').forEach(b => obsBoucles.observe(b));
+    document.querySelectorAll('#page-landing .lp-hero, #page-landing .lp-fond-navy, #page-landing .cab-cadre').forEach(b => obsBoucles.observe(b));
   }
   remplirChiffresLanding();
   if (window.matchMedia('(min-width: 900px)').matches) remplirApercuLanding();
@@ -11292,6 +11528,262 @@ function ouvrirLanding() {
     e.target.classList.add('visible');
   }), { rootMargin: '0px 0px -40px 0px' });
   sections.forEach(sec => obsSections.observe(sec));
+}
+
+// ═══════════════════════════════════════════════
+// VISITE DU CABINET
+//
+// Une scène SVG, cinq objets cliquables. La caméra (transform du bloc
+// de la scène) zoome sur l'objet, un panneau reprend le contenu réel de
+// la landing (rangées, offres publiques, recherche de fiche), sans
+// requête de plus et sans tarif. Hash #cabinet-… : liens partageables,
+// bouton retour du navigateur.
+// ═══════════════════════════════════════════════
+// Lu avant le démarrage, qui réécrit l'adresse sans le hash.
+const CAB_HASH_DEPART = location.hash;
+const CAB_HASHS = { produits: '#cabinet-produits', formations: '#cabinet-formations', congres: '#cabinet-congres', emploi: '#cabinet-emploi', annuaire: '#cabinet-fiche' };
+// Boîtes des objets dans le repère 1600 x 900 de la scène.
+const CAB_BOITES = { fenetre: [50, 90, 320, 400], emploi: [350, 160, 270, 270], congres: [640, 96, 224, 250],
+  produits: [430, 440, 760, 360], annuaire: [1160, 340, 400, 440], formations: [1374, 100, 190, 260] };
+const CAB_TEXTES = {
+  produits: ['Produits', 'Aligneurs, caméras intra-orales, brackets : les fiches techniques, comparables d\'un système à l\'autre.', '/produits', 'produits'],
+  formations: ['Formations', 'Les formations publiées, avec leur organisme, leur format et leur prochaine session.', '/formations', 'formations'],
+  congres: ['Congrès', 'Les prochains congrès et journées de l\'orthodontie, par date.', '/congres', 'congres'],
+  emploi: ['Emploi', 'Les dernières offres publiées : collaboration, remplacement, association.', '/emploi', 'emploi'],
+  annuaire: ['Retrouvez votre fiche', 'Votre fiche existe peut-être déjà dans l\'annuaire. Cherchez votre nom.', '/carte', 'carte']
+};
+let cabOuvert = null;
+let cabPousse = false;
+let cabDeclencheur = null;
+let cabPrete = false;
+
+function cabSection() { return document.getElementById('cabinet'); }
+
+function cabTransformPour(boite, panneau) {
+  const cadre = document.getElementById('cabCadre');
+  const camera = document.getElementById('cabCamera');
+  const W = cadre.clientWidth, H = cadre.clientHeight;
+  const camW = camera.offsetWidth, camH = camera.offsetHeight, decalX = camera.offsetLeft;
+  const k = camW / 1600;
+  const [x, y, w, h] = boite;
+  const mobile = ECRAN_MOBILE.matches;
+  const largeurPanneau = panneau && !mobile ? Math.min(420, W * 0.42) : 0;
+  const libreW = W - largeurPanneau;
+  // Sur mobile, la feuille peut monter jusqu'à 70 % de l'écran : l'objet
+  // doit tenir dans la bande visible entre la barre fixe et la feuille.
+  const libreH = mobile && panneau ? Math.max(H * 0.3, Math.min(H, window.innerHeight * 0.3 - 76)) : H;
+  let echelle = Math.min(libreW * 0.82 / (w * k), libreH * 0.86 / (h * k));
+  echelle = Math.max(mobile && panneau ? 1.1 : 1.3, Math.min(3.2, echelle));
+  const cx = (x + w / 2) * k, cy = (y + h / 2) * k;
+  const Px = libreW / 2, Py = libreH / 2;
+  // Le bord droit de la scène peut passer sous le panneau : seule la zone
+  // libre doit rester couverte, sinon un objet de droite (écran, étagère)
+  // resterait caché derrière. Si le cadrage bute sur un bord et laisse
+  // l'objet hors de la zone visible, on rapproche un peu plus.
+  let tx, ty;
+  for (;;) {
+    tx = Math.min(-decalX, Math.max(libreW - decalX - echelle * camW, Px - decalX - echelle * cx));
+    ty = Math.min(0, Math.max(H - echelle * camH, Py - echelle * cy));
+    const oy = ty + echelle * cy;
+    if ((oy > 8 && oy < libreH - 8) || echelle >= 3.2) break;
+    echelle = Math.min(3.2, echelle + 0.1);
+  }
+  // Où l'objet se retrouve dans le cadre : centre du projecteur du voile.
+  const fx = decalX + tx + echelle * cx, fy = ty + echelle * cy;
+  return { t: `translate(${tx}px, ${ty}px) scale(${echelle})`, fx: fx / W * 100, fy: fy / H * 100 };
+}
+
+function cabCartes(cle) {
+  if (cle === 'produits') return Promise.resolve(lpProduits().map(lpCarteProduit));
+  if (cle === 'formations') return lpFormations().then(l => l.map(lpCarteFormation));
+  if (cle === 'congres') return lpCongres().then(l => l.map(lpCarteCongres));
+  if (cle === 'emploi') {
+    // Les offres publiques déjà chargées pour la page Emploi : intitulé,
+    // ville et contrat seulement.
+    const offres = jobsDB.filter(annonceActive)
+      .sort((a, b) => String(b.publie_le || b.created_at || '').localeCompare(String(a.publie_le || a.created_at || '')))
+      .slice(0, 6);
+    return Promise.resolve(offres.map(j => `<a class="lp-carte lp-u-emploi" href="${esc(cheminAnnonce(j))}" onclick="return lienInterne(event, () => ouvrirAnnonce(${esc(JSON.stringify(j.id))}))">
+        <span class="lp-pastille">${esc(libelleContrat(j.type_contrat))}</span>
+        <span class="lp-carte-titre">${esc(j.titre)}</span>
+        ${j.ville ? `<span class="lp-carte-ligne">${esc(j.ville)}</span>` : ''}
+      </a>`));
+  }
+  if (cle === 'annuaire') {
+    return Promise.resolve([`<div class="cab-recherche landing-visiteur">
+        <label class="lp-recherche-label" for="cabRechercheNom">Orthodontiste ? Retrouvez votre fiche</label>
+        <div class="lp-recherche-champ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="cabRechercheNom" placeholder="Votre nom" autocomplete="off" oninput="saisirRechercheAnnuaire('cabRechercheNom', 'cabResultats')">
+        </div>
+        <div class="lp-resultats" id="cabResultats" aria-live="polite"></div>
+      </div>
+      <a class="btn btn-turquoise landing-connecte" href="/mon-espace" onclick="return lienInterne(event, () => showPage('dashboard'))">Aller à mon espace</a>`]);
+  }
+  return Promise.resolve([]);
+}
+
+async function cabRemplir(cle) {
+  const [titre, accroche, lien, page] = CAB_TEXTES[cle];
+  document.getElementById('cabPanneauTitre').textContent = titre;
+  document.getElementById('cabAccroche').textContent = accroche;
+  const voir = document.getElementById('cabVoirTout');
+  voir.setAttribute('href', lien);
+  voir.onclick = (e) => lienInterne(e, () => showPage(page));
+  const zone = document.getElementById('cabContenu');
+  zone.innerHTML = cle === 'annuaire' ? '' : '<div class="lp-carte lp-squelette" aria-hidden="true"></div>'.repeat(2);
+  let cartes = [];
+  try { cartes = await cabCartes(cle); } catch (e) { console.warn('Cabinet, ' + cle + ' :', e); }
+  // Panneau vide ou en erreur : l'accroche et « Voir tout » seulement.
+  if (cabOuvert === cle) zone.innerHTML = cartes.join('');
+}
+
+function cabAppliquerZoom(cle) {
+  const sec = cabSection(), camera = document.getElementById('cabCamera');
+  const z = cabTransformPour(CAB_BOITES[cle], true);
+  sec.style.setProperty('--fx', z.fx + '%');
+  sec.style.setProperty('--fy', z.fy + '%');
+  camera.style.transform = z.t;
+}
+
+function ouvrirCabinet(cle, options) {
+  const o = options || {};
+  if (!CAB_TEXTES[cle]) return;
+  const sec = cabSection();
+  if (cabOuvert === cle) return;
+  if (!cabOuvert) cabDeclencheur = o.declencheur || document.activeElement;
+  cabOuvert = cle;
+  if (o.pousser) { history.pushState(history.state, '', location.pathname + location.search + CAB_HASHS[cle]); cabPousse = true; }
+  else if (location.hash !== CAB_HASHS[cle]) history.replaceState(history.state, '', location.pathname + location.search + CAB_HASHS[cle]);
+  sec.style.removeProperty('--cab-mx'); sec.style.removeProperty('--cab-my');
+  // Sur ordinateur, le cadre (et donc le panneau) est amené dans l'écran.
+  if (!ECRAN_MOBILE.matches) document.getElementById('cabCadre').scrollIntoView({ block: 'nearest', behavior: LP_MOUVEMENT_REDUIT.matches ? 'auto' : 'smooth' });
+  // Sur mobile, le cadre passe juste sous la barre fixe : l'objet zoomé
+  // reste visible au-dessus de la feuille du bas.
+  if (ECRAN_MOBILE.matches) window.scrollTo(0, Math.max(0, document.getElementById('cabCadre').getBoundingClientRect().top + window.scrollY - 76));
+  cabAppliquerZoom(cle);
+  sec.classList.add('cab-zoom', 'cab-ouvert');
+  if (ECRAN_MOBILE.matches) bloquerPage();
+  cabRemplir(cle);
+  setTimeout(() => {
+    if (cabOuvert !== cle) return;
+    document.getElementById('cabPanneauTitre').focus({ preventScroll: true });
+  }, LP_MOUVEMENT_REDUIT.matches ? 0 : 700);
+}
+
+// Dézoom et fermeture de l'écran. Le retour d'historique n'est pas fait
+// ici : voir fermerCabinet.
+function cabFermerUI() {
+  if (!cabOuvert) return;
+  const sec = cabSection();
+  cabOuvert = null;
+  cabPousse = false;
+  sec.classList.remove('cab-zoom', 'cab-ouvert');
+  document.getElementById('cabCamera').style.transform = '';
+  if (document.documentElement.classList.contains('ecran-bloque') && !ecransPile.length) debloquerPage();
+  const retour = cabDeclencheur;
+  cabDeclencheur = null;
+  if (retour && document.contains(retour)) retour.focus({ preventScroll: true });
+}
+
+function fermerCabinet() {
+  if (!cabOuvert) return;
+  if (cabPousse) { history.back(); return; }
+  history.replaceState(history.state, '', location.pathname + location.search);
+  cabFermerUI();
+}
+
+// Retour et avance du navigateur : le hash décide, le routage de la page
+// n'est pas rejoué (le chemin n'a pas changé).
+window.addEventListener('popstate', (e) => {
+  const cle = Object.keys(CAB_HASHS).find(c => CAB_HASHS[c] === location.hash);
+  if (cabOuvert && !cle) { e.stopImmediatePropagation(); cabFermerUI(); return; }
+  if (cle && document.getElementById('page-landing').classList.contains('active')) {
+    e.stopImmediatePropagation();
+    if (cabOuvert) { cabOuvert = null; }
+    ouvrirCabinet(cle);
+    cabPousse = true;
+  }
+}, true);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && cabOuvert) { e.preventDefault(); fermerCabinet(); }
+});
+
+function allerCabinet() {
+  cabSection().scrollIntoView({ behavior: LP_MOUVEMENT_REDUIT.matches ? 'auto' : 'smooth', block: 'start' });
+}
+
+// Introduction : gros plan sur la fenêtre, puis recul en 1,4 s. Une fois
+// par session, jamais en mouvement réduit.
+function cabIntroduction() {
+  let deja = false;
+  try { deja = sessionStorage.getItem('oc_cabinet_intro') === '1'; } catch (e) { deja = false; }
+  const sec = cabSection();
+  sec.classList.add('cab-vue');
+  if (deja || LP_MOUVEMENT_REDUIT.matches || cabOuvert) return;
+  try { sessionStorage.setItem('oc_cabinet_intro', '1'); } catch (e) { /* stockage indisponible */ }
+  const camera = document.getElementById('cabCamera');
+  camera.style.transition = 'none';
+  camera.style.transform = cabTransformPour(CAB_BOITES.fenetre, false).t;
+  camera.getBoundingClientRect();
+  camera.style.transition = '';
+  camera.classList.add('cab-intro');
+  requestAnimationFrame(() => { camera.style.transform = ''; });
+  setTimeout(() => camera.classList.remove('cab-intro'), 1500);
+}
+
+function preparerCabinet() {
+  if (cabPrete) return;
+  cabPrete = true;
+  const sec = cabSection();
+  sec.classList.add('cab-actif');
+  sec.querySelectorAll('.cab-point, .cab-barre-bouton').forEach(b => b.addEventListener('click', () => ouvrirCabinet(b.dataset.cle, { pousser: true, declencheur: b })));
+
+  // Un lien du panneau mène ailleurs : le panneau se ferme d'abord, sans
+  // retour d'historique qui défairait la navigation.
+  document.getElementById('cabPanneau').addEventListener('click', (e) => {
+    const a = e.target.closest('a[href]');
+    if (!a || !cabOuvert) return;
+    history.replaceState(history.state, '', location.pathname + location.search);
+    cabFermerUI();
+  }, true);
+
+  // Parallaxe à la souris, 12 px au plus sur le premier plan.
+  const cadre = document.getElementById('cabCadre');
+  if (!LP_MOUVEMENT_REDUIT.matches && window.matchMedia('(hover: hover)').matches) {
+    let image = 0;
+    cadre.addEventListener('pointermove', (e) => {
+      if (cabOuvert || image) return;
+      image = requestAnimationFrame(() => {
+        image = 0;
+        const r = cadre.getBoundingClientRect();
+        sec.style.setProperty('--cab-mx', (((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
+        sec.style.setProperty('--cab-my', (((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
+      });
+    });
+    cadre.addEventListener('pointerleave', () => { sec.style.removeProperty('--cab-mx'); sec.style.removeProperty('--cab-my'); });
+  }
+
+  if ('IntersectionObserver' in window) {
+    const obs = new IntersectionObserver((entrees) => {
+      if (!entrees.some(e => e.isIntersecting)) return;
+      obs.disconnect();
+      cabIntroduction();
+    }, { threshold: 0.35 });
+    obs.observe(cadre);
+  } else {
+    sec.classList.add('cab-vue');
+  }
+
+  // Lien direct : #cabinet-produits, #cabinet-fiche…
+  const cle = Object.keys(CAB_HASHS).find(c => CAB_HASHS[c] === CAB_HASH_DEPART);
+  if (cle) {
+    try { sessionStorage.setItem('oc_cabinet_intro', '1'); } catch (e) { /* stockage indisponible */ }
+    sec.classList.add('cab-vue');
+    sec.scrollIntoView({ block: 'start' });
+    setTimeout(() => ouvrirCabinet(cle), 150);
+  }
 }
 
 // ═══════════════════════════════════════════════
