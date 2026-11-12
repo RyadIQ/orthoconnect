@@ -10071,13 +10071,15 @@ function oublierFicheLocale() {
 // La base les écrit sans accents ni majuscules : la comparaison ignore
 // les deux, et la ponctuation. Un message inconnu s'affiche tel quel.
 const MESSAGES_BASE = [
-  [['connexion requise'], 'Connectez-vous pour continuer.'],
-  [['fiche introuvable', 'profil introuvable'], 'Cette fiche est introuvable.'],
+  // Les erreurs levées par demander_revendication, une par une.
+  [['connexion requise'], 'Votre session a expiré. Connectez-vous pour continuer.'],
+  [['fiche introuvable'], "Cette fiche est introuvable dans l'annuaire. Recherchez de nouveau votre nom."],
+  [['profil introuvable'], "Votre profil praticien n'est pas encore prêt. Rechargez la page dans quelques instants, puis réessayez."],
   [['fiche deja revendiquee', 'fiche deja attribuee a un autre compte'],
-    "Cette fiche est déjà revendiquée. Si c'est la vôtre, écrivez-nous à contact@orthoconnect.fr."],
-  [['trop de demandes en attente'], 'Vous avez déjà plusieurs demandes en attente.'],
-  [['ce compte est deja valide avec un autre rpps'], 'Ce compte est déjà rattaché à un autre praticien.'],
-  [['compte non valide'], "Votre compte n'a pas été validé."],
+    "Cette fiche est déjà revendiquée par un autre compte. Si c'est la vôtre, écrivez-nous à contact@orthoconnect.fr."],
+  [['trop de demandes en attente'], "Vous avez déjà plusieurs demandes en cours de vérification. Attendez notre réponse avant d'en faire une nouvelle."],
+  [['ce compte est deja valide avec un autre rpps'], "Votre compte est déjà rattaché à un autre praticien. Si cette fiche est bien la vôtre, écrivez-nous à contact@orthoconnect.fr."],
+  [['compte non valide'], "Votre compte n'a pas été validé, vous ne pouvez donc pas revendiquer de fiche. Si vous pensez qu'il s'agit d'une erreur, écrivez-nous à contact@orthoconnect.fr."],
   [['presentation trop longue'], 'La présentation dépasse 1200 caractères.'],
   [['horaires trop longs'], 'Les horaires sont trop longs. Raccourcissez-les.'],
   [['telephone trop long'], 'Le numéro de téléphone est trop long.'],
@@ -10109,24 +10111,60 @@ function messageBase(error) {
   return "L'action n'a pas pu aboutir. Réessayez dans quelques instants.";
 }
 
+// demander_revendication renvoie toujours 'en_attente', même quand la
+// demande existait déjà (on conflict do nothing) ou avait été refusée :
+// sa réponse ne dit rien de l'état réel. Seule une erreur compte ici,
+// l'état se lit ensuite dans revendications (revendiquerEtLire).
 async function envoyerRevendication(ficheId) {
   try {
-    const { data, error } = await sb.rpc('demander_revendication', { p_fiche: ficheId });
+    const { error } = await sb.rpc('demander_revendication', { p_fiche: ficheId });
     if (error) {
       console.error('demander_revendication :', error);
-      return { ok: false, message: messageBase(error) };
+      const refuse = normaliserMessageBase(error.message).includes('compte non valide');
+      return { ok: false, message: messageBase(error), compteRefuse: refuse, titre: refuse ? 'Compte non validé' : undefined };
     }
-    if (data !== 'en_attente') {
-      console.error('demander_revendication, retour inattendu :', data);
-      return { ok: false, message: "La demande n'a pas pu être confirmée. Réessayez dans quelques instants." };
-    }
-    maRevendicationEnCours = true;
-    etatRevendication = 'en_attente';
     return { ok: true };
   } catch (e) {
     console.error('demander_revendication :', e);
     return { ok: false, message: "La demande n'a pas pu être envoyée. Vérifiez votre connexion et réessayez." };
   }
+}
+
+// Ce que l'écran d'issue dit d'une fiche, d'après la ligne lue en base.
+// deja : la demande existait avant ce clic.
+function issueDeLaFiche(lignes, fiche, deja) {
+  const ligne = (lignes || []).filter(l => !('fiche_id' in l) || String(l.fiche_id) === String(fiche));
+  const etat = etatDesRevendications(ligne);
+  if (deja && etat === 'en_attente') return { ok: true, titre: 'Demande déjà en cours',
+    message: "Vous avez déjà demandé cette fiche. Nous vérifions votre identité par téléphone sous 48 h et nous vous écrivons dès que c'est validé." };
+  if (etat === 'refusee') return { ok: false, titre: 'Demande déjà refusée',
+    message: "Votre demande pour cette fiche a déjà été examinée et n'a pas abouti. Écrivez-nous à contact@orthoconnect.fr pour que nous regardions votre situation." };
+  if (etat === 'traitee') return { ok: false, titre: 'Demande déjà traitée',
+    message: "Votre demande pour cette fiche a déjà été traitée. Écrivez-nous à contact@orthoconnect.fr pour en savoir plus." };
+  return { ok: true };
+}
+
+// Envoie la demande, puis relit la base pour afficher l'état réel. Un
+// compte refusé (« compte non valide ») bascule sur sa page de refus.
+async function revendiquerEtLire(userId, fiche) {
+  // Une demande existe déjà pour cette fiche : un nouvel appel ne la
+  // changerait pas, même refusée. On affiche son état sans rien envoyer.
+  const avant = await lireRevendications(userId);
+  if (avant && avant.some(l => 'fiche_id' in l && String(l.fiche_id) === String(fiche))) {
+    etatRevendication = etatDesRevendications(avant);
+    maRevendicationEnCours = etatRevendication === 'en_attente';
+    return { issue: issueDeLaFiche(avant, fiche, true), lignes: avant };
+  }
+  const r = await envoyerRevendication(String(fiche));
+  if (r.compteRefuse && compteNonValide) { compteNonValide = 'refuse'; renderCompteNonValide(); }
+  const lignes = await lireRevendications(userId);
+  if (lignes !== null) {
+    etatRevendication = etatDesRevendications(lignes);
+    maRevendicationEnCours = etatRevendication === 'en_attente';
+  }
+  if (!r.ok) return { issue: r, lignes };
+  // Lecture impossible : l'appel a réussi, la demande est au moins reçue.
+  return { issue: lignes === null ? { ok: true } : issueDeLaFiche(lignes, fiche), lignes };
 }
 
 // Les demandes de fiche déjà enregistrées pour ce compte. fiche_id et
@@ -10186,30 +10224,28 @@ async function suivreRevendication(session, profil) {
       : choisie ? lignes.some(l => 'fiche_id' in l && String(l.fiche_id) === String(fiche))
       : lignes.length > 0;
     if (dejaEnBase) {
+      // Rien à envoyer : un nouvel appel ne changerait pas une demande
+      // existante, même refusée. L'écran reflète le statut lu.
       oublierFicheLocale();
-      if (choisie) {
-        const enCours = etatDesRevendications(lignes) === 'en_attente';
-        afficherIssueRevendication(enCours ? { ok: true }
-          : { ok: false, message: "Vous avez déjà demandé cette fiche. Écrivez-nous à contact@orthoconnect.fr pour en savoir plus." });
-      }
+      if (choisie) afficherIssueRevendication(issueDeLaFiche(lignes, fiche, true));
     } else if (!dejaTentee && (dejaEnBase === false || choisie)) {
       // Lecture impossible (null) : la reprise automatique attend la
       // prochaine session ; un choix explicite part quand même.
       revendicationsTentees.add(cle);
       try { sessionStorage.setItem(cle, '1'); } catch (e) { /* stockage indisponible */ }
-      const r = await envoyerRevendication(String(fiche));
-      if (r.ok) {
-        oublierFicheLocale();
-        lignes = (lignes || []).concat([{ fiche_id: String(fiche), statut: 'en_attente' }]);
-      }
+      const resultat = await revendiquerEtLire(user.id, fiche);
+      if (resultat.lignes !== null) lignes = resultat.lignes;
+      if (resultat.issue.ok) oublierFicheLocale();
       // La reprise automatique se lit sur la page d'attente, seul un
       // échec s'affiche par-dessus.
-      if (choisie || !r.ok) afficherIssueRevendication(r);
+      if (choisie || !resultat.issue.ok) afficherIssueRevendication(resultat.issue);
     }
   }
 
-  etatRevendication = etatDesRevendications(lignes);
-  maRevendicationEnCours = etatRevendication === 'en_attente';
+  if (lignes !== null) {
+    etatRevendication = etatDesRevendications(lignes);
+    maRevendicationEnCours = etatRevendication === 'en_attente';
+  }
 }
 
 async function cliquerMaFiche(btn) {
@@ -10218,10 +10254,10 @@ async function cliquerMaFiche(btn) {
 
   if (sessionUtilisateur) {
     btn.disabled = true;
-    const r = await envoyerRevendication(String(l.id));
+    const { issue } = await revendiquerEtLire(sessionUtilisateur.id, l.id);
     btn.disabled = false;
-    if (r.ok && compteNonValide) renderCompteNonValide();
-    afficherIssueRevendication(r);
+    if (compteNonValide) renderCompteNonValide();
+    afficherIssueRevendication(issue);
     return;
   }
 
@@ -10235,8 +10271,8 @@ async function cliquerMaFiche(btn) {
 
 function afficherIssueRevendication(r) {
   montrerPanneauAuth('authRevendicationOk');
-  document.getElementById('revIssueTitre').textContent = r.ok ? 'Merci' : 'Demande non envoyée';
-  document.getElementById('revIssueTexte').textContent = r.ok ? MESSAGE_REVENDICATION : r.message;
+  document.getElementById('revIssueTitre').textContent = r.titre || (r.ok ? 'Merci' : 'Demande non envoyée');
+  document.getElementById('revIssueTexte').textContent = r.message || MESSAGE_REVENDICATION;
 }
 
 function fermerIssueRevendication() {
