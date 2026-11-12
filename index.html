@@ -2435,20 +2435,17 @@
   .cab-lueur { position: absolute; left: 51%; top: 24%; width: 11%; height: 9%; border-radius: 50%;
     background: radial-gradient(closest-side, rgba(255,246,205,0.95), rgba(255,246,205,0)); animation: cabLueur 5s ease-in-out infinite; }
   @keyframes cabLueur { 0%, 100% { opacity: 0.75; } 40% { opacity: 1; } 55% { opacity: 0.85; } 70% { opacity: 1; } }
-  .cab-onde { position: absolute; width: 1.1%; aspect-ratio: 1; margin: -0.55% 0 0 -0.55%; border-radius: 50%; border: 2px solid var(--lp-turquoise);
+  .cab-onde { position: absolute; width: 0.62%; aspect-ratio: 1; margin: -0.31% 0 0 -0.31%; border-radius: 50%; border: 1.5px solid var(--lp-turquoise);
     opacity: 0; animation: cabOnde 2.8s ease-out infinite; animation-delay: var(--d, 0s); }
   /* Emplacements partenaires de la scène : libellé masqué tant qu'aucune marque n'est active (voir le commentaire data-slot). */
   .cab-slot .slot-partenaire { display: none; }
   .cab-slot.slot-actif .slot-partenaire { display: inline; }
-  @keyframes cabOnde { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(2.6); opacity: 0; } }
-  /* Mobile : une onde par ville au plus, sur 5 villes espacées (Paris, Lyon, Bordeaux, Marseille,
+  /* Toutes largeurs : une onde par ville au plus, sur 5 villes espacées (Paris, Lyon, Bordeaux, Marseille,
      Strasbourg), rayon proportionnel à la carte (diamètre maximal 21 unités de scène, la carte en fait
      168 et les villes gardées sont à 36 unités au moins l'une de l'autre) : aucune onde ne se chevauche. */
-  @media (max-width: 960px) {
-    .cab-onde { width: 0.62%; margin: -0.31% 0 0 -0.31%; border-width: 1px; animation-name: cabOndeMobile; }
-    .cab-onde[data-ville="Toulouse"], .cab-onde[data-ville="Lille"], .cab-onde[data-ville="Nantes"] { display: none; }
-  }
-  @keyframes cabOndeMobile { from { transform: scale(0.5); opacity: 0.9; } to { transform: scale(2.1); opacity: 0; } }
+  .cab-onde[data-ville="Toulouse"], .cab-onde[data-ville="Lille"], .cab-onde[data-ville="Nantes"] { display: none; }
+  @media (max-width: 960px) { .cab-onde { border-width: 1px; } }
+  @keyframes cabOnde { from { transform: scale(0.5); opacity: 0.9; } to { transform: scale(2.1); opacity: 0; } }
   .cab-page-calendrier { position: absolute; left: 40.75%; top: 13.8%; width: 12.5%; height: 23.8%; border-radius: 12px; background: #fff;
     box-shadow: 0 4px 10px rgba(91,58,26,0.15); transform-origin: 50% 0; opacity: 0; }
   .cab-page-calendrier::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 18%; border-radius: 12px 12px 0 0; background: var(--lp-corail); }
@@ -11492,6 +11489,10 @@ const CAB_BOITES = { fenetre: [50, 90, 320, 400], emploi: [350, 160, 270, 270], 
 // du bureau avec son cadre, et le plateau avec la caméra et la boîte. Le zoom
 // est alors calculé sur la hauteur réelle de la feuille (voir cabTransformPour).
 const CAB_BOITES_MOBILE = { annuaire: [1176, 356, 260, 170], produits: [322, 418, 346, 110] };
+// Sur ordinateur, Produits cadre aussi le plateau (caméra et boîte d'aligneurs) :
+// la boîte fauteuil + plateau, trop large pour la zone libre à gauche du panneau,
+// faisait sortir le plateau du cadre à gauche.
+const CAB_BOITES_ORDI = { produits: [322, 418, 346, 110] };
 const CAB_TEXTES = {
   produits: ['Produits', 'Aligneurs, caméras intra-orales, brackets : les fiches techniques, comparables d\'un système à l\'autre.', '/produits', 'produits'],
   formations: ['Formations', 'Les formations publiées, avec leur organisme, leur format et leur prochaine session.', '/formations', 'formations'],
@@ -11684,7 +11685,8 @@ async function cabRemplir(cle) {
 function cabAppliquerZoom(cle) {
   const sec = cabSection(), camera = document.getElementById('cabCamera');
   const serre = ECRAN_MOBILE.matches && CAB_BOITES_MOBILE[cle];
-  const z = cabTransformPour(serre || CAB_BOITES[cle], true, !!serre);
+  const ordi = !ECRAN_MOBILE.matches && CAB_BOITES_ORDI[cle];
+  const z = cabTransformPour(serre || ordi || CAB_BOITES[cle], true, !!serre);
   sec.style.setProperty('--fx', z.fx + '%');
   sec.style.setProperty('--fy', z.fy + '%');
   camera.style.transform = z.t;
