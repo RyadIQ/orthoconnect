@@ -2907,16 +2907,22 @@
           <div class="auth-hint">Pour vous connecter et recevoir le lien qui confirme votre adresse.</div>
         </div>
 
+        <div class="auth-field">
+          <label for="suTelephone">Téléphone</label>
+          <input type="tel" id="suTelephone" placeholder="06 12 34 56 78" autocomplete="tel" inputmode="tel">
+          <div class="auth-hint">Pour vous joindre si une vérification est nécessaire. Il n'est jamais affiché publiquement.</div>
+        </div>
+
         <div class="auth-field" id="fieldRpps">
           <label for="suRpps">Numéro RPPS</label>
-          <input type="text" id="suRpps" placeholder="10001234567" maxlength="11" inputmode="numeric" autocomplete="off">
+          <input type="text" id="suRpps" placeholder="10001234567" maxlength="14" inputmode="numeric" autocomplete="off">
           <div class="auth-hint">11 chiffres, inscrits sur votre carte CPS. Il prouve que vous êtes orthodontiste.</div>
         </div>
 
         <div class="auth-field" id="fieldFac" style="display:none">
           <label for="suFac">Faculté de rattachement</label>
           <input type="text" id="suFac" placeholder="Université de Lyon 1">
-          <div class="auth-hint">Pour vérifier votre statut d'interne. Votre accès est confirmé sous 48 h en général.</div>
+          <div class="auth-hint">Pour vérifier votre statut d'interne. Votre accès est confirmé sous 24 h en général.</div>
         </div>
 
         <div class="auth-field">
@@ -2957,6 +2963,11 @@
           <label for="revEmail">Adresse e-mail</label>
           <input type="email" id="revEmail" placeholder="marie.dupont@cabinet.fr" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false">
           <div class="auth-hint">Pour vous connecter et suivre votre demande.</div>
+        </div>
+        <div class="auth-field">
+          <label for="revTelephone">Téléphone</label>
+          <input type="tel" id="revTelephone" placeholder="06 12 34 56 78" autocomplete="tel" inputmode="tel">
+          <div class="auth-hint">Pour vérifier que cette fiche est bien la vôtre. Il n'est jamais affiché publiquement.</div>
         </div>
         <div class="auth-field">
           <label for="revPassword">Mot de passe</label>
@@ -6502,6 +6513,19 @@ function erreurAuth(error) {
   return { cle: 'inconnu', message: "Une erreur est survenue. Réessayez dans quelques instants." };
 }
 
+// Numéro français : 01 à 05, 06, 07 ou 09, avec ou sans +33 (ou 0033),
+// espaces, points ou tirets. Rendu au format « 06 12 34 56 78 », ou null.
+function normaliserTelephone(saisie) {
+  let t = String(saisie || '').replace(/[\s.\-()]/g, '');
+  if (/^(\+33|0033)/.test(t)) t = '0' + t.replace(/^(\+33|0033)0?/, '');
+  if (!/^0[1-79]\d{8}$/.test(t)) return null;
+  return t.replace(/(\d{2})(?=\d)/g, '$1 ');
+}
+function erreurTelephone(saisie) {
+  if (!String(saisie || '').trim()) return "Indiquez votre numéro de téléphone.";
+  return "Ce numéro de téléphone n'est pas valide. Indiquez un numéro français, par exemple 06 12 34 56 78 ou +33 6 12 34 56 78.";
+}
+
 function emailValide(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
 
 // Dernière adresse saisie, pour préremplir les écrans « lien expiré » et
@@ -6751,7 +6775,10 @@ function setStatut(s, btn) {
 async function doSignup() {
   const nom = document.getElementById('suPrenom').value.trim();
   const email = document.getElementById('suEmail').value.trim();
-  const rpps = document.getElementById('suRpps').value.trim();
+  // Espaces tolérés dans le RPPS tel qu'il est imprimé sur la carte CPS.
+  const rpps = document.getElementById('suRpps').value.replace(/\s/g, '');
+  const telSaisi = document.getElementById('suTelephone').value;
+  const telephone = normaliserTelephone(telSaisi);
   const fac = document.getElementById('suFac').value.trim();
   const ville = document.getElementById('suVille').value.trim();
   const mdp = document.getElementById('suPassword').value;
@@ -6759,6 +6786,7 @@ async function doSignup() {
 
   if (!nom) return showError('signupError', "Indiquez votre prénom et nom.");
   if (!emailValide(email)) return showError('signupError', "Indiquez une adresse e-mail valide.");
+  if (!telephone) return showError('signupError', erreurTelephone(telSaisi));
   if (!estInterne && !/^\d{11}$/.test(rpps)) return showError('signupError', "Le numéro RPPS doit contenir exactement 11 chiffres.");
   if (estInterne && !fac) return showError('signupError', "Indiquez votre faculté de rattachement.");
   if (!ville) return showError('signupError', estInterne ? "Indiquez votre ville d'internat." : "Indiquez votre ville d'exercice.");
@@ -6786,6 +6814,7 @@ async function doSignup() {
         data: {
           nom,
           ville,
+          telephone,
           statut: statutChoisi,
           rpps: estInterne ? null : rpps,
           faculte: estInterne ? fac : null
@@ -6948,7 +6977,7 @@ function renderCompteNonValide() {
     revendication_en_attente: ['Votre demande est en cours de vérification',
       "Vous avez demandé à reprendre une fiche de l'annuaire. Avant d'ouvrir votre espace, nous vérifions qu'elle est bien la vôtre.",
       ['Votre demande est enregistrée.',
-       "Nous vérifions votre identité par téléphone, en général sous 48 h.",
+       "Nous vérifions votre identité en vous contactant au numéro indiqué, en général sous 24 h.",
        "Vous recevez un e-mail dès que c'est validé : votre espace praticien et votre fiche vous sont alors ouverts."]],
     revendication_refusee: ["Votre demande de fiche n'a pas abouti",
       "Nous n'avons pas pu confirmer que cette fiche est la vôtre. Votre compte reste en cours de vérification. Écrivez-nous pour que nous regardions votre situation ensemble.",
@@ -6959,7 +6988,7 @@ function renderCompteNonValide() {
     en_attente: ['Votre compte est en cours de vérification',
       "Votre inscription est bien enregistrée. Avant d'ouvrir l'accès complet, nous vérifions votre identité professionnelle.",
       ['Votre inscription est enregistrée.',
-       "Nous vérifions votre numéro RPPS, ou votre faculté si vous êtes interne, en général sous 48 h.",
+       "Nous vérifions votre numéro RPPS, ou votre faculté si vous êtes interne, en général sous 24 h.",
        "Vous recevez un e-mail dès que votre accès est ouvert."]],
     refuse: ["Votre compte n'a pas été validé",
       "Nous n'avons pas pu vérifier votre identité professionnelle : l'espace praticien ne vous est donc pas ouvert. Si vous pensez qu'il s'agit d'une erreur, écrivez-nous en indiquant votre numéro RPPS, nous regarderons votre situation.",
@@ -10108,7 +10137,7 @@ async function basculerInteret(btn) {
 // jamais. La fiche choisie voyage dans les métadonnées du compte, pour
 // survivre à la confirmation de l'adresse e-mail, avec un repli local.
 // ═══════════════════════════════════════════════
-const MESSAGE_REVENDICATION = "Demande enregistrée. Nous vérifions votre identité par téléphone sous 48 h et nous vous écrivons dès que c'est validé.";
+const MESSAGE_REVENDICATION = "Demande enregistrée. Nous vérifions votre identité en vous contactant au numéro indiqué, en général sous 24 h, et nous vous écrivons dès que c'est validé.";
 const CLE_FICHE_LOCALE = 'oc_fiche_a_revendiquer';
 const MAX_PRESENTATION = 1200;
 const MAX_TECHNIQUES = 15;
@@ -10193,7 +10222,7 @@ function issueDeLaFiche(lignes, fiche, deja) {
   const ligne = (lignes || []).filter(l => !('fiche_id' in l) || String(l.fiche_id) === String(fiche));
   const etat = etatDesRevendications(ligne);
   if (deja && etat === 'en_attente') return { ok: true, titre: 'Demande déjà en cours',
-    message: "Vous avez déjà demandé cette fiche. Nous vérifions votre identité par téléphone sous 48 h et nous vous écrivons dès que c'est validé." };
+    message: "Vous avez déjà demandé cette fiche. Nous vérifions votre identité en vous contactant au numéro indiqué, en général sous 24 h, et nous vous écrivons dès que c'est validé." };
   if (etat === 'refusee') return { ok: false, titre: 'Demande déjà refusée',
     message: "Votre demande pour cette fiche a déjà été examinée et n'a pas abouti. Écrivez-nous à contact@orthoconnect.fr pour que nous regardions votre situation." };
   if (etat === 'traitee') return { ok: false, titre: 'Demande déjà traitée',
@@ -10424,6 +10453,9 @@ async function doSignupRevendication() {
   const mdp = document.getElementById('revPassword').value;
 
   if (!emailValide(email)) return showError('revError', "Indiquez une adresse e-mail valide.");
+  const telSaisi = document.getElementById('revTelephone').value;
+  const telephone = normaliserTelephone(telSaisi);
+  if (!telephone) return showError('revError', erreurTelephone(telSaisi));
   if (!mdp || mdp.length < 8) return showError('revError', "Choisissez un mot de passe d'au moins 8 caractères.");
 
   const btn = document.getElementById('revSignupBtn');
@@ -10448,6 +10480,7 @@ async function doSignupRevendication() {
         data: {
           nom: prenomNomFiche(l),
           ville: l.ville || null,
+          telephone,
           statut: 'liberal',
           rpps: null,
           faculte: null,
@@ -11644,6 +11677,13 @@ let adminComptes = [];
 let adminFichesRpps = new Map();
 let erreurFichesRpps = null;
 
+// Lien tel: d'un numéro saisi par le praticien (praticiens.telephone),
+// distinct du téléphone de la fiche de l'annuaire.
+function lienTelephone(tel) {
+  if (!tel) return '<span style="color:var(--text-light)">non renseigné</span>';
+  return `<a href="tel:${esc(String(tel).replace(/[^\d+]/g, ''))}">${esc(tel)}</a>`;
+}
+
 function rppsBienForme(rpps) {
   return /^\d{11}$/.test(rpps || '');
 }
@@ -11667,7 +11707,7 @@ async function lireFichesRpps(comptes) {
 
 async function chargerComptesAValider() {
   const r = await sb.from('praticiens')
-    .select('id, nom, email, statut, ville, rpps, created_at')
+    .select('id, nom, email, telephone, statut, ville, rpps, created_at')
     .eq('validation', 'en_attente')
     .order('created_at');
 
@@ -11745,6 +11785,7 @@ function renderAdminComptes() {
               <td>
                 <div class="admin-nom">${esc(c.nom || 'Non renseigné')}</div>
                 <div style="font-size:12px; color:var(--text-light)">${esc(c.email || '')}</div>
+                <div style="font-size:12px">Tél. saisi : ${lienTelephone(c.telephone)}</div>
               </td>
               <td>${esc(libelleStatut(c.statut))}</td>
               <td>${esc(c.ville || 'Non renseignée')}</td>
@@ -11840,7 +11881,7 @@ async function chargerRevendicationsAdmin() {
   const enAttente = new Set(adminComptes.map(c => String(c.id)));
   const autres = [...new Set(adminRevendications.map(d => String(d.praticien_id)))].filter(id => !enAttente.has(id));
   if (autres.length) {
-    const c = await sb.from('praticiens').select('id, nom, email, validation').in('id', autres);
+    const c = await sb.from('praticiens').select('id, nom, email, telephone, validation').in('id', autres);
     if (c.error) erreurRevendications = 'Comptes des demandes indisponibles : ' + c.error.message;
     else (c.data || []).forEach(l => adminComptesRevendication.set(String(l.id), l));
   }
@@ -11866,6 +11907,7 @@ function renderFicheRevendication(d) {
   const plusieurs = rpps && adminRevendications.filter(x => rppsDeRevendication(x) === rpps).length > 1;
   const adresse = f ? [f.adresse, [f.code_postal, f.ville].filter(Boolean).join(' ')].filter(Boolean).join(', ') : '';
   const tel = f && f.telephone ? String(f.telephone) : '';
+  const compte = compteDeRevendication(d);
 
   return `<div class="rev-fiche">
       ${plusieurs ? '<div class="rev-alerte">Plusieurs demandes pour cette fiche</div>' : ''}
@@ -11875,10 +11917,11 @@ function renderFicheRevendication(d) {
         ${f.specialite ? `<div>${esc(f.specialite)}</div>` : ''}
         ${f.cabinet ? `<div>${esc(f.cabinet)}</div>` : ''}
         ${adresse ? `<div>${esc(adresse)}</div>` : ''}
-        <div>Téléphone : ${tel
+        <div>Téléphone de la fiche (annuaire) : ${tel
           ? `<a href="tel:${esc(tel.replace(/[^\d+]/g, ''))}">${esc(tel)}</a> · <span class="rev-appel">Appeler ce numéro pour vérifier</span>`
           : 'non renseigné sur la fiche'}</div>`
         : '<div class="rev-alerte">Fiche introuvable dans l\'annuaire</div>'}
+      <div>Téléphone saisi par le praticien : ${lienTelephone(compte && compte.telephone)}</div>
       <div>RPPS : ${rpps ? `<span style="font-variant-numeric:tabular-nums">${esc(rpps)}</span>` : 'non renseigné'}</div>
       <div><a href="${ANNUAIRE_SANTE_URL}" target="_blank" rel="noopener noreferrer">Annuaire Santé</a></div>
       <div class="rev-actions">
