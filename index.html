@@ -1015,6 +1015,13 @@
     .auth-overlay { padding: 12px; }
     .auth-box { padding: 28px 18px 22px; }
   }
+  /* État de la demande de fiche, sur /mon-espace : en cours, refusée, ou échec avec « Réessayer ». */
+  .rev-etat { border-radius: var(--radius-sm); padding: 12px 16px; margin: 16px 0; font-size: 14px; line-height: 1.5;
+    display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; max-width: 760px;
+    background: #FFFFFF; border: 1px solid var(--grey-border); color: var(--text-main); }
+  .rev-etat[hidden] { display: none; }
+  .rev-etat.echec { background: #FEF2F2; border-color: #FECACA; color: #991B1B; }
+  .rev-etat .btn { min-height: 44px; }
   /* Page d'attente de /mon-espace. */
   .verif-texte { font-size: 15px; line-height: 1.6; margin-bottom: 18px; max-width: 640px; }
   .verif-suite { background: var(--white); border: 1px solid var(--grey-border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; max-width: 640px; }
@@ -4208,6 +4215,7 @@
   <section class="dash-body">
     <div class="container">
       <p id="verifTexte" class="verif-texte"></p>
+      <div class="rev-etat" id="verifRevendication" role="status" hidden></div>
       <div id="verifSuite" class="verif-suite" style="display:none">
         <div class="verif-suite-titre">Ce qui se passe ensuite</div>
         <ol class="verif-etapes" id="verifEtapes"></ol>
@@ -4232,6 +4240,7 @@
     <div class="container">
       <div class="dash-hello" id="dashHello">Bonjour</div>
       <div class="dash-sub" id="dashSub">Votre espace praticien OrthoConnect</div>
+      <div class="rev-etat" id="dashRevendication" role="status" hidden></div>
       <div class="dash-profile-alert" id="dashAlert">
         <span>La partie « Mon cabinet » de votre fiche n'est pas encore complète.</span>
         <button class="btn btn-turquoise btn-sm" onclick="showDashPanel('cabinet')">Compléter ma fiche</button>
@@ -6121,9 +6130,11 @@ let jetonTotauxInterets = 0;
 let sessionUtilisateur = null;
 let maRevendicationEnCours = false;
 let etatRevendication = null;   // dernière demande de fiche du compte : en_attente, refusee, traitee ou null
+let mesRevendications = [];     // les lignes de revendications du compte, lues en base
+let echecRevendication = null;  // { message } : la dernière tentative de demande de fiche a échoué
+let erreurProfil = null;        // pourquoi le profil praticien n'a pas pu être lu ou créé
 let ficheVoulue = null;        // fiche choisie depuis l'écran « C'est ma fiche »
 let ficheInscription = null;   // la ligne de recherche correspondante
-const revendicationsTentees = new Set();
 let annuaireResultatsParId = new Map();
 let mesFiches = [];
 let jobsDB = [];
@@ -6889,11 +6900,15 @@ function requireAuth(panel) {
 async function ensureProfile(user) {
   // maybeSingle et non single : zéro ligne est un cas normal ici,
   // single le traiterait comme une erreur.
+  erreurProfil = null;
   const { data, error } = await sb.from('praticiens')
     .select('*').eq('id', user.id).maybeSingle();
 
   if (error) {
     console.error('Lecture du profil praticien:', error);
+    erreurProfil = /fetch|network|load failed/i.test(String(error.message || ''))
+      ? "La connexion a été interrompue pendant la lecture de votre profil."
+      : "Votre profil praticien n'a pas pu être lu.";
     return null;
   }
   if (data) return data;
@@ -6911,6 +6926,7 @@ async function ensureProfile(user) {
 
   if (insErr) {
     console.error('Création du profil praticien:', insErr);
+    erreurProfil = "Votre profil praticien n'a pas encore été créé.";
     return null;
   }
   return cree;
@@ -6948,8 +6964,8 @@ function renderCompteNonValide() {
     refuse: ["Votre compte n'a pas été validé",
       "Nous n'avons pas pu vérifier votre identité professionnelle : l'espace praticien ne vous est donc pas ouvert. Si vous pensez qu'il s'agit d'une erreur, écrivez-nous en indiquant votre numéro RPPS, nous regarderons votre situation.",
       []],
-    indisponible: ['Vérification impossible pour le moment',
-      "Le statut de votre compte n'a pas pu être lu. Rechargez la page dans quelques instants.",
+    indisponible: ['Votre espace n\'a pas pu être chargé',
+      (erreurProfil || "Votre profil praticien n'a pas pu être lu.") + " Réessayez dans quelques instants. Si le problème continue, écrivez-nous à contact@orthoconnect.fr en indiquant votre adresse de connexion.",
       []]
   };
   const cle = compteNonValide === 'en_attente' && etatRevendication ? 'revendication_' + etatRevendication : compteNonValide;
@@ -6959,6 +6975,20 @@ function renderCompteNonValide() {
   const liste = document.getElementById('verifEtapes');
   liste.replaceChildren(...etapes.map(t => { const li = document.createElement('li'); li.textContent = t; return li; }));
   document.getElementById('verifSuite').style.display = etapes.length ? 'block' : 'none';
+  // Profil indisponible : un vrai « Réessayer », qui relit tout.
+  const zone = document.getElementById('verifRevendication');
+  if (cle === 'indisponible' && !echecRevendication) {
+    zone.replaceChildren();
+    zone.classList.add('echec');
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn btn-turquoise btn-sm'; b.textContent = 'Réessayer';
+    b.addEventListener('click', async () => { b.disabled = true; b.textContent = 'Chargement...'; await refreshAuthUI(); });
+    const s = document.createElement('span'); s.textContent = (erreurProfil || "Votre profil praticien n'a pas pu être lu.");
+    zone.append(s, b);
+    zone.hidden = false;
+  } else {
+    renderEtatRevendication();
+  }
 }
 
 // Un seul rafraîchissement à la fois : init et onAuthStateChange peuvent
@@ -6987,8 +7017,10 @@ async function rafraichirAuthUI() {
   compteNonValide = session ? etatValidation(profil) : null;
   currentUser = session && !compteNonValide ? session.user : null;
   sessionUtilisateur = session ? session.user : null;
-  // Après ensureProfile, jamais avant : la demande suppose le profil créé.
-  await suivreRevendication(session, profil);
+  // Après ensureProfile : la fonction lève « profil introuvable » sans
+  // ligne praticiens. Elle est tentée même si le profil n'a pas pu être
+  // lu, pour afficher sa vraie raison.
+  await suivreRevendication(session);
   rechercheRemplie = false;
 
   // La liste est la même dans les deux cas — elle ne transporte aucun
@@ -7088,6 +7120,7 @@ async function rafraichirAuthUI() {
   // L'accueil : recherche et inscription pour un visiteur, « Aller à mon
   // espace » dès qu'une session est ouverte.
   document.body.classList.toggle('oc-session', !!sessionUtilisateur);
+  if (!compteNonValide) renderEtatRevendication();
 }
 
 // ═══════════════════════════════════════════════
@@ -7127,6 +7160,30 @@ function computeCompletion(p) {
   return Math.round((filled / (fields.length + 1)) * 100);
 }
 
+// « BARON » ou « le gall » devient « Baron », « Le Gall ». Les particules
+// restent en minuscules hors du premier mot (« Martin de la Tour »).
+function nomPropre(t) {
+  return String(t || '').trim().toLocaleLowerCase('fr-FR').split(/\s+/).filter(Boolean)
+    .map((mot, i) => (i > 0 && ['de', 'du', 'des', 'la', 'le', "d'"].includes(mot)) ? mot
+      : mot.replace(/(^|[-'])(\p{L})/gu, (m, sep, l) => sep + l.toLocaleUpperCase('fr-FR')))
+    .join(' ');
+}
+
+// Le nom de famille pour le bonjour : celui de la fiche de l'annuaire
+// rattachée quand il y en a une (nom et prénom y sont séparés). Sinon,
+// depuis le nom saisi : les mots en capitales s'il y en a parmi
+// d'autres (« Pascal BARON »), à défaut tout sauf le premier mot
+// (« PASCAL BARON », « Marie Dupont »).
+function nomDeFamille(p) {
+  const f = (mesFiches || []).find(x => x && x.nom);
+  if (f) return nomPropre(f.nom);
+  const mots = String((p && p.nom) || '').trim().split(/\s+/).filter(Boolean);
+  if (!mots.length) return '';
+  const capitales = mots.filter(m => /\p{Lu}/u.test(m) && m === m.toLocaleUpperCase('fr-FR'));
+  if (capitales.length && capitales.length < mots.length) return nomPropre(capitales.join(' '));
+  return nomPropre(mots.length > 1 ? mots.slice(1).join(' ') : mots[0]);
+}
+
 function renderDashboard() {
   // Profil introuvable malgré ensureProfile : on l'explique au lieu
   // d'afficher un tableau de bord vide sans raison apparente.
@@ -7139,9 +7196,9 @@ function renderDashboard() {
   }
 
   const p = currentProfile;
-  const prenom = (p.nom || '').split(' ').filter(Boolean)[0] || '';
+  const nom = nomDeFamille(p);
 
-  document.getElementById('dashHello').textContent = prenom ? 'Bonjour Dr. ' + prenom : 'Bonjour';
+  document.getElementById('dashHello').textContent = nom ? 'Bonjour Dr ' + nom : 'Bonjour';
   document.getElementById('dashSub').textContent =
     (p.ville ? p.ville + ' · ' : '') + 'Espace praticien OrthoConnect';
 
@@ -10186,66 +10243,142 @@ function etatDesRevendications(lignes) {
   return lignes.some(l => /refus/i.test(String(l.statut || ''))) ? 'refusee' : 'traitee';
 }
 
-// Appelée par refreshAuthUI une fois le profil lu ou créé. La demande
-// part une seule fois : la base dit d'abord si elle existe déjà (seule
-// source fiable d'un onglet ou d'un appareil à l'autre), la mémoire et
-// sessionStorage évitent un second envoi pendant que la première réponse
-// est en route.
-async function suivreRevendication(session, profil) {
+// La fiche choisie à l'inscription (« C'est ma fiche ») voyage dans
+// user_metadata.fiche_id ; repli local pour un compte de la même adresse.
+function ficheDesMetadonnees(user) {
+  const meta = (user && user.user_metadata) || {};
+  if (meta.fiche_id) return String(meta.fiche_id);
+  const locale = lireFicheLocale();
+  return locale && locale.fiche_id && locale.email
+    && String(locale.email).toLowerCase() === String((user && user.email) || '').toLowerCase() ? String(locale.fiche_id) : null;
+}
+
+function appliquerRevendications(lignes) {
+  mesRevendications = lignes || [];
+  etatRevendication = etatDesRevendications(mesRevendications);
+  maRevendicationEnCours = etatRevendication === 'en_attente';
+}
+
+// Relance de la demande de fiche, à chaque ouverture de session et à
+// chaque arrivée sur /mon-espace. Le seul garde-fou est la base : si
+// revendications contient déjà une ligne pour ce compte, rien n'est
+// envoyé. Un compte validé est concerné comme un compte en attente
+// (validé directement dans l'admin, il n'a jamais eu de demande) ; un
+// compte refusé ne l'est pas, la fonction le rejetterait.
+// Deux déclenchements simultanés partagent la même promesse.
+let suiviRevendicationEnCours = null;
+let dernierSuiviRevendication = 0;
+async function relancerRevendicationAuto(user) {
+  if (!user) return;
+  if (suiviRevendicationEnCours) return suiviRevendicationEnCours;
+  // Un échec tout récent n'est pas rejoué par les rafraîchissements qui
+  // suivent la connexion (SIGNED_IN, arrivée sur /mon-espace) : seul
+  // « Réessayer », qui efface l'échec, relance aussitôt.
+  if (echecRevendication && Date.now() - dernierSuiviRevendication < 15000) return;
+  suiviRevendicationEnCours = (async () => {
+    try {
+      dernierSuiviRevendication = Date.now();
+      const fiche = ficheDesMetadonnees(user);
+      const lignes = await lireRevendications(user.id);
+      if (lignes === null) {
+        echecRevendication = fiche ? { message: "Votre demande de fiche n'a pas pu être vérifiée. Vérifiez votre connexion, puis réessayez." } : null;
+        return;
+      }
+      if (lignes.length || !fiche || compteNonValide === 'refuse') {
+        echecRevendication = null;
+        appliquerRevendications(lignes);
+        if (lignes.length) oublierFicheLocale();
+        return;
+      }
+      // Fiche demandée à l'inscription, aucune demande en base : on l'envoie.
+      const r = await envoyerRevendication(fiche);
+      if (r.compteRefuse && compteNonValide) compteNonValide = 'refuse';
+      const apres = await lireRevendications(user.id);
+      if (apres !== null) appliquerRevendications(apres);
+      if (!r.ok) { echecRevendication = { message: r.message }; return; }
+      if (apres !== null && !apres.length) {
+        // La fonction répond toujours 'en_attente' : seule la relecture prouve l'envoi.
+        echecRevendication = { message: "Votre demande de fiche n'a pas pu être enregistrée. Réessayez dans quelques instants." };
+        return;
+      }
+      if (apres === null) appliquerRevendications([{ fiche_id: fiche, statut: 'en_attente' }]);
+      echecRevendication = null;
+      oublierFicheLocale();
+    } finally {
+      suiviRevendicationEnCours = null;
+    }
+  })();
+  return suiviRevendicationEnCours;
+}
+
+// Appelée par refreshAuthUI. Fiche choisie à l'instant (« C'est ma
+// fiche » puis connexion) : la demande part tout de suite et son issue
+// s'affiche. Sinon, reprise depuis les métadonnées du compte.
+async function suivreRevendication(session) {
   maRevendicationEnCours = false;
   etatRevendication = null;
-  if (!session || !profil) return;
+  mesRevendications = [];
+  if (!session) { echecRevendication = null; return; }
   const user = session.user;
-
-  // Fiche choisie à l'instant (écran « C'est ma fiche » puis connexion),
-  // ou reprise des métadonnées pour un compte en attente : c'est le cas
-  // de la première session après la confirmation de l'adresse.
-  const choisie = !!ficheVoulue;
-  let fiche = ficheVoulue;
-  if (!fiche && compteNonValide === 'en_attente') {
-    const meta = user.user_metadata || {};
-    const locale = lireFicheLocale();
-    fiche = meta.fiche_id
-      || (locale && locale.fiche_id && locale.email
-          && String(locale.email).toLowerCase() === String(user.email || '').toLowerCase() ? locale.fiche_id : null);
-  }
+  const choisie = ficheVoulue;
   ficheVoulue = null;
+  if (choisie) {
+    const { issue, lignes } = await revendiquerEtLire(user.id, choisie);
+    if (lignes !== null) appliquerRevendications(lignes);
+    echecRevendication = null;
+    if (issue.ok) oublierFicheLocale();
+    afficherIssueRevendication(issue);
+    return;
+  }
+  await relancerRevendicationAuto(user);
+}
 
-  if (!fiche && !compteNonValide) return;
-  let lignes = await lireRevendications(user.id);
-
-  if (fiche) {
-    const cle = 'oc_revendication_' + user.id + '_' + fiche;
-    let dejaTentee = revendicationsTentees.has(cle);
-    try { dejaTentee = dejaTentee || sessionStorage.getItem(cle) === '1'; } catch (e) { /* stockage indisponible */ }
-    // Reprise automatique : n'importe quelle demande du compte suffit.
-    // Choix explicite : une demande sur cette fiche-là.
-    const dejaEnBase = lignes === null ? null
-      : choisie ? lignes.some(l => 'fiche_id' in l && String(l.fiche_id) === String(fiche))
-      : lignes.length > 0;
-    if (dejaEnBase) {
-      // Rien à envoyer : un nouvel appel ne changerait pas une demande
-      // existante, même refusée. L'écran reflète le statut lu.
-      oublierFicheLocale();
-      if (choisie) afficherIssueRevendication(issueDeLaFiche(lignes, fiche, true));
-    } else if (!dejaTentee && (dejaEnBase === false || choisie)) {
-      // Lecture impossible (null) : la reprise automatique attend la
-      // prochaine session ; un choix explicite part quand même.
-      revendicationsTentees.add(cle);
-      try { sessionStorage.setItem(cle, '1'); } catch (e) { /* stockage indisponible */ }
-      const resultat = await revendiquerEtLire(user.id, fiche);
-      if (resultat.lignes !== null) lignes = resultat.lignes;
-      if (resultat.issue.ok) oublierFicheLocale();
-      // La reprise automatique se lit sur la page d'attente, seul un
-      // échec s'affiche par-dessus.
-      if (choisie || !resultat.issue.ok) afficherIssueRevendication(resultat.issue);
+// L'état de la demande, en tête de /mon-espace (tableau de bord et page
+// d'attente) : échec avec sa raison et « Réessayer », demande en cours,
+// demande refusée. Rien quand la fiche est rattachée ou sans demande.
+function renderEtatRevendication() {
+  const encart = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.replaceChildren();
+    el.classList.remove('echec');
+    let texte = '';
+    if (echecRevendication) {
+      el.classList.add('echec');
+      const raison = String(echecRevendication.message || '');
+      texte = "Votre demande de fiche n'a pas abouti : " + raison.charAt(0).toLocaleLowerCase('fr-FR') + raison.slice(1);
+    } else if (id === 'dashRevendication' && etatRevendication === 'en_attente' && !(mesFiches || []).length) {
+      texte = "Votre demande de rattachement à votre fiche de l'annuaire est en cours de vérification. Nous vous écrivons dès qu'elle est validée.";
+    } else if (id === 'dashRevendication' && etatRevendication === 'refusee' && !(mesFiches || []).length) {
+      texte = "Votre demande de fiche n'a pas abouti. Écrivez-nous à contact@orthoconnect.fr pour que nous regardions votre situation.";
     }
-  }
+    el.hidden = !texte;
+    if (!texte) return;
+    const span = document.createElement('span');
+    span.textContent = texte;
+    el.appendChild(span);
+    if (echecRevendication) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn btn-turquoise btn-sm';
+      b.textContent = 'Réessayer';
+      b.addEventListener('click', () => reessayerRevendication(b));
+      el.appendChild(b);
+    }
+  };
+  encart('dashRevendication');
+  encart('verifRevendication');
+}
 
-  if (lignes !== null) {
-    etatRevendication = etatDesRevendications(lignes);
-    maRevendicationEnCours = etatRevendication === 'en_attente';
-  }
+async function reessayerRevendication(bouton) {
+  if (!sessionUtilisateur) return;
+  if (bouton) { bouton.disabled = true; bouton.textContent = 'Envoi en cours...'; }
+  echecRevendication = null;
+  // Profil indisponible : tout est relu, profil compris.
+  if (compteNonValide === 'indisponible') { await refreshAuthUI(); return; }
+  await relancerRevendicationAuto(sessionUtilisateur);
+  if (compteNonValide) renderCompteNonValide();
+  renderEtatRevendication();
 }
 
 async function cliquerMaFiche(btn) {
@@ -10254,9 +10387,10 @@ async function cliquerMaFiche(btn) {
 
   if (sessionUtilisateur) {
     btn.disabled = true;
-    const { issue } = await revendiquerEtLire(sessionUtilisateur.id, l.id);
+    const { issue, lignes } = await revendiquerEtLire(sessionUtilisateur.id, l.id);
     btn.disabled = false;
-    if (compteNonValide) renderCompteNonValide();
+    if (lignes !== null) appliquerRevendications(lignes);
+    if (compteNonValide) renderCompteNonValide(); else renderEtatRevendication();
     afficherIssueRevendication(issue);
     return;
   }
@@ -11678,9 +11812,17 @@ async function chargerRevendicationsAdmin() {
   adminComptesRevendication = new Map();
   erreurRevendications = null;
 
-  const r = await sb.from('revendications')
+  // cree_le n'est pas garanti (revendications n'a pas de created_at) :
+  // sans lui, les demandes se lisent quand même, sans tri par date.
+  let r = await sb.from('revendications')
     .select('id, praticien_id, rpps, fiche_id, statut, cree_le')
     .eq('statut', 'en_attente').order('cree_le');
+  if (r.error) {
+    console.warn('revendications avec cree_le :', r.error.message);
+    r = await sb.from('revendications')
+      .select('id, praticien_id, rpps, fiche_id, statut')
+      .eq('statut', 'en_attente');
+  }
   if (r.error) { erreurRevendications = 'Demandes de fiche indisponibles : ' + r.error.message; return; }
   adminRevendications = r.data || [];
   if (!adminRevendications.length) return;
@@ -11727,7 +11869,7 @@ function renderFicheRevendication(d) {
 
   return `<div class="rev-fiche">
       ${plusieurs ? '<div class="rev-alerte">Plusieurs demandes pour cette fiche</div>' : ''}
-      <div class="rev-fiche-titre">Fiche demandée le ${esc(formatDate(d.cree_le))}</div>
+      <div class="rev-fiche-titre">${d.cree_le ? 'Fiche demandée le ' + esc(formatDate(d.cree_le)) : 'Fiche demandée'}</div>
       ${f ? `
         <div class="admin-nom">${esc([f.nom, f.prenom].filter(Boolean).join(' ') || 'Nom non renseigné')}</div>
         ${f.specialite ? `<div>${esc(f.specialite)}</div>` : ''}
@@ -11791,6 +11933,20 @@ async function rechargerInscritsAdmin() {
   renderAdminInscrits();
 }
 
+// Après valider_revendication : la fiche demandée est-elle rattachée au
+// compte dans annuaire_praticiens (lecture réservée à l'admin) ?
+async function verifierRattachement(d) {
+  if (!d.fiche_id) return { ok: false, message: 'Fiche validée, mais la demande ne porte aucune fiche à relire.' };
+  const f = await sb.from('annuaire_praticiens').select('id, statut, profil_id').eq('id', d.fiche_id).maybeSingle();
+  if (f.error) return { ok: false, message: 'Fiche validée, mais son rattachement n\'a pas pu être relu : ' + f.error.message };
+  if (!f.data) return { ok: false, message: 'Fiche validée, mais la fiche est introuvable dans l\'annuaire.' };
+  if (f.data.statut === 'revendiquee' && String(f.data.profil_id) === String(d.praticien_id)) {
+    return { ok: true, message: 'Fiche validée et rattachée au compte.' };
+  }
+  return { ok: false, message: 'Demande validée, mais la fiche n\'est pas rattachée : statut « ' + (f.data.statut || 'vide')
+    + ' », profil ' + (f.data.profil_id ? 'd\'un autre compte' : 'vide') + '. À vérifier dans valider_revendication.' };
+}
+
 async function deciderRevendication(btn, action) {
   if (!estAdmin()) return;
   const id = btn.dataset.rev;
@@ -11820,9 +11976,13 @@ async function deciderRevendication(btn, action) {
   if (!ok) return;
 
   if (action === 'valider') {
-    revendicationValidee = { nom: compte && compte.nom, email: compte && compte.email };
+    // La relecture de la fiche prouve le rattachement : statut revendiquee
+    // et profil_id du compte. Sinon l'admin le voit tout de suite, et
+    // aucun « Prévenir par e-mail » ne lui est proposé.
+    const v = await verifierRattachement(d);
+    if (v.ok) revendicationValidee = { nom: compte && compte.nom, email: compte && compte.email };
     renderRevendicationsAdmin();
-    adminMessage('Fiche validée.');
+    adminMessage(v.message, !v.ok);
   } else {
     adminMessage('Demande refusée.');
   }
@@ -15389,6 +15549,12 @@ function showPage(page, chemin) {
   if (page === 'admin' && !estAdmin()) page = currentUser ? 'dashboard' : 'landing';
 
   // Un compte non validé lit son message à la place de son espace.
+  if (page === 'dashboard' && sessionUtilisateur && compteNonValide !== 'refuse' && Date.now() - dernierSuiviRevendication > 30000) {
+    relancerRevendicationAuto(sessionUtilisateur).then(() => {
+      if (compteNonValide) renderCompteNonValide();
+      renderEtatRevendication();
+    });
+  }
   if (page === 'dashboard' && compteNonValide) page = 'verification';
 
   setNoindex(page === 'admin' || page === 'introuvable' || page === 'marques');
