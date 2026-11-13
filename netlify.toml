@@ -1,10 +1,17 @@
-# Le site reste un site statique : aucune commande de build, le dossier
-# publié reste celui réglé dans l'interface Netlify, _redirects s'applique
-# comme avant. Ce fichier ne déclare que les fonctions.
+# Le site reste un site statique : aucune commande de build. Seul le
+# dossier public/ est mis en ligne. Le reste du dépôt (fichiers SQL,
+# code des fonctions, tests, package.json, notes de travail) reste dans
+# git mais n'est jamais servi. Ce réglage prime sur celui de l'interface
+# Netlify : un fichier ajouté à la racine du dépôt ne part plus en ligne.
+[build]
+  publish = "public"
+
 [build.environment]
   # nodemailer 10 exige Node 20 ou plus.
   NODE_VERSION = "22"
 
+# Les fonctions sont lues depuis le dépôt, pas depuis public/ : elles
+# restent servies sous /.netlify/functions/ sans que leur code le soit.
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
