@@ -2859,6 +2859,220 @@
   .detail-hero .interet-btn.actif { border-color: var(--turquoise); color: var(--turquoise); }
   .detail-hero .interet-total { color: rgba(255,255,255,0.8); }
   .detail-hero .interet-erreur { color: #FFB3A7; }
+
+  /* ===== FICHES : formation, produit, congrès =====
+     Une seule mise en page pour les trois, rendue par renderFiche().
+     Bandeau navy (titre, pastilles, infos clés, action principale),
+     puis des sections courtes, puis trois éléments similaires. Une
+     section sans données n'est pas rendue du tout. */
+  .fiche-bandeau {
+    background: var(--navy);
+    color: var(--white);
+    padding: 28px 0 40px;
+  }
+  .fiche-bandeau .detail-retour {
+    display: inline-flex; align-items: center; min-height: 44px;
+    margin: -8px 0 12px; text-decoration: none;
+  }
+  .fiche-tete { display: flex; gap: 20px; align-items: flex-start; }
+  .fiche-tete-texte { flex: 1; min-width: 0; }
+  .fiche-pastilles { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .fiche-bandeau h1 {
+    font-size: 32px; font-weight: 800; line-height: 1.2;
+    letter-spacing: -0.5px; max-width: 820px; overflow-wrap: break-word;
+  }
+  .fiche-source { font-size: 15px; font-weight: 600; color: var(--turquoise); margin-top: 8px; }
+  .fiche-accroche {
+    font-size: 16px; line-height: 1.6; color: rgba(255,255,255,0.82);
+    max-width: 720px; margin-top: 14px;
+  }
+
+  /* Tuile de date, à gauche du titre d'un congrès. */
+  .fiche-date {
+    flex: none; width: 76px; border-radius: var(--radius);
+    background: var(--white); color: var(--navy);
+    text-align: center; padding: 10px 0 11px; line-height: 1;
+  }
+  .fiche-date-jour { display: block; font-size: 30px; font-weight: 800; }
+  .fiche-date-mois {
+    display: block; margin-top: 5px; font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px; color: #007A86;
+  }
+  .fiche-date-annee { display: block; margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+
+  /* Visuel d'un produit. Sans visuel, une tuile neutre aux initiales
+     du fournisseur, comme sur les cartes du catalogue. */
+  .fiche-visuel {
+    flex: none; width: 168px; height: 168px; border-radius: var(--radius);
+    background: var(--white); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fiche-visuel img { width: 100%; height: 100%; object-fit: contain; }
+  .fiche-visuel-neutre {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+    font-size: 30px; font-weight: 800; color: rgba(255,255,255,0.7); letter-spacing: 1px;
+  }
+
+  /* Les informations clés : la valeur d'abord, son libellé dessous. */
+  .fiche-infos {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px; margin-top: 28px; max-width: 880px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .fiche-infos-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 680px; }
+  .fiche-infos-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 460px; }
+  .fiche-infos-1 { grid-template-columns: minmax(0, 1fr); max-width: 260px; }
+  .fiche-info {
+    display: flex; flex-direction: column-reverse; justify-content: flex-end;
+    padding: 14px 16px; background: var(--navy); min-width: 0;
+  }
+  .fiche-info dt { font-size: 13px; color: rgba(255,255,255,0.68); margin-top: 3px; }
+  .fiche-info dd { font-size: 17px; font-weight: 700; color: var(--white); line-height: 1.35; overflow-wrap: break-word; }
+  .fiche-info-long dd { font-size: 14px; font-weight: 600; line-height: 1.5; }
+  .fiche-info .detail-squelette { display: block; width: 6.5ch; height: 18px; }
+
+  /* L'action principale. Sur mobile, la barre est fixée en bas de
+     l'écran ; sur ordinateur, elle reste dans le bandeau. */
+  .fiche-actions {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px;
+    margin-top: 28px;
+  }
+  .fiche-barre { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+  .fiche-barre:empty { display: none; }
+  .fiche-barre .btn { min-height: 48px; justify-content: center; }
+  .fiche-barre-note { font-size: 13px; color: rgba(255,255,255,0.72); max-width: 360px; line-height: 1.5; }
+  .fiche-secondaires { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+  .fiche-lien {
+    display: inline-flex; align-items: center; min-height: 44px;
+    font-size: 14px; font-weight: 600; color: var(--white);
+    text-decoration: underline; text-underline-offset: 4px;
+    text-decoration-color: rgba(255,255,255,0.4);
+    background: none; border: none; padding: 0; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .fiche-lien:hover { text-decoration-color: var(--turquoise); }
+  .fiche-bandeau .interet { display: inline-flex; margin: 0; }
+  .fiche-bandeau .interet-btn {
+    min-height: 44px; padding: 8px 16px;
+    background: transparent; border-color: rgba(255,255,255,0.4); color: var(--white);
+  }
+  .fiche-bandeau .interet-btn.actif { border-color: var(--turquoise); color: var(--turquoise); }
+  .fiche-bandeau .interet-total { color: rgba(255,255,255,0.75); }
+  .fiche-bandeau .interet-erreur { color: #FFB3A7; }
+  .fiche-bandeau .detail-tarif-bande { margin-top: 20px; }
+  /* Zone de clic de 44 px sans changer l'allure du lien. */
+  .fiche-bandeau .detail-tarif-lien { min-height: 44px; margin: -13px 0; }
+
+  /* Le corps : une colonne de lecture, des sections séparées par un filet. */
+  .fiche-corps { padding: 8px 0 56px; }
+  .fiche-colonne { max-width: 760px; }
+  .fiche-section { padding: 36px 0; border-bottom: 1px solid var(--grey-border); }
+  .fiche-section:last-child { border-bottom: none; }
+  .fiche-section > h2 {
+    font-size: 20px; font-weight: 700; color: var(--navy);
+    letter-spacing: -0.2px; margin-bottom: 16px;
+  }
+  .fiche-texte { font-size: 16px; line-height: 1.75; color: var(--text-main); white-space: pre-line; overflow-wrap: break-word; }
+  .fiche-section .detail-liste li { font-size: 16px; color: var(--text-main); }
+  .fiche-section .detail-formateur { border: none; padding: 0; }
+  .fiche-section .tarif-carte { margin: 0; }
+  .fiche-section .contact-partenaire { margin: 0; }
+
+  /* Caractéristiques : le libellé au-dessus de sa valeur, jamais
+     séparés par toute la largeur de l'écran. */
+  .fiche-specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+  .fiche-specs .spec-row,
+  .fiche-specs .spec-row-bloc {
+    display: block; padding: 14px 0; border-bottom: 1px solid var(--grey-border); font-size: 15px;
+  }
+  .fiche-specs .spec-row-bloc { grid-column: 1 / -1; }
+  .fiche-specs .spec-key { display: block; font-size: 13px; margin-bottom: 4px; }
+  .fiche-specs .spec-val { display: block; text-align: left; font-weight: 600; overflow-wrap: break-word; }
+  .fiche-specs .spec-row-bloc .spec-val { font-weight: 500; }
+
+  /* Prochaines dates d'une formation. */
+  .fiche-sessions { display: grid; gap: 12px; }
+  .fiche-session {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 20px;
+    border: 1px solid var(--grey-border); border-radius: var(--radius); padding: 16px 18px;
+  }
+  .fiche-session-date { font-size: 16px; font-weight: 700; color: var(--navy); }
+  .fiche-session-detail { font-size: 14px; color: var(--text-secondary); margin-top: 2px; white-space: pre-line; }
+  .fiche-session .btn { min-height: 44px; }
+  .fiche-renvoi { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; font-size: 16px; color: var(--text-main); }
+  .fiche-renvoi .btn { min-height: 44px; }
+
+  /* L'organisme d'une formation : son logo tel qu'il est en base. */
+  .fiche-orga { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .fiche-orga img { width: 72px; height: 72px; object-fit: contain; border-radius: var(--radius-sm); }
+  .fiche-orga-nom { font-size: 16px; font-weight: 700; color: var(--navy); }
+  .fiche-orga a { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; font-weight: 600; color: #007A86; }
+
+  /* Pour continuer la visite. */
+  .fiche-similaires { background: var(--grey-bg); padding: 44px 0 56px; }
+  .fiche-similaires h2 { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 18px; }
+  .fiche-similaires-grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .fiche-similaire {
+    display: flex; flex-direction: column; gap: 6px;
+    background: var(--white); border: 1px solid var(--grey-border); border-radius: var(--radius);
+    padding: 18px 20px; text-decoration: none; color: var(--navy); min-height: 44px;
+    transition: border-color var(--transition);
+  }
+  .fiche-similaire:hover { border-color: var(--turquoise); }
+  .fiche-similaire-sur { font-size: 12px; font-weight: 600; color: #007A86; text-transform: uppercase; letter-spacing: 0.4px; }
+  .fiche-similaire-titre { font-size: 16px; font-weight: 700; line-height: 1.35; overflow-wrap: break-word; }
+  .fiche-similaire-ligne { font-size: 14px; color: var(--text-secondary); }
+
+  /* Carte de congrès : le titre devient un lien qui couvre la carte,
+     le lien du site officiel reste cliquable au-dessus. */
+  .congres-carte { position: relative; }
+  .congres-nom-lien { color: inherit; text-decoration: none; }
+  .congres-nom-lien::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+  .congres-nom-lien:hover { color: #007A86; }
+  .congres-carte .congres-lien { position: relative; z-index: 1; }
+
+  @media (max-width: 900px) {
+    .fiche-bandeau h1 { font-size: 26px; }
+    .fiche-infos, .fiche-infos-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: none; }
+    /* Un nombre impair d'infos : la dernière prend toute la ligne, pas de case vide. */
+    .fiche-info:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .fiche-similaires-grille { grid-template-columns: 1fr; }
+    .fiche-visuel { width: 112px; height: 112px; }
+  }
+
+  @media (max-width: 600px) {
+    .fiche-bandeau { padding: 20px 0 30px; }
+    .fiche-tete { gap: 14px; }
+    .fiche-bandeau h1 { font-size: 24px; }
+    .fiche-date { width: 64px; padding: 8px 0 9px; }
+    .fiche-date-jour { font-size: 25px; }
+    .fiche-visuel { width: 72px; height: 72px; }
+    .fiche-visuel-neutre { font-size: 20px; }
+    .fiche-infos-1 { max-width: none; }
+    .fiche-info { padding: 12px 14px; }
+    .fiche-info dd { font-size: 16px; }
+    .fiche-actions { margin-top: 22px; }
+    .fiche-specs { grid-template-columns: 1fr; }
+    .fiche-section { padding: 28px 0; }
+    .fiche-texte, .fiche-section .detail-liste li { font-size: 15px; }
+    .fiche-session { padding: 14px 16px; }
+    .fiche-session .btn, .fiche-renvoi .btn { width: 100%; justify-content: center; }
+
+    /* La barre d'action passe en bas de l'écran. */
+    .fiche-barre {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 800;
+      display: flex; flex-direction: column; align-items: stretch; gap: 4px;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      background: var(--white); border-top: 1px solid var(--grey-border);
+      box-shadow: 0 -4px 16px rgba(15,43,77,0.08);
+    }
+    .fiche-barre .btn { width: 100%; white-space: normal; text-align: center; }
+    .fiche-barre-note { color: var(--text-secondary); font-size: 12px; text-align: center; max-width: none; }
+    .fiche-barre .produit-action-faite { justify-content: center; }
+    body:has(.page.fiche-page.active .fiche-barre:not(:empty)) { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  }
 </style>
 </head>
 <body>
@@ -3814,20 +4028,8 @@
 <!-- PAGE : FICHE PRODUIT -->
 <!-- Contenu injecte par ouvrirProduit()                            -->
 <!-- ==================== -->
-<div class="page" id="page-produit">
-  <section class="detail-hero">
-    <div class="container">
-      <button type="button" class="detail-retour" onclick="showPage('produits')">&larr; Retour au comparatif</button>
-      <div id="produitHero"></div>
-    </div>
-  </section>
-
-  <section class="detail-body">
-    <div class="container">
-      <div id="produitAction"></div>
-      <div id="produitPrincipal"></div>
-    </div>
-  </section>
+<div class="page fiche-page" id="page-produit">
+  <div id="ficheProduit"></div>
 
   <!-- Confirmation d'une demande d'informations. Dans #page-produit :
        quitter la fiche ferme la boite avec elle. -->
@@ -3867,7 +4069,7 @@
       </div>
       <div class="footer-col">
         <h4>Navigation</h4>
-        <a href="/produits" onclick="showPage('produits')">Comparatif du mat&eacute;riel</a>
+        <a href="/produits" onclick="showPage('produits')">Produits</a>
         <a href="/formations" onclick="showPage('formations')">Formations</a>
         <a href="/" onclick="showPage('landing')">Accueil</a>
       </div>
@@ -4124,6 +4326,42 @@
 </div>
 
 <!-- ==================== -->
+<!-- PAGE : FICHE CONGRÈS -->
+<!-- ==================== -->
+<div class="page fiche-page" id="page-congres-fiche">
+  <div id="ficheCongres"></div>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo">
+          <div class="logo-oc" style="font-size:28px">
+            <span class="lo" style="color:white">O</span><span class="lc">C</span>
+          </div>
+          <div class="logo-wordmark" style="border-left-color:rgba(255,255,255,0.15)">
+            <span class="logo-wordmark-text"><span class="lw-o" style="color:white">Ortho</span><span class="lw-c">Connect</span></span>
+          </div>
+        </div>
+        <p>Formations, matériel et postes en ODF.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <a href="/congres" onclick="showPage('congres')">Congrès et salons</a>
+        <a href="/formations" onclick="showPage('formations')">Formations</a>
+        <a href="/" onclick="showPage('landing')">Accueil</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:contact@orthoconnect.fr">contact@orthoconnect.fr</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 OrthoConnect &middot; orthoconnect.fr</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ==================== -->
 <!-- PAGE : CONTENU INTROUVABLE                                     -->
 <!-- Une URL qui ne mène à rien vaut mieux qu'une page blanche :     -->
 <!-- on dit ce qui manque et on renvoie au catalogue concerné.       -->
@@ -4165,22 +4403,8 @@
 <!-- PAGE : FICHE FORMATION  -->
 <!-- Contenu injecte par ouvrirFormation()                          -->
 <!-- ======================= -->
-<div class="page" id="page-formation">
-  <section class="detail-hero">
-    <div class="container">
-      <button type="button" class="detail-retour" onclick="showPage('formations')">&larr; Retour au catalogue</button>
-      <div id="detailHero"></div>
-    </div>
-  </section>
-
-  <section class="detail-body">
-    <div class="container">
-      <div class="detail-grid" id="detailGrid">
-        <div id="detailPrincipal"></div>
-        <aside class="detail-aside" id="detailAside"></aside>
-      </div>
-    </div>
-  </section>
+<div class="page fiche-page" id="page-formation">
+  <div id="ficheFormation"></div>
 
   <footer>
     <div class="footer-inner">
@@ -6357,7 +6581,7 @@ async function loadCatalogues() {
     const [f, p, j, a, pc, cp, ct] = await Promise.all([
       chargerFormationsPubliques(),
       sb.from('produits')
-        .select('*, fournisseurs(id, nom, logo_url, partenaire)')
+        .select('*, fournisseurs(id, nom, logo_url, partenaire, site_url)')
         .eq('visible', true).order('ordre'),
       chargerAnnonces(),
       sb.from('actualites').select('*').eq('actif', true).order('publie_le', { ascending: false }),
@@ -9129,48 +9353,76 @@ function ouvrirProduit(id) {
 function renderDetailProduit(p) {
   const cat = categorieProduit(p.categorie);
   const f = p.fournisseurs || null;
+  const nomFournisseur = f && f.nom ? f.nom : '';
 
-  // ── En-tête ──
-  const badges = [
+  const pastilles = [
     cat || p.categorie
       ? `<span class="badge badge-categorie">${esc(cat ? cat.libelle : p.categorie)}</span>` : '',
     f && f.partenaire ? '<span class="badge badge-pro">Partenaire</span>' : ''
-  ].filter(Boolean).join('');
+  ];
 
-  const meta = [
-    p.pays_production
-      ? `<div class="detail-meta-item"><strong>${esc(p.pays_production)}</strong>Pays de production</div>` : '',
-    p.marquage_ce
-      ? `<div class="detail-meta-item"><strong>${esc(p.marquage_ce)}</strong>Marquage CE</div>` : ''
-  ].filter(Boolean).join('');
+  // Le visuel tel qu'il est en base. Sans lui, une tuile neutre aux
+  // initiales du fournisseur, la même que sur les cartes du catalogue :
+  // jamais une image qui ne serait pas celle du produit.
+  const visuel = urlHttp(p.visuel_url);
+  const initiales = (nomFournisseur || p.nom || '').split(' ').filter(Boolean)
+    .map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const tuileVisuel = visuel
+    ? `<div class="fiche-visuel"><img src="${esc(visuel)}" alt="${esc(p.nom || '')}"></div>`
+    : `<div class="fiche-visuel fiche-visuel-neutre" aria-hidden="true">${esc(initiales)}</div>`;
 
-  document.getElementById('produitHero').innerHTML = `
-    ${badges ? `<div class="detail-badges">${badges}</div>` : ''}
-    <h1>${esc(p.nom || '')}</h1>
-    ${f && f.nom ? `<div class="detail-orga">${esc(f.nom)}</div>` : ''}
-    ${p.accroche ? `<p class="detail-accroche">${esc(p.accroche)}</p>` : ''}
-    ${renderCoeurInteret('produit', p.id)}
-    ${meta ? `<div class="detail-meta">${meta}</div>` : ''}`;
+  const site = f ? urlHttp(f.site_url) : null;
+  const secondaires = renderCoeurInteret('produit', p.id) + (site
+    ? `<a class="fiche-lien" href="${esc(site)}" target="_blank" rel="noopener noreferrer">Site de ${esc(nomFournisseur || 'du fournisseur')}</a>`
+    : '');
 
-  // ── Corps ──
   const lignes = lignesCaracteristiques(p, cat);
+  const texte = v => valeurRemplie(v) ? `<div class="fiche-texte">${esc(v)}</div>` : '';
 
-  const principal = [
-    blocDetail('Présentation', p.presentation
-      ? `<div class="detail-texte">${esc(p.presentation)}</div>` : ''),
-    blocDetail('Caractéristiques', lignes ? `<div class="produit-specs">${lignes}</div>` : ''),
-    blocDetail('Indications', listeDetail(p.indications)),
-    blocDetail('Limites', p.limites
-      ? `<div class="detail-texte">${esc(p.limites)}</div>` : ''),
-    blocDetail('Formation requise', p.formation_requise
-      ? `<div class="detail-texte">${esc(p.formation_requise)}</div>` : '')
-  ].filter(Boolean).join('');
-
-  document.getElementById('produitPrincipal').innerHTML = principal ||
-    '<div class="detail-texte">La fiche de ce matériel est en cours de rédaction.</div>';
+  document.getElementById('ficheProduit').innerHTML = renderFiche({
+    retour: { chemin: '/produits', libelle: 'Retour aux produits' },
+    pastilles,
+    titre: p.nom || '',
+    source: nomFournisseur,
+    accroche: p.accroche,
+    visuel: tuileVisuel,
+    infos: [
+      { libelle: 'Pays de production', valeur: p.pays_production },
+      { libelle: 'Marquage CE', valeur: p.marquage_ce }
+    ],
+    idBarre: 'produitAction',
+    secondaires,
+    sections: [
+      { contenu: f && f.partenaire ? renderContactPartenaire(f) : '' },
+      { titre: 'Présentation', contenu: texte(p.presentation) },
+      { titre: 'Caractéristiques', contenu: lignes ? `<div class="fiche-specs">${lignes}</div>` : '' },
+      { titre: 'Indications', contenu: listeDetail(p.indications) },
+      { titre: 'Limites', contenu: texte(p.limites) },
+      { titre: 'Formation requise', contenu: texte(p.formation_requise) }
+    ],
+    similaires: { titre: 'Produits similaires', elements: produitsSimilaires(p) }
+  });
 
   renderActionProduit(p);
   majDonneesStructurees(p);
+}
+
+// La même catégorie d'abord, puis le même fournisseur. Rien d'autre :
+// un produit sans rapport ne serait pas « similaire ».
+function produitsSimilaires(p) {
+  const autres = produitsDB.filter(x => String(x.id) !== String(p.id));
+  const memeCategorie = autres.filter(x => p.categorie && x.categorie === p.categorie);
+  const memeFournisseur = autres.filter(x => p.fournisseur_id && x.fournisseur_id === p.fournisseur_id
+    && !memeCategorie.includes(x));
+  return memeCategorie.concat(memeFournisseur).slice(0, 3).map(x => {
+    const cat = categorieProduit(x.categorie);
+    return {
+      chemin: cheminProduit(x),
+      sur: x.fournisseurs && x.fournisseurs.nom,
+      titre: x.nom,
+      lignes: [cat ? cat.libelle : x.categorie]
+    };
+  });
 }
 
 // ─────── Demander des informations sur un produit ───────
@@ -9196,28 +9448,22 @@ function renderActionProduit(p) {
   const zone = document.getElementById('produitAction');
   if (!zone || !p) return;
 
+  // Fournisseur partenaire : ses coordonnees, dans le corps de la fiche,
+  // remplacent la demande. La barre reste vide, donc masquee.
   const f = p.fournisseurs || null;
-  if (f && f.partenaire) { zone.innerHTML = renderContactPartenaire(f); return; }
+  if (f && f.partenaire) { zone.innerHTML = ''; return; }
 
   if (demandeEnCoursPour(p.id)) {
-    zone.innerHTML = `<div class="produit-action">
-        <span class="produit-action-faite">✓ Demande envoyée</span>
-        <div class="produit-action-note">
-          Nous revenons vers vous. Vous pourrez en refaire une lorsque celle-ci aura été traitée.
-        </div>
-      </div>`;
+    zone.innerHTML = `<span class="produit-action-faite">✓ Demande envoyée</span>`
+      + `<span class="fiche-barre-note">Nous revenons vers vous. Vous pourrez en refaire une lorsque celle-ci aura été traitée.</span>`;
     return;
   }
 
   // Le bouton porte toujours le meme appel : c'est ouvrirDemandeProduit
   // qui renvoie a l'inscription, faute de quoi il resterait cable sur
   // l'inscription apres une connexion faite depuis cette page.
-  zone.innerHTML = `<div class="produit-action">
-      <button class="btn btn-turquoise" onclick="ouvrirDemandeProduit('${p.id}')">Demander des informations</button>
-      ${currentUser ? '' : `<div class="produit-action-note">
-        Réservé aux praticiens inscrits. La création d'un compte est gratuite.
-      </div>`}
-    </div>`;
+  zone.innerHTML = `<button class="btn btn-turquoise" onclick="ouvrirDemandeProduit('${esc(p.id)}')">Demander des informations</button>`
+    + (currentUser ? '' : `<span class="fiche-barre-note">Réservé aux praticiens inscrits. La création d'un compte est gratuite.</span>`);
 }
 
 function renderContactPartenaire(f) {
@@ -9472,6 +9718,88 @@ async function submitForm(e) {
 }
 
 // ═══════════════════════════════════════════════
+// LA MISE EN PAGE COMMUNE DES FICHES
+//
+// Formation, produit et congrès passent tous par renderFiche() :
+// bandeau navy (retour, pastilles, titre, source, infos clés, action
+// principale), sections courtes, puis trois éléments similaires.
+// Règle d'or : ce qui n'a pas de données n'est pas rendu. Pas de
+// « non renseigné », pas de bloc vide, pas de texte de remplacement.
+// ═══════════════════════════════════════════════
+
+// Une adresse web lisible, en http ou https, sinon rien.
+function urlHttp(valeur) {
+  try {
+    const url = new URL(String(valeur || '').trim());
+    return /^https?:$/.test(url.protocol) ? url.href : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function renderFiche(o) {
+  const pastilles = (o.pastilles || []).filter(Boolean).join('');
+  // Une info s'affiche si elle a une valeur, texte ou HTML déjà échappé.
+  const infos = (o.infos || []).filter(i => i && (i.html || valeurRemplie(i.valeur))).slice(0, 4);
+  const sections = (o.sections || []).filter(x => x && x.contenu);
+  const sim = o.similaires && Array.isArray(o.similaires.elements)
+    ? o.similaires.elements.filter(e => e && e.chemin && e.titre).slice(0, 3) : [];
+  const action = o.action || '';
+  const avecActions = o.idBarre || action || o.secondaires;
+
+  return `
+  <section class="fiche-bandeau">
+    <div class="container">
+      <a class="detail-retour" href="${esc(o.retour.chemin)}">&larr; ${esc(o.retour.libelle)}</a>
+      <div class="fiche-tete">
+        ${o.tuile || ''}
+        <div class="fiche-tete-texte">
+          ${pastilles ? `<div class="fiche-pastilles">${pastilles}</div>` : ''}
+          <h1>${esc(o.titre)}</h1>
+          ${valeurRemplie(o.source) ? `<div class="fiche-source">${esc(o.source)}</div>` : ''}
+          ${valeurRemplie(o.accroche) ? `<p class="fiche-accroche">${esc(o.accroche)}</p>` : ''}
+        </div>
+        ${o.visuel || ''}
+      </div>
+      ${infos.length ? `<dl class="fiche-infos fiche-infos-${infos.length}">${infos.map(i => `
+        <div class="fiche-info${!i.html && String(i.valeur).length > 40 ? ' fiche-info-long' : ''}"><dt>${esc(i.libelle)}</dt><dd>${i.html || esc(i.valeur)}</dd></div>`).join('')}
+      </dl>` : ''}
+      ${avecActions ? `<div class="fiche-actions">
+        <div class="fiche-barre"${o.idBarre ? ` id="${esc(o.idBarre)}"` : ''}>${action}</div>
+        ${o.secondaires ? `<div class="fiche-secondaires">${o.secondaires}</div>` : ''}
+      </div>` : ''}
+      ${o.apresActions || ''}
+    </div>
+  </section>
+  ${sections.length ? `<section class="fiche-corps">
+    <div class="container"><div class="fiche-colonne">
+      ${sections.map(x => `<div class="fiche-section"${x.id ? ` id="${esc(x.id)}"` : ''}>
+        ${x.titre ? `<h2>${esc(x.titre)}</h2>` : ''}
+        ${x.contenu}
+      </div>`).join('')}
+    </div></div>
+  </section>` : ''}
+  ${sim.length ? `<section class="fiche-similaires">
+    <div class="container">
+      <h2>${esc(o.similaires.titre)}</h2>
+      <div class="fiche-similaires-grille">
+        ${sim.map(e => `<a class="fiche-similaire" href="${esc(e.chemin)}">
+          ${valeurRemplie(e.sur) ? `<span class="fiche-similaire-sur">${esc(e.sur)}</span>` : ''}
+          <span class="fiche-similaire-titre">${esc(e.titre)}</span>
+          ${(e.lignes || []).filter(valeurRemplie).map(l => `<span class="fiche-similaire-ligne">${esc(l)}</span>`).join('')}
+        </a>`).join('')}
+      </div>
+    </div>
+  </section>` : ''}`;
+}
+
+// « du 6 au 8 mai 2027 » en tête de ligne devient « Du 6 au 8 mai 2027 ».
+function majuscule(t) {
+  const s = String(t || '');
+  return s ? s[0].toUpperCase() + s.slice(1) : s;
+}
+
+// ═══════════════════════════════════════════════
 // FICHE FORMATION (public)
 // ═══════════════════════════════════════════════
 let formationOuverte = null;
@@ -9583,7 +9911,7 @@ async function ouvrirFormation(id) {
   majMeta(f.titre + ' | OrthoConnect',
     resumeMeta(f.description, 'Formation en orthodontie référencée sur OrthoConnect.'),
     cheminFormation(f), 'article');
-  renderDetailFormation(f, null, []);
+  renderDetailFormation(f, null, null);
 
   // Programme, sessions et tarif arrivent après le premier rendu : la
   // fiche s'affiche tout de suite avec ce qu'on a déjà en mémoire.
@@ -9617,49 +9945,98 @@ function renderDetailFormation(f, sections, sessions) {
   const fmt = { presentiel: 'Présentiel', distanciel: 'Distanciel', hybride: 'Hybride' };
   const niv = { initiation: 'Initiation', perfectionnement: 'Perfectionnement', expert: 'Expert' };
 
-  // ── En-tête ──
-  const badges = [
-    `<span class="badge badge-${esc(f.format)}">${esc(fmt[f.format] || f.format)}</span>`,
-    f.dpc ? '<span class="badge badge-new">DPC éligible</span>' : '',
+  const pastilles = [
+    '<span class="badge badge-new">Formation</span>',
     f.niveau ? `<span class="badge badge-pro">${esc(niv[f.niveau] || f.niveau)}</span>` : '',
     f.thematique ? `<span class="badge badge-hybride">${esc(f.thematique)}</span>` : ''
-  ].filter(Boolean).join('');
+  ];
 
-  const meta = [
-    f.duree ? `<div class="detail-meta-item"><strong>${esc(f.duree)}</strong>Durée</div>` : '',
-    renderMetaPrix(f),
-    f.participants_max ? `<div class="detail-meta-item"><strong>${esc(f.participants_max)}</strong>Participants max</div>` : '',
-    f.dpc_numero ? `<div class="detail-meta-item"><strong>${esc(f.dpc_numero)}</strong>Référence DPC</div>` : ''
-  ].filter(Boolean).join('');
+  const infos = [
+    { libelle: 'Durée', valeur: f.duree },
+    { libelle: 'Format', valeur: fmt[f.format] || f.format },
+    infoPrix(f),
+    f.dpc ? { libelle: 'DPC', valeur: f.dpc_numero ? 'Éligible, réf. ' + f.dpc_numero : 'Éligible' } : null,
+    { libelle: 'Participants max', valeur: f.participants_max }
+  ];
 
-  document.getElementById('detailHero').innerHTML = `
-    <div class="detail-badges">${badges}</div>
-    <h1>${esc(f.titre)}</h1>
-    ${nomOrganisme(f) ? `<div class="detail-orga">${esc(nomOrganisme(f))}</div>` : ''}
-    ${renderCoeurInteret('formation', f.id)}
-    ${meta ? `<div class="detail-meta">${meta}</div>` : ''}
-    ${renderBandeauTarif(f)}`;
+  // Une seule action principale : la page de l'organisme, ou à défaut
+  // l'inscription à la première session qui en donne une.
+  const source = urlHttp(f.url_source);
+  const inscription = (sessions || []).map(s => urlHttp(s.url_inscription)).find(Boolean);
+  const action = source
+    ? `<a class="btn btn-turquoise" href="${esc(source)}" target="_blank" rel="noopener noreferrer">Voir sur le site de l'organisme</a>`
+    : inscription
+      ? `<a class="btn btn-turquoise" href="${esc(inscription)}" target="_blank" rel="noopener noreferrer">S'inscrire</a>`
+      : '';
 
-  // ── Colonne principale ──
-  const principal = [
-    blocDetail('Présentation', f.description
-      ? `<div class="detail-texte">${esc(f.description)}</div>` : ''),
-    blocDetail('Objectifs pédagogiques', listeDetail(f.objectifs)),
-    blocDetail('Programme', renderProgramme(sections)),
-    blocDetail('Prérequis', f.prerequis
-      ? `<div class="detail-texte">${esc(f.prerequis)}</div>` : ''),
-    blocDetail('Ce qui est inclus', listeDetail(f.inclus)),
-    blocDetail('Le formateur', renderFormateur(f))
-  ].filter(Boolean).join('');
+  const enregistree = savedIds.includes(f.id);
+  const secondaires = renderCoeurInteret('formation', f.id)
+    + `<button type="button" class="fiche-lien" id="detailBtnSave" onclick="enregistrerDepuisFiche(${f.id})">${enregistree ? '✓ Enregistrée dans mon espace' : 'Enregistrer'}</button>`;
 
-  document.getElementById('detailPrincipal').innerHTML = principal ||
-    '<div class="detail-texte">Le détail de cette formation est en cours de rédaction.</div>';
+  const texte = v => valeurRemplie(v) ? `<div class="fiche-texte">${esc(v)}</div>` : '';
 
-  // ── Colonne latérale ──
-  const aside = document.getElementById('detailAside');
-  aside.innerHTML = renderDetailAside(f, sessions);
-  document.getElementById('detailGrid')
-    .classList.toggle('pleine-largeur', !aside.innerHTML.trim());
+  document.getElementById('ficheFormation').innerHTML = renderFiche({
+    retour: { chemin: '/formations', libelle: 'Retour aux formations' },
+    pastilles,
+    titre: f.titre,
+    source: nomOrganisme(f),
+    infos,
+    action,
+    secondaires,
+    apresActions: renderBandeauTarif(f),
+    sections: [
+      { titre: 'Présentation', contenu: texte(f.description) },
+      { titre: 'Objectifs pédagogiques', contenu: listeDetail(f.objectifs) },
+      { titre: 'Programme', contenu: renderProgramme(sections) },
+      { titre: 'Public et prérequis', contenu: texte(f.prerequis) },
+      { titre: 'Ce qui est inclus', contenu: listeDetail(f.inclus) },
+      { titre: 'Le formateur', contenu: renderFormateur(f) },
+      { titre: 'Prochaines dates', contenu: renderSessionsFiche(sessions, source) },
+      { contenu: renderCarteTarif(f) },
+      { titre: "L'organisme", contenu: renderOrgaFiche(f) }
+    ],
+    similaires: { titre: 'Autres formations', elements: formationsSimilaires(f) }
+  });
+}
+
+// null : les sessions ne sont pas encore arrivées, rien n'est affiché
+// plutôt qu'un renvoi qui disparaîtrait une seconde plus tard.
+function renderSessionsFiche(sessions, source) {
+  if (sessions === null || sessions === undefined) return '';
+  if (sessions.length) {
+    return `<div class="fiche-sessions">${sessions.map(s => {
+      const lien = urlHttp(s.url_inscription);
+      const detail = [s.ville, s.places != null ? s.places + ' places' : ''].filter(Boolean).join(', ');
+      return `<div class="fiche-session">
+        <div>
+          <div class="fiche-session-date">${esc(majuscule(formatPeriodeCongres(s.date_debut, s.date_fin)))}</div>
+          ${detail ? `<div class="fiche-session-detail">${esc(detail)}</div>` : ''}
+          ${s.horaires ? `<div class="fiche-session-detail">${esc(s.horaires)}</div>` : ''}
+        </div>
+        ${lien ? `<a class="btn btn-outline btn-sm" href="${esc(lien)}" target="_blank" rel="noopener noreferrer">S'inscrire</a>` : ''}
+      </div>`;
+    }).join('')}</div>`;
+  }
+  if (!source) return '';
+  return `<div class="fiche-renvoi">
+      <span>Dates sur le site de l'organisme.</span>
+      <a class="btn btn-outline btn-sm" href="${esc(source)}" target="_blank" rel="noopener noreferrer">Voir les dates</a>
+    </div>`;
+}
+
+// La même thématique d'abord, puis le même organisme, puis le reste du
+// catalogue : il est encore court, et une formation reste une formation.
+function formationsSimilaires(f) {
+  const fmt = { presentiel: 'Présentiel', distanciel: 'Distanciel', hybride: 'Hybride' };
+  const autres = formationsDB.filter(x => x.id !== f.id);
+  const score = x => (f.thematique && x.thematique === f.thematique ? 2 : 0)
+    + (nomOrganisme(f) && nomOrganisme(x) === nomOrganisme(f) ? 1 : 0);
+  return autres.slice().sort((a, b) => score(b) - score(a)).slice(0, 3).map(x => ({
+    chemin: cheminFormation(x),
+    sur: nomOrganisme(x),
+    titre: x.titre,
+    lignes: [[fmt[x.format] || x.format, x.dpc ? 'DPC' : ''].filter(Boolean).join(', ')]
+  }));
 }
 
 function renderProgramme(sections) {
@@ -9716,22 +10093,20 @@ function renderFormateur(f) {
     </div>`;
 }
 
-// Encart organisme, en tête de la colonne de droite. Le logo s'affiche
-// pour tout organisme qui en a un, partenaire ou non.
-function renderCarteOrganisme(f) {
+// L'organisme, sous les sections. Le logo s'affiche pour tout
+// organisme qui en a un, partenaire ou non, comme avant.
+function renderOrgaFiche(f) {
   const o = f.organismes;
   const nom = nomOrganisme(f);
-  if (!o || !nom || (!o.logo_url && !o.site_web)) return '';
+  const site = o ? urlHttp(o.site_web) : null;
+  if (!o || !nom || (!o.logo_url && !site)) return '';
 
-  return `<div class="detail-carte detail-carte-orga">
-      ${o.logo_url
-        ? `<img class="detail-carte-orga-logo" src="${esc(o.logo_url)}" alt="${esc(nom)}">`
-        : ''}
-      <div class="detail-carte-orga-nom">${esc(nom)}</div>
-      ${o.site_web
-        ? `<a class="detail-carte-orga-lien" href="${esc(o.site_web)}"
-              target="_blank" rel="noopener noreferrer">Voir le site &rarr;</a>`
-        : ''}
+  return `<div class="fiche-orga">
+      ${o.logo_url ? `<img src="${esc(o.logo_url)}" alt="${esc(nom)}">` : ''}
+      <div>
+        <div class="fiche-orga-nom">${esc(nom)}</div>
+        ${site ? `<a href="${esc(site)}" target="_blank" rel="noopener noreferrer">Voir le site</a>` : ''}
+      </div>
     </div>`;
 }
 
@@ -9764,16 +10139,16 @@ function tarifEnAttente(f) {
   return !f.tarifRepondu;
 }
 
-function renderMetaPrix(f) {
+function infoPrix(f) {
   const libelle = aTarifPrefere(f) ? 'Tarif public' : 'Par personne';
 
   if (f.prix == null) {
     return tarifEnAttente(f)
-      ? `<div class="detail-meta-item detail-meta-prix"><strong><span class="detail-squelette"></span></strong>${libelle}</div>`
-      : '';
+      ? { libelle, html: '<span class="detail-squelette"></span>' }
+      : null;
   }
 
-  return `<div class="detail-meta-item detail-meta-prix"><strong>${esc(f.prix)} €</strong>${libelle}</div>`;
+  return { libelle, valeur: f.prix + ' €' };
 }
 
 // L'en-tête annonce le prix plein. Sans ce rappel juste en dessous, un
@@ -9919,54 +10294,10 @@ async function obtenirCode(formationId) {
   renderMesCodes();
 }
 
-function renderDetailAside(f, sessions) {
-  const enregistree = savedIds.includes(f.id);
-  const partenaire = !!(f.organismes && f.organismes.partenaire);
-
-  const actions = `<div class="detail-carte" style="margin-bottom:18px">
-      <div class="detail-actions">
-        ${f.url_source
-          ? `<a class="btn btn-turquoise" href="${esc(f.url_source)}" target="_blank" rel="noopener noreferrer">Voir sur le site de l'organisme</a>`
-          : `<button type="button" class="btn btn-turquoise" disabled
-                     title="Aucun lien source renseigné pour cette formation">Voir sur le site de l'organisme</button>`}
-        <button type="button" class="btn ${enregistree ? 'btn-outline' : 'btn-primary'}"
-                onclick="enregistrerDepuisFiche(${f.id})" id="detailBtnSave">
-          ${enregistree ? '✓ Enregistrée dans mon espace' : 'Enregistrer'}
-        </button>
-      </div>
-      <div style="font-size:12px; color:var(--text-light); margin-top:12px; text-align:center">
-        Retrouvez vos formations enregistrées dans votre espace praticien.
-      </div>
-    </div>`;
-
-  const listeSessions = (sessions || []).map(s => `
-    <div class="detail-session">
-      <div class="detail-session-date">
-        ${esc(formatDate(s.date_debut))}${s.date_fin && s.date_fin !== s.date_debut ? ' → ' + esc(formatDate(s.date_fin)) : ''}
-      </div>
-      ${s.ville ? `<div class="detail-session-lieu">${esc(s.ville)}</div>` : ''}
-      ${s.horaires ? `<div class="detail-session-horaires">${esc(s.horaires)}</div>` : ''}
-      ${s.places != null ? `<div class="detail-session-places">${esc(s.places)} places</div>` : ''}
-      ${s.url_inscription
-        ? `<a class="btn btn-outline btn-sm" style="margin-top:8px; width:100%; justify-content:center"
-              href="${esc(s.url_inscription)}" target="_blank" rel="noopener noreferrer">S'inscrire</a>`
-        : ''}
-    </div>`).join('');
-
-  const carteSessions = listeSessions
-    ? `<div class="detail-carte"><h3>Prochaines sessions</h3>${listeSessions}</div>`
-    : '';
-
-  return renderCarteOrganisme(f) + renderCarteTarif(f) + actions + carteSessions;
-}
-
 async function enregistrerDepuisFiche(id) {
   await saveFormation(id);
   const btn = document.getElementById('detailBtnSave');
-  if (btn && savedIds.includes(id)) {
-    btn.textContent = '✓ Enregistrée dans mon espace';
-    btn.className = 'btn btn-outline';
-  }
+  if (btn && savedIds.includes(id)) btn.textContent = '✓ Enregistrée dans mon espace';
 }
 
 // ═══════════════════════════════════════════════
@@ -13481,8 +13812,8 @@ async function lancerRechercheAnnuaire(terme, jeton, idZone = 'annuaireResultats
 // ─────────── Congrès ───────────
 const MOIS_CONGRES = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 // Liste fermée : url_source et organisateur ne quittent pas la base
-// pour la page publique.
-const COLONNES_CONGRES_PUBLIQUES = 'id, nom, type, sigle, edition, date_debut, date_fin, ville, pays, lieu, description, url_officiel';
+// pour la page publique. Le slug donne son adresse à la fiche.
+const COLONNES_CONGRES_PUBLIQUES = 'id, nom, slug, type, sigle, edition, date_debut, date_fin, ville, pays, lieu, description, url_officiel';
 
 let congresDB = [];
 let congresErreur = false;
@@ -13536,19 +13867,109 @@ function congresAVenir(c) {
   return !reference || reference >= aujourdhui;
 }
 
-async function chargerCongres() {
+// La lecture est partagée entre la liste et la fiche : une fiche ouverte
+// par son adresse attend la même requête au lieu d'en lancer une autre.
+let promesseCongres = null;
+
+function lireCongres() {
   const jeton = ++congresJeton;
   // Le filtre sur le statut reste nécessaire : la policy de l'admin lui
   // fait aussi remonter brouillons et archives.
-  const r = await sb.from('congres').select(COLONNES_CONGRES_PUBLIQUES)
-    .eq('statut', 'publie').order('date_debut');
-  if (jeton !== congresJeton) return;
+  promesseCongres = Promise.resolve(sb.from('congres').select(COLONNES_CONGRES_PUBLIQUES)
+    .eq('statut', 'publie').order('date_debut'))
+    .catch(e => ({ error: { message: (e && e.message) || String(e) } }))
+    .then(r => {
+      if (jeton !== congresJeton) return;
+      congresErreur = !!r.error;
+      if (r.error) console.warn('Congrès indisponibles :', r.error.message);
+      congresDB = r.data || [];
+    });
+  return promesseCongres;
+}
 
-  congresErreur = !!r.error;
-  if (r.error) console.warn('Congrès indisponibles :', r.error.message);
-  congresDB = r.data || [];
+async function chargerCongres() {
+  await lireCongres();
   renderSocietesCongres();
   renderCongres();
+}
+
+// Attend la dernière lecture en cours, même si une autre l'a relancée.
+async function congresLus() {
+  if (!promesseCongres) lireCongres();
+  let p;
+  do { p = promesseCongres; await p; } while (p !== promesseCongres);
+}
+
+function cheminCongres(c) {
+  return c && c.slug ? '/congres/' + encodeURIComponent(c.slug) : null;
+}
+
+// /congres/<slug> ouvert directement : la liste n'est peut-être pas
+// encore lue. Si le visiteur est parti ailleurs entre-temps, on ne
+// le ramène pas sur la fiche.
+async function ouvrirCongresParAdresse(slug) {
+  const demandee = cheminCourant();
+  await congresLus();
+  const ici = cheminCourant();
+  if (ici !== demandee && !ici.startsWith('/congres/')) return;
+  ouvrirParSlug(congresDB, slug, c => c.slug || '', ouvrirCongres, 'congres');
+}
+
+function ouvrirCongres(id) {
+  const c = congresDB.find(x => String(x.id) === String(id));
+  const chemin = cheminCongres(c);
+  if (!c || !chemin) return;
+
+  showPage('congres-fiche', chemin);
+  majMeta(c.nom + ' | OrthoConnect',
+    resumeMeta(c.description, "Congrès d'orthodontie : dates, lieu et site officiel."),
+    chemin, 'article');
+  renderDetailCongres(c);
+}
+
+function renderDetailCongres(c) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(c.date_debut || '');
+  const tuile = m
+    ? `<div class="fiche-date" aria-hidden="true"><span class="fiche-date-jour">${+m[3]}</span><span class="fiche-date-mois">${esc(LP_MOIS_COURTS[+m[2] - 1])}</span><span class="fiche-date-annee">${m[1]}</span></div>`
+    : '';
+  const type = c.type === 'salon' ? 'Salon' : c.type === 'congres' ? 'Congrès' : '';
+  const site = urlHttpCongres(c.url_officiel);
+
+  document.getElementById('ficheCongres').innerHTML = renderFiche({
+    retour: { chemin: '/congres', libelle: 'Retour aux congrès' },
+    tuile,
+    pastilles: [
+      type ? `<span class="badge badge-new">${esc(type)}</span>` : '',
+      c.sigle ? `<span class="badge badge-pro">${esc(c.sigle)}</span>` : '',
+      congresAVenir(c) ? '' : '<span class="badge badge-archive">Terminé</span>'
+    ],
+    titre: c.nom,
+    source: c.edition,
+    infos: [
+      { libelle: 'Dates', valeur: m ? majuscule(formatPeriodeCongres(c.date_debut, c.date_fin)) : '' },
+      { libelle: 'Ville', valeur: [c.ville, c.pays].filter(Boolean).join(', ') },
+      { libelle: 'Lieu', valeur: c.lieu }
+    ],
+    action: site
+      ? `<a class="btn btn-turquoise" href="${esc(site)}" target="_blank" rel="noopener noreferrer">Site officiel</a>`
+      : '',
+    sections: [
+      { titre: 'Présentation', contenu: valeurRemplie(c.description) ? `<div class="fiche-texte">${esc(c.description)}</div>` : '' }
+    ],
+    similaires: {
+      titre: 'Autres congrès à venir',
+      elements: congresDB
+        .filter(x => String(x.id) !== String(c.id) && congresAVenir(x) && x.slug)
+        .slice(0, 3)
+        .map(x => ({
+          chemin: cheminCongres(x),
+          sur: x.sigle,
+          titre: x.nom,
+          lignes: [majuscule(formatPeriodeCongres(x.date_debut, x.date_fin)),
+                   [x.ville, x.pays].filter(Boolean).join(', ')]
+        }))
+    }
+  });
 }
 
 function renderSocietesCongres() {
@@ -13614,7 +14035,9 @@ function renderCongres() {
         ${c.sigle ? `<span class="badge badge-new">${esc(c.sigle)}</span>` : ''}
         ${c.edition ? `<span>${esc(c.edition)}</span>` : ''}
       </div>` : ''}
-      <h3 class="congres-nom">${esc(c.nom)}</h3>
+      <h3 class="congres-nom">${cheminCongres(c)
+        ? `<a class="congres-nom-lien" href="${esc(cheminCongres(c))}">${esc(c.nom)}</a>`
+        : esc(c.nom)}</h3>
       <div class="congres-dates">${esc(formatPeriodeCongres(c.date_debut, c.date_fin))}</div>
       ${lieu ? `<div class="congres-lieu">${esc(lieu)}</div>` : ''}
       ${c.lieu ? `<div class="congres-lieu">${esc(c.lieu)}</div>` : ''}
@@ -15485,8 +15908,9 @@ function appliquerRoute(chemin) {
         return;
 
       case 'congres':
-        if (seg[1]) { pageIntrouvable(); return; }
-        showPage('congres');
+        if (!seg[1]) { showPage('congres'); return; }
+        if (seg[2]) { pageIntrouvable(); return; }
+        ouvrirCongresParAdresse(seg[1]);
         return;
 
       // L'espace partenaires est hors ligne le temps d'etre reecrit.
@@ -15548,6 +15972,11 @@ function pageIntrouvable(genre) {
       titre: 'Cette annonce est introuvable',
       texte: "Elle n'existe pas, ou elle a expiré : les offres quittent le site d'elles-mêmes à leur date de fin.",
       lien: 'Voir toutes les offres', chemin: '/emploi', page: 'emploi'
+    },
+    congres: {
+      titre: 'Ce congrès est introuvable',
+      texte: "Il n'existe pas, ou il n'est plus publié. La liste des congrès est à jour, celui-ci y figure peut-être sous un autre nom.",
+      lien: 'Voir tous les congrès', chemin: '/congres', page: 'congres'
     },
     produit: {
       titre: 'Cette fiche matériel est introuvable',
@@ -15644,7 +16073,7 @@ function showPage(page, chemin) {
   if (el) el.classList.add('active');
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
   // Les congrès n'ont plus d'entrée à eux : ils s'ouvrent depuis Formations.
-  const navEl = document.getElementById('nav-' + (page === 'congres' ? 'formations' : page));
+  const navEl = document.getElementById('nav-' + (page === 'congres' || page === 'congres-fiche' ? 'formations' : page));
   if (navEl) navEl.classList.add('active');
 
   // L'adresse suit la vue réellement affichée : quand la garde renvoie
