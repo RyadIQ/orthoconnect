@@ -11845,7 +11845,10 @@ let adminRevendications = [];
 let adminFichesRevendiquees = new Map();
 let adminComptesRevendication = new Map();
 let erreurRevendications = null;
-let revendicationValidee = null;
+// Dernière décision prise sur une demande, affichée sous la liste.
+// emailEnvoye : la validation du compte a changé (webhook notify) ;
+// null quand la relecture des inscrits a échoué.
+let revendicationDecidee = null;
 
 async function chargerRevendicationsAdmin() {
   adminRevendications = [];
@@ -11931,23 +11934,22 @@ function renderFicheRevendication(d) {
     </div>`;
 }
 
-function lienPrevenirParEmail(email) {
-  const corps = "Bonjour,\n\nVotre fiche OrthoConnect est validée. Connectez-vous pour la compléter depuis votre espace praticien, rubrique « Ma fiche ».\n\nBien cordialement,\nOrthoConnect";
-  return 'mailto:' + encodeURIComponent(email).replace(/%40/g, '@')
-    + '?subject=' + encodeURIComponent('Votre fiche OrthoConnect est validée')
-    + '&body=' + encodeURIComponent(corps);
-}
-
 function renderRevendicationsAdmin() {
   const erreur = document.getElementById('admRevErreur');
   erreur.textContent = erreurRevendications || '';
   erreur.classList.toggle('show', !!erreurRevendications);
 
   const prevenir = document.getElementById('admRevPrevenir');
-  const v = revendicationValidee;
+  const v = revendicationDecidee;
+  const suite = !v ? ''
+    : v.emailEnvoye === true ? (v.email ? 'Un e-mail de confirmation a été envoyé au praticien.' : 'Aucune adresse e-mail connue pour ce compte.')
+    : v.emailEnvoye === false ? (v.action === 'valider'
+      ? "Aucun e-mail automatique : le compte était déjà validé."
+      : "Aucun e-mail automatique : la validation du compte n'a pas changé.")
+    : '';
   prevenir.innerHTML = v
-    ? `<div class="admin-message ok show">Fiche validée pour ${esc(v.nom || 'ce compte')}.
-        ${v.email ? `<a href="${esc(lienPrevenirParEmail(v.email))}">Prévenir par e-mail</a>` : "Aucune adresse e-mail connue pour ce compte."}</div>`
+    ? `<div class="admin-message ok show">${v.action === 'valider' ? 'Fiche validée' : 'Demande refusée'} pour ${esc(v.nom || 'ce compte')}.
+        ${suite}</div>`
     : '';
 
   const zone = document.getElementById('admRevendicationsListe');
@@ -11971,9 +11973,28 @@ function renderRevendicationsAdmin() {
 
 async function rechargerInscritsAdmin() {
   const r = await chargerPraticiensAdmin();
-  if (r.error) { adminMessage('Liste des inscrits non rechargée : ' + r.error.message, true); return; }
+  if (r.error) { adminMessage('Liste des inscrits non rechargée : ' + r.error.message, true); return false; }
   adminPraticiens = r.data || [];
   renderAdminInscrits();
+  return true;
+}
+
+// Le webhook notify n'écrit au praticien que si praticiens.validation
+// change (valide ou refuse) : on compare avant et après la décision.
+function validationDuCompte(id) {
+  const p = adminPraticiens.find(x => String(x.id) === String(id));
+  return p ? p.validation : undefined;
+}
+
+// Avant la décision, la liste des inscrits peut ne pas être chargée :
+// on se rabat sur les listes de l'onglet (comptes en attente, comptes
+// des demandes de fiche).
+function validationAvantDecision(id) {
+  const v = validationDuCompte(id);
+  if (v !== undefined) return v;
+  if (adminComptes.some(c => String(c.id) === String(id))) return 'en_attente';
+  const c = adminComptesRevendication.get(String(id));
+  return c ? c.validation : undefined;
 }
 
 // Après valider_revendication : la fiche demandée est-elle rattachée au
@@ -12000,7 +12021,8 @@ async function deciderRevendication(btn, action) {
   if (action === 'refuser' && !window.confirm('Refuser la demande de fiche de « ' + nom + ' » ?')) return;
 
   btn.closest('.rev-fiche').querySelectorAll('button').forEach(b => { b.disabled = true; });
-  revendicationValidee = null;
+  revendicationDecidee = null;
+  const validationAvant = validationAvantDecision(d.praticien_id);
 
   const { data, error } = await sb.rpc(action === 'valider' ? 'valider_revendication' : 'refuser_revendication', { p_id: d.id });
   let ok = false;
@@ -12009,7 +12031,7 @@ async function deciderRevendication(btn, action) {
   else ok = true;
 
   // valider_revendication valide aussi le compte : les deux listes bougent.
-  await Promise.all([chargerComptesAValider(), rechargerInscritsAdmin()]);
+  const [, inscritsRelus] = await Promise.all([chargerComptesAValider(), rechargerInscritsAdmin()]);
 
   // La relecture fait foi : une demande encore en attente n'a pas été traitée.
   if (ok && adminRevendications.some(x => String(x.id) === id)) {
@@ -12018,15 +12040,22 @@ async function deciderRevendication(btn, action) {
   }
   if (!ok) return;
 
+  const validationApres = validationDuCompte(d.praticien_id);
+  const emailEnvoye = inscritsRelus && validationAvant !== undefined && validationApres !== undefined
+    ? validationApres !== validationAvant && (validationApres === 'valide' || validationApres === 'refuse')
+    : null;
+
   if (action === 'valider') {
     // La relecture de la fiche prouve le rattachement : statut revendiquee
-    // et profil_id du compte. Sinon l'admin le voit tout de suite, et
-    // aucun « Prévenir par e-mail » ne lui est proposé.
+    // et profil_id du compte. Sinon l'admin le voit tout de suite, sans
+    // message de confirmation.
     const v = await verifierRattachement(d);
-    if (v.ok) revendicationValidee = { nom: compte && compte.nom, email: compte && compte.email };
+    if (v.ok) revendicationDecidee = { action, nom: compte && compte.nom, email: compte && compte.email, emailEnvoye };
     renderRevendicationsAdmin();
     adminMessage(v.message, !v.ok);
   } else {
+    revendicationDecidee = { action, nom: compte && compte.nom, email: compte && compte.email, emailEnvoye };
+    renderRevendicationsAdmin();
     adminMessage('Demande refusée.');
   }
 }
