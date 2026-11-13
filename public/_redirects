@@ -1,0 +1,31 @@
+# Anciennes adresses de fichiers de travail. Depuis que seul public/ est
+# publié, ces fichiers ne sont plus en ligne ; sans ces règles, le renvoi
+# général ci-dessous répondrait quand même 200 avec la page du site. On
+# répond 404, avec la page « introuvable » du site.
+/admin_et_organismes.sql        /index.html  404!
+/carte_emploi.sql               /index.html  404!
+/carte_rayon_cabinet.sql        /index.html  404!
+/detail_formations.sql          /index.html  404!
+/emploi.sql                     /index.html  404!
+/emploi_cabinet_masque.sql      /index.html  404!
+/emploi_detail_reserve.sql      /index.html  404!
+/medias_et_horaires.sql         /index.html  404!
+/sitemap.sql                    /index.html  404!
+/slugs_et_urls.sql              /index.html  404!
+/tarif_prefere.sql              /index.html  404!
+/trigger_profil.sql             /index.html  404!
+/vue_formations_publiques.sql   /index.html  404!
+/package.json                   /index.html  404!
+/package-lock.json              /index.html  404!
+/netlify.toml                   /index.html  404!
+/_redirects                     /index.html  404!
+/.gitignore                     /index.html  404!
+/.env                           /index.html  404!
+/CONTEXTE_ORTHOCONNECT.md       /index.html  404!
+/netlify/*                      /index.html  404!
+/tests/*                        /index.html  404!
+/node_modules/*                 /index.html  404!
+/.git/*                         /index.html  404!
+
+# Application à page unique : toute autre adresse est résolue par index.html.
+/*    /index.html   200
