@@ -1,0 +1,10 @@
+# Le site reste un site statique : aucune commande de build, le dossier
+# publié reste celui réglé dans l'interface Netlify, _redirects s'applique
+# comme avant. Ce fichier ne déclare que les fonctions.
+[build.environment]
+  # nodemailer 10 exige Node 20 ou plus.
+  NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

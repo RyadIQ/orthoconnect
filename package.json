@@ -1,0 +1,14 @@
+{
+  "name": "orthoconnect",
+  "private": true,
+  "description": "Site OrthoConnect : page statique et fonctions Netlify (e-mails de la plateforme).",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test:notify": "node tests/notify.test.js"
+  },
+  "dependencies": {
+    "nodemailer": "10.3.1"
+  }
+}
